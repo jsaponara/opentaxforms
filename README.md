@@ -1,4 +1,4 @@
-OpenTaxForms automates US tax forms--it reads PDF tax forms
+OpenTaxForms opens and automates US tax forms--it reads PDF tax forms
 (currently from IRS.gov only, not state forms),
 converts them to more feature-full HTML5, 
 and offers a database and API for developers to create their own tax applications.
