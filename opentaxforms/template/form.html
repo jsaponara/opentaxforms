@@ -1,0 +1,75 @@
+<html>
+<head>
+<title>[=[title]=]</title>
+<meta charset="UTF-8">
+<link rel="shortcut icon" href="static/img/favicon.ico">
+<link rel="stylesheet" type="text/css" href="static/css/styles.css">
+<script type='text/javascript' src='static/js/knockout-3.4.0.js'></script>
+<script type='text/javascript' src='static/js/opentaxforms.js'></script>
+<script type='text/javascript' src='static/js/basil.js'></script>
+<style>
+	body {
+		background-image:url('[=[bkgdimgfname]=]');
+	}
+</style>
+</head>
+<body>
+<form>
+[=[pagelinks]=]
+[=[inputboxes]=]
+[=[formlinks]=]
+</form>
+<a style='border:none;top:1584px;left:1px;width:1px;height:1px;'></a>
+</body>
+<script type='text/javascript'>
+	var db=new window.Basil({namespace:'[=[dbid]=]',storage:'local'});
+	var dbform='[=[formid]=]'
+	var vals=db.get(dbform)||{};
+	var rz='[=[readonlyz]=]'.split(' ');
+	var nz='[=[nonobsvblz]=]'.split(' ');
+	var oz='[=[obsvblz]=]'.split(' ');
+	var cz='[=[computedz]=]'.split(' ');
+	function inputs() {
+		var o=opentaxforms,
+			koo=o.koo,
+			koc=o.koc,
+			zz=o.zz,
+			dd=o.dd,
+			cc=o.cc,
+			nn=o.nn,
+			pp=o.pp,
+			ll=o.ll,
+			s={};
+		for (var i=0;i<rz.length;i++) {
+			o.setval(vals[rz[i]],rz[i]);
+		}
+		for (var i=0;i<nz.length;i++) {
+			o.setval(vals[nz[i]],nz[i]);
+		}
+		for (var i=0;i<oz.length;i++) {
+			s[oz[i]]=o.ld(vals[oz[i]],koo,'');
+		}
+		[=[inputdeps]=]
+		return s;
+	}
+	data=inputs();
+	ko.applyBindings(data);
+
+window.onbeforeunload=function(e) {
+	for (var i=0;i<oz.length;i++) {
+		if (rz.indexOf(oz[i])==-1) {
+			vals[oz[i]]=opentaxforms.getval(oz[i]);
+			//console.log(i+' '+oz[i]+' '+vals[oz[i]]);
+		}
+	}
+	for (var i=0;i<nz.length;i++) {
+		vals[nz[i]]=opentaxforms.getval(nz[i]);
+	}
+	for (var i=0;i<cz.length;i++) {
+		vals[cz[i]]=opentaxforms.getval(cz[i]);
+	}
+	db.set(dbform,vals);
+	//var msg = "Yo.", e = e || window.event; if (e) { e.returnValue = msg; } return msg;
+};
+</script>
+</html>

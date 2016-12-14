@@ -1,0 +1,38 @@
+103|couldbe|1040,B|Schedule B|Taxable interest. Attach Schedule B if required 
+114|couldbe|1040,B|Schedule B|Ordinary dividends. Attach Schedule B if required 
+134|couldbe|1040,C|Schedule C|Business income or (loss). Attach Schedule C or C-EZ 
+134|couldbe|1040,C-EZ|C-EZ|Business income or (loss). Attach Schedule C or C-EZ 
+139|couldbe|1040,D|Schedule D|Capital gain or (loss). Attach Schedule D if required. If not required, check here ▶
+145|couldbe|4797|Form 4797|Other gains or (losses). Attach Form 4797 
+170|couldbe|1040,E|Schedule E|Rental real estate, royalties, partnerships, S corporations, trusts, etc. Attach Schedule E 
+175|couldbe|1040,F|Schedule F|Farm income or (loss). Attach Schedule F 
+212|couldbe|2106|Form 2106|Certain business expenses of reservists, performing artists, and fee-basis government officials. Attach Form 2106 or 2106-EZ 
+212|couldbe|2106-EZ|2106-EZ|Certain business expenses of reservists, performing artists, and fee-basis government officials. Attach Form 2106 or 2106-EZ 
+217|couldbe|8889|Form 8889|Health savings account deduction. Attach Form 8889 
+222|couldbe|3903|Form 3903|Moving expenses. Attach Form 3903 
+227|couldbe|1040,SE|Schedule SE|Deductible part of self-employment tax. Attach Schedule SE 
+265|couldbe|8917|Form 8917|Tuition and fees. Attach Form 8917 
+270|couldbe|8903|Form 8903|Domestic production activities deduction. Attach Form 8903 
+312|couldbe|1040,A|Schedule A|Itemized deductions (from Schedule A) or your standard deduction (see left margin) 
+334|couldbe|8814|Form(s) 8814|Form(s) 8814 
+336|couldbe|4972|Form 4972|Form 4972
+344|couldbe|6251|Form 6251|Alternative minimum tax (see instructions). Attach Form 6251 
+349|couldbe|8962|Form 8962|Excess advance premium tax credit repayment. Attach Form 8962 
+359|couldbe|1116|Form 1116|Foreign tax credit. Attach Form 1116 if required 
+364|couldbe|2441|Form 2441|Credit for child and dependent care expenses. Attach Form 2441 
+369|couldbe|8863|Form 8863|Education credits from Form 8863, line 19 
+374|couldbe|8880|Form 8880|Retirement savings contributions credit. Attach Form 8880
+379|couldbe|1040,8812|Schedule 8812|Child tax credit. Attach Schedule 8812, if required 
+384|couldbe|5695|Form 5695|Residential energy credits. Attach Form 5695 
+412|couldbe|1040,SE|Schedule SE|Self-employment tax. Attach Schedule SE 
+426|couldbe|5329|Form 5329|Additional tax on IRAs, other qualified retirement plans, etc. Attach Form 5329 if required 
+432|couldbe|1040,H|Schedule H|Household employment taxes from Schedule H 
+437|couldbe|5405|Form 5405|First-time homebuyer credit repayment. Attach Form 5405 if required 
+451|couldbe|8959|Form 8959|Form 8959
+453|couldbe|8960|Form 8960|Form 8960
+477|couldbe|1040,EIC|Schedule EIC|If you have a qualifying child, attach Schedule EIC. 
+490|couldbe|1040,8812|Schedule 8812|Additional child tax credit. Attach Schedule 8812 .
+495|couldbe|8863|Form 8863|American opportunity credit from Form 8863, line 8 
+500|couldbe|8962|Form 8962|Net premium tax credit. Attach Form 8962 
+515|couldbe|4136|Form 4136|Credit for federal tax on fuels. Attach Form 4136 
+547|couldbe|8888|Form 8888|Amount of line 75 you want refunded to you. If Form 8888 is attached, check here ▶

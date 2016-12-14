@@ -1,0 +1,4 @@
+
+# run fast tests
+pytest
+

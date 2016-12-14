@@ -1,0 +1,37 @@
+body {
+	background-repeat: no-repeat;
+	background-size: 1224px 1584px;
+}
+img {
+	position:absolute;
+	top:0;
+	left:0;
+}
+a,input,textarea {
+	position: absolute;
+	background-color: transparent;
+}
+input,textarea {
+	border-color: orange;
+	font-color:orange; 
+	font-size: 1.2em;
+}
+a {
+	border-bottom:3px solid blue;
+}
+input[type="checkbox"]{
+	display:none;
+}
+input[type="checkbox"] + label {
+	display: inline-block;
+	/*border: 1px solid #000;*/
+	position: absolute;
+}
+input[type="checkbox"]:checked + label:after {
+	content: '✔';
+	display: inline-block;
+	font-size: 1.6em;
+}
+.dd {
+	text-align:right;
+}
