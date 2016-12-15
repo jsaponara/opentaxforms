@@ -137,10 +137,7 @@ def extractFields(prefix='fields',dirName='.'):
     def xmlFromPdf(pathprefix):
         outname='%s.xml'%(pathprefix)
         if not exists(outname):
-            if exists('bin/dumppdf.py'):
-                dumppdfName='bin/dumppdf.py'
-            else:
-                dumppdfName='dumppdf'
+            dumppdfName='dumppdf.py'
             run('%s -at %s.pdf > %s.xml'%(dumppdfName,pathprefix,pathprefix))
     xmlFromPdf(pathprefix)
     xmlAsStr=getRawXml(prefix,dirName)

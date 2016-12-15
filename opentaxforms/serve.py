@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from config import appname,apiVersion
+from version import appname,apiVersion
 from flask import Flask
 
 def createApi(**kw):

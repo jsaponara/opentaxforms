@@ -9,7 +9,7 @@ from sys import exit
 from ut import Bag,CharEnum
 import db
 from domain import computeTitle as computeFormTitle
-from config import appname
+from version import appname
 from datetime import datetime
 from itertools import chain
 from sqlalchemy import \

@@ -3,9 +3,7 @@ import sys
 import ut
 from ut import Bag,setupLogging,logg,NL
 
-appname='opentaxforms'
-appversion='0.4.1'
-apiVersion='1'
+from version import appname,appversion
 
 cfg,log=None,None
 
@@ -160,10 +158,6 @@ def setup(**overrideArgs):
     # log entire config .before. getFileList makes it huge
     logg('config:'+str(cfg),[log.warn])
 
-    if cfg.checkFileList:
-        getFileList(dirName)
-
-    # postpone writing to disk until end of setup, right here
     if not ut.exists(dirName):
         makedirs(dirName)
     staticDir=ut.Resource(appname,'static').path()
@@ -171,6 +165,9 @@ def setup(**overrideArgs):
     import os.path
     if not os.path.lexists(staticLink):
         symlink(staticDir,staticLink)
+
+    if cfg.checkFileList:
+        getFileList(dirName)
 
     alreadySetup=True
     return cfg,log

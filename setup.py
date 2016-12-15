@@ -1,6 +1,7 @@
 from setuptools import setup
 import io
 import os
+from opentaxforms.version import appversion
 
 def read(*filenames, **kwargs):
     encoding = kwargs.get('encoding', 'utf-8')
@@ -15,7 +16,7 @@ long_description = read('README.md', 'CHANGES.md')
 
 setup(
     name='opentaxforms',
-    version='0.4.1',
+    version=appversion,
     url='http://github.com/jsaponara/opentaxforms/',
     license="Affero GNU General Public License v3",
     author='John Saponara',
@@ -29,7 +30,7 @@ setup(
         'Flask-Restless==0.17.0',
         'Flask-SQLAlchemy==2.1',
         ],
-    scripts = ['opentaxforms/opentaxforms.py'],
+    scripts = ['script/otf'],
     author_email='john@opentaxforms.org',
     description='Modernizes tax forms and provides an API for new tax form interfaces',
     long_description=long_description,
