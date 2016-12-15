@@ -46,7 +46,7 @@ defaults=Bag(dict(
 from argparse import ArgumentParser
 def parseCmdline():
     '''Load command line arguments'''
-    parser=ArgumentParser(description='Automates tax forms and provides an API for new tax form interfaces')
+    parser=ArgumentParser(description='Automates tax forms and provides an API for new tax form interfaces; must specify either form or directory option')
     parser.add_argument('-f', '--form', dest='formName', nargs='?', help='form file name, eg f1040')
     # disallowing --year option for now
     #   the code currently assumes all forms are available at irs-prior/ [the collection of all past forms]
@@ -58,7 +58,7 @@ def parseCmdline():
     #       1. attempt to download each url from f8903--2015 on back to f8903--2010
     #       2. OR download entire listing of irs-prior/ and use latest 8903 year not-greater-than 2015
     #parser.add_argument('-y', '--year', dest='formyear', nargs='?', default=defaults.latestTaxYear, help='form year, used only if forms will be downloaded, defaults to latestTaxYear; eg 2013')
-    parser.add_argument('-d', '--directory', dest='dirName', nargs='?', help='directory of form files to parse')
+    parser.add_argument('-d', '--directory', dest='dirName', default=defaults.dirName, nargs='?', help='directory of form files to parse')
     parser.add_argument('-l', '--loglevel', help='set loglevel', default=defaults.loglevel, dest='LOG_LEVEL')
     parser.add_argument('-T', '--doctests', help='run doctests', action="store_true")
     parser.add_argument('-v', '--verbose', help='log more [only affects doctests]', action="store_true")
@@ -148,12 +148,6 @@ def setup(**overrideArgs):
     logg('logfilename is "{}"'.format(cfg.logfilename))
     logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
 
-    if not ut.exists(dirName):
-        makedirs(dirName)
-    staticDir=ut.Resource(appname,'static').path()
-    staticLink=dirName+'/static'
-    if not ut.exists(staticLink):
-        symlink(staticDir,staticLink)
     if formName:
         cfg.formsRequested=[(formName,RecursionRootLevel)]
     else:
@@ -168,7 +162,16 @@ def setup(**overrideArgs):
 
     if cfg.checkFileList:
         getFileList(dirName)
-    
+
+    # postpone writing to disk until end of setup, right here
+    if not ut.exists(dirName):
+        makedirs(dirName)
+    staticDir=ut.Resource(appname,'static').path()
+    staticLink=dirName+'/static'
+    import os.path
+    if not os.path.lexists(staticLink):
+        symlink(staticDir,staticLink)
+
     alreadySetup=True
     return cfg,log
 

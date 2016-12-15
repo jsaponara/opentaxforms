@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+if __name__=='__main__':
+    from opentaxforms.config import setup
+    cfg,log=setup(readCmdlineArgs=True)
+    if cfg.doctests:
+        import doctest; doctest.testmod(verbose=cfg.verbose)
+    else:
+        from opentaxforms.opentaxforms import opentaxforms
+        import sys
+        sys.exit(opentaxforms())
+
