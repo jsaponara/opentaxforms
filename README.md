@@ -21,7 +21,7 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
   - **Build status**
 
-    [CI widget forthcoming]
+    [![Build Status](https://travis-ci.org/jsaponara/opentaxforms.svg?branch=0.4.9)](https://travis-ci.org/jsaponara/opentaxforms)
 
   - **Form status**
   	
