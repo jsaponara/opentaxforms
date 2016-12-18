@@ -1064,7 +1064,7 @@ def getFormInfo(fname):
     formName=docinfo['formName']
     return prefix,fpath,docinfo,pageinfo,formName
 
-statusmsgtmpl='layout {},{}overlappingBoxes; refs {},{}unrecognizedRefs; math {},{}sansDeps'
+statusmsgtmpl='layoutBoxes: {}plausible,{}overlapping,?missing,?spurious; refs: {}plausible,{}unrecognized,?missing,?spurious; computedFields: {}plausible,{}empty,?missing,?spurious'
 def logFormStatus(formName,fv,formrefs,statusTotals):
     z=Bag()
     z.lgood,z.lerrs=layoutStatus(fv.fields)
@@ -1082,11 +1082,12 @@ def logRunStatus(formsdone,formsfail,statusTotals):
         print 'successfully processed {} forms'.format(len(formsdone))
         msg='statusTotals:'+statusmsgtmpl.format(*statusTotals(*'lgood lerrs rgood rerrs mgood merrs'.split()))
         logg(msg,[log.warn,stdout])
-    if len(formsdone)>0:
+    '''if len(formsdone)>0:
         statusmsg2='further errors: '+' '.join('??'+feature+error
             for feature in 'inputboxes formreferences computedfields dependencyfields'.split()
             for error in 'Missing Spurious'.split())
         logg(statusmsg2,[log.warn,stdout])
+        '''
     if formsfail:
         msg='failed to process %d forms: %s'%(len(formsfail),formsfail,)
         logg(msg,[log.error,stdout])
