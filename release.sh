@@ -1,9 +1,12 @@
-#!/bin/sh
-UNTESTED!
+#!/bin/bash
+# automating https://cookiecutter-pypackage.readthedocs.io/en/latest/pypi_release_checklist.html
+# UNTESTED!
+
 getver() { echo `python -c 'from opentaxforms.version import appversion;print appversion'` ; }
 # ensure no pending changes...
-if [[ `git status --porcelain` ]]; then
-	echo there are uncommitted changes.
+if [ `git status --porcelain >& /dev/null` ] ; then
+	echo there are uncommitted changes or extra files:
+	git status --porcelain
 	exit
 else
 	echo PASS no uncommitted changes.
@@ -18,7 +21,7 @@ else
 fi
 oldVersionTag=`getver`
 git log --pretty=format:%s $oldVersionTag..HEAD >> CHANGES.md
-bumpversion patch  # 'patch' arg should be overridable
+bumpversion patch  # todo 'patch' arg should be overridable
 newVersionTag=`getver`
 if [ $oldVersionTag = $newVersionTag ] ; then
 	echo oops bumpversion didnt change the version
@@ -27,9 +30,10 @@ else
 	echo PASS moving from $oldVersionTag to $newVersionTag
 fi
 git commit -m "Changelog for upcoming release $newVersionTag"
+exit
 git flow release start $newVersionTag
 ./setup.py develop
-pytest  # or py.test
+tox  # or pytest or py.test
 if [ $? = 0 ] ; then
 	echo tests passed.
 else
