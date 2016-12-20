@@ -14,9 +14,8 @@ sys.setdefaultencoding('utf-8')
 
 import ut
 from ut import jj,ntuple,ddict,Bag,logg,stdout,Qnty,numerify,NL
-from config import setup
-from config import RecurseInfinitely
-from domain import *
+from config import setup,RecurseInfinitely
+import domain
 from decimal import Decimal as decim
 import traceback
 import re
@@ -397,7 +396,7 @@ def computeMath(fields,draws,fieldsByLine,prefix):
                 cond,s,s2=m.groups()
             else:
                 cond=s2=None
-            m=re.match(commandPtn,s)
+            m=re.match(domain.commandPtn,s)
             if m:
                 cmd,s=m.groups()
             else:
@@ -737,7 +736,7 @@ def findFormRefs(formName,prefix,dirName,draws,pageinfo):
             form,sched=formish,None
             formFnames=possibleFilePrefixes(form)
         # check excludedformsPttn before allpdfnames cuz excludedforms are included in allpdfnames
-        m=re.match(excludedformsPttn,form)
+        m=re.match(domain.excludedformsPttn,form)
         if m:
             log.debug('ignoring excludedform: {}'.format(m.group()))
             return ['excludedform']
@@ -971,7 +970,7 @@ def linkfields(fields):
         f['linenum']=l
         f['unit']=u.lower() if u else None
         if f['unit'] is not None:
-            if any(typ in f['coltype'] for typ in possibleColTypes):
+            if any(typ in f['coltype'] for typ in domain.possibleColTypes):
                 f['unit']=None#'dollars'
         if u=='cents':
             # todo should check abit more, eg approx dollars.ypos==cents.ypos and dollars.xpos+dollars.wdim==cents.xpos
@@ -1064,34 +1063,33 @@ def getFormInfo(fname):
     formName=docinfo['formName']
     return prefix,fpath,docinfo,pageinfo,formName
 
-statusmsgtmpl='layoutBoxes: {}plausible,{}overlapping,?missing,?spurious; refs: {}plausible,{}unrecognized,?missing,?spurious; computedFields: {}plausible,{}empty,?missing,?spurious'
-def logFormStatus(formName,fv,formrefs,statusTotals):
+statusmsgtmpl='layoutBoxes: {}found,{}overlapping,?missing,?spurious; refs: {}found,{}unrecognized,?missing,?spurious; computedFields: {}found,{}empty,?missing,?spurious'
+def logFormStatus(formName,fv,formrefs):
     z=Bag()
     z.lgood,z.lerrs=layoutStatus(fv.fields)
     z.rgood,z.rerrs=formrefs.status() if formrefs else (0,0)
     z.mgood,z.merrs=mathStatus(fv.computedFields)
     statusmsg='form {} status: '.format(formName)+statusmsgtmpl.format(
-        *z(*'lgood lerrs rgood rerrs mgood merrs'.split())
+        *z(*('lgood','lerrs','rgood','rerrs','mgood','merrs'))
         )
     logg(statusmsg,[log.warn,stdout])
-    statusTotals+=z
-    return z
+    return z.__dict__
 
-def logRunStatus(formsdone,formsfail,statusTotals):
+def logRunStatus(formsdone,formsfail,status):
     if len(formsdone)>1:
         print 'successfully processed {} forms'.format(len(formsdone))
-        msg='statusTotals:'+statusmsgtmpl.format(*statusTotals(*'lgood lerrs rgood rerrs mgood merrs'.split()))
+        statusTotals=sum(status.values(),Bag())
+        msg='status totals:'+statusmsgtmpl.format(*statusTotals(*'lgood lerrs rgood rerrs mgood merrs'.split()))
         logg(msg,[log.warn,stdout])
-    '''if len(formsdone)>0:
-        statusmsg2='further errors: '+' '.join('??'+feature+error
-            for feature in 'inputboxes formreferences computedfields dependencyfields'.split()
-            for error in 'Missing Spurious'.split())
-        logg(statusmsg2,[log.warn,stdout])
-        '''
     if formsfail:
-        msg='failed to process %d forms: %s'%(len(formsfail),formsfail,)
+        msg='failed to process %d forms: %s'%(len(formsfail),[domain.computeFormId(f) for f in formsfail])
         logg(msg,[log.error,stdout])
         logg('logfilename is "{}"'.format(cfg.logfilename))
+    import json
+    status.update({'f'+domain.computeFormId(f).lower():None for f in formsfail})
+    statusStr=json.dumps(status.__dict__)
+    # status is partial because missing,spurious values are unknown and thus omitted
+    log.warn('status partial data: %s'%(statusStr))
 
 def addFormsTodo(formsdone,formstodo,recurselevel,formrefs,formsfail):
     if cfg.recurse and (cfg.maxrecurselevel==RecurseInfinitely or recurselevel<cfg.maxrecurselevel):
@@ -1124,7 +1122,7 @@ def opentaxforms(**args):
     formstodo,formsdone,formsfail=[],[],[]
     formstodo.extend(cfg.formsRequested)
     cfg.indicateProgress=cfg.recurse or len(formstodo)>1
-    statusTotals=Bag()
+    status=Bag()
     
     while formstodo:
         formName,recurselevel=formstodo.pop(0)
@@ -1143,8 +1141,8 @@ def opentaxforms(**args):
             cleanupFiles(prefix)
             formsdone.append(formName)
             formstodo=addFormsTodo(formsdone,formstodo,recurselevel,formrefs,formsfail)
-            logFormStatus(formName,fv,formrefs,statusTotals)
-        except CrypticXml as e:
+            status[prefix]=logFormStatus(formName,fv,formrefs)
+        except domain.CrypticXml as e:
             # eg 1040 older than 2012 fails here
             log.error(jj('EEEError',e.__class__.__name__,str(e)))
             formsfail.append(formName)
@@ -1152,7 +1150,7 @@ def opentaxforms(**args):
             log.error(jj('EEEError',traceback.format_exc()))
             if cfg.debug: raise
             formsfail.append(formName)
-    logRunStatus(formsdone,formsfail,statusTotals)
+    logRunStatus(formsdone,formsfail,status)
     ut.pickle(failurls,'failurls')
     atLeastSomeFormsSucceeded=(len(formsdone)>0) ; Success=0 ; Failure=1
     return Success if atLeastSomeFormsSucceeded else Failure
