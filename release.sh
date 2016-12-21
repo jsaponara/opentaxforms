@@ -33,7 +33,7 @@ else
 	echo PASS moving from $oldVersionTag to $newVersionTag
 fi
 (echo $newVersionTag ; cat changes-recent.log) >> CHANGES.md
-git commit -m "Changelog for upcoming release $newVersionTag"
+git commit -a -m "Changelog for upcoming release $newVersionTag"
 exit
 git flow release start $newVersionTag
 python setup.py develop
