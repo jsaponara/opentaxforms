@@ -238,13 +238,19 @@ class Bag(object):
             for k,v in getitems(mapp):
                 self.__dict__[k]=v
         return self
+    def __add__(self,*maps):
+        self.__iadd__(*maps)
+        return self
     def __iadd__(self,*maps):
         '''
             >>> b=Bag(a=1,b=2)
             >>> b+=Bag(a=1,b=1,c=0)
             >>> assert b('a','b','c')==(2,3,0)
+            >>> b=Bag(a='1',b='2')
+            >>> b+=Bag(a='1',b='1',c='0')
+            >>> assert b('a','b','c')==('11','21','0')
             '''
-        # todo either remove or move to class IntBag(Bag)
+        # todo error for empty maps[0]
         zero=type(maps[0].values()[0])()
         for mapp in maps:
             mapp,getitems=self._getGetitems(mapp)
