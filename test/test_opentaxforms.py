@@ -16,12 +16,14 @@ class TestOtfSteps(TestOtfBase):
     def run_1040(self):
         from opentaxforms import opentaxforms as otf
         # skip cleanupFiles to allow comparison with target output
-        otf.opentaxforms(
-            **dict(dirName='forms',formName='1040',
-                okToDownload=False,skip=['c'],
-                # todo change dbpath to dburl
-                dbpath=self.dbpath,
-                ))
+        returnval=otf.opentaxforms(
+            dirName='forms',rootForms=['1040'],
+            okToDownload=False,skip=['c'],
+            # todo change dbpath to dburl
+            dbpath=self.dbpath,
+            )
+        if returnval!=0:
+            raise Exception('run failed, no output to compare against target')
         import filecmp
         shallow=False
         fileToCheck='f1040-p1.html'

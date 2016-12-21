@@ -22,7 +22,7 @@ defaults=Bag(dict(
     dirName='forms',
     checkFileList=True,
     debug=False,
-    formName=None,
+    rootForms=None,
     formyear=None,
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho could be incomplete
     #      eg during dec2016 the 2016 1040 and 400ish other forms are ready but not schedule D and 200ish others
@@ -45,7 +45,7 @@ from argparse import ArgumentParser
 def parseCmdline():
     '''Load command line arguments'''
     parser=ArgumentParser(description='Automates tax forms and provides an API for new tax form interfaces; must specify either form or directory option')
-    parser.add_argument('-f', '--form', dest='formName', nargs='?', help='form file name, eg f1040')
+    parser.add_argument('-f', '--form', dest='rootForms', nargs='*', help='form file name, eg f1040')
     # disallowing --year option for now
     #   the code currently assumes all forms are available at irs-prior/ [the collection of all past forms]
     #   for each year, eg f1040--2015.pdf; but some forms arent revised every year,
@@ -134,9 +134,9 @@ def setup(**overrideArgs):
     if cfg.formyear is None:
         cfg.formyear=cfg.latestTaxYear
     dirName=cfg.dirName
-    formName=cfg.formName
-    if formName:
-        logname=formName
+    rootForms=cfg.rootForms
+    if rootForms:
+        logname=rootForms[0]+'etc'
     elif dirName:
         logname=dirName.replace('/','_').strip('._')
     else:
@@ -146,8 +146,8 @@ def setup(**overrideArgs):
     logg('logfilename is "{}"'.format(cfg.logfilename))
     logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
 
-    if formName:
-        cfg.formsRequested=[(formName,RecursionRootLevel)]
+    if rootForms:
+        cfg.formsRequested=[(rootForm,RecursionRootLevel) for rootForm in rootForms]
     else:
         from os import listdir
         from os.path import isfile, join as joinpath
