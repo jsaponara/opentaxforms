@@ -1,3 +1,6 @@
+# using README.md for git but pypi needs an rst README
+README
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
