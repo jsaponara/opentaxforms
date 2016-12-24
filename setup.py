@@ -12,7 +12,7 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
-long_description = read('README', 'CHANGES')
+long_description = read('README')
 
 setup(
     name='opentaxforms',
