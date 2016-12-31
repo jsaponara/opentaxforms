@@ -1,3 +1,9 @@
+0.4.14 (2016-12-31)
+
+- mv math.py cmds.py: workaround for tox build failure [tox.Random imports py.math and gets our math.py instead].
+- oops apparently gotta incl README for travis build to succeed.
+- setup.cfg: git flow release already tags the release, so we dont want bumpversion to do so, otherwise git flow refuses to release.
+
 0.4.13 (2016-12-30)
 
 - gitignore release.sh temp files so they dont affect git status.
