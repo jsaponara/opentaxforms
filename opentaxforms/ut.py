@@ -15,6 +15,10 @@ log=Pass()
 
 # NT eg X=ntuple('X','linenum unit name')
 
+Bbox=ntuple('Bbox','x0 y0 x1 y1')
+def merge(bb1,bb2):
+    return Bbox(min(bb1.x0,bb2.x0),min(bb1.y0,bb2.y0),max(bb1.x1,bb2.x1),max(bb1.y1,bb2.y1))
+
 def localsitepkgs():
     import sys; sys.path = sys.path[1:]; import django; print(django.__path__)
 #python -c "import sys; sys.path = sys.path[1:]; import django; print(django.__path__)"
@@ -419,6 +423,14 @@ def now(**kw):
         return datetime.now().strftime(kw['format'])
     else:
         return datetime.now().isoformat()
+
+def readImgSize(fname,dirName):
+    from PIL import Image
+    f=open(dirName+'/'+fname,'rb')
+    img=Image.open(f)
+    imgw,imgh=img.size
+    f.close()
+    return imgw,imgh
 
 def ipysession():
     return '\\n'.join('>>> '+str(In[i])+'\\n'+str(Out.get(i)) for i in range(max(len(In),max(Out.keys()))))

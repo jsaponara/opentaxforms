@@ -8,7 +8,7 @@ slot=fillable slot in a form
 from sys import exit
 from ut import Bag,CharEnum
 import db
-from domain import computeTitle as computeFormTitle
+from irs import computeTitle as computeFormTitle
 from version import appname
 from datetime import datetime
 from itertools import chain
@@ -176,14 +176,18 @@ def qntyToStr(q):
         '''
     return str(q.magnitude)+str(q.units)
 
-def writeFormToDb(formName,year,fields,formrefs,prefix,pageinfo):
+def writeFormToDb(form,year):
     # write form data to db tables form and slot
     # todo maybe write formrefs data as well [to a new table]
-    # todo generate both code and title from formName [no need for prefix arg]
+    # todo generate both code and title from form.name [no need for prefix arg]
     from config import cfg
     if 'd' not in cfg.steps: return
+    prefix=form.prefix
+    fields=form.bfields
+    pageinfo=form.pageinfo
+    formrefs=form.refs
     conn,engine,metadata,dbt,dbc=setup(cfg)
-    code=generateFormCode(formName)
+    code=generateFormCode(form.name)
     title=computeFormTitle(prefix)
     orgn='us_irs'
     irs_id=dbc['orgn.'+orgn]

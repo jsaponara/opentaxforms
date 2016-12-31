@@ -1,6 +1,6 @@
 
 from ut import setupLogging,exists,skip,NL,Qnty,pf,run
-from domain import commandPtn,possibleColTypes,CrypticXml
+from irs import commandPtn,possibleColTypes,CrypticXml
 from sys import exc_info
 import re
 
@@ -125,14 +125,23 @@ def parseXml(xmlAsStr,pathPrefix=None):
                 )
     return tree
 
-def extractFields(prefix='fields',dirName='.'):
+def ensurePathsAreUniq(fields):
+    fieldsbyid=set()
+    for f in fields:
+        if f['path'] in fieldsbyid:
+            log.error('dup paths [%s]'%(f['path']))
+        fieldsbyid.add(f['path'])
+    assert len(fields)==len(fieldsbyid),'dup paths?  see log'
+
+def extractFields(form,dirName='.'):
     # create <form>.xml, single-line <form>-text.xml, and formatted <form>-fmt.xml
     global cfg,log
     from config import cfg,log
-    fields=[]
-    visiblz=[]
+    prefix=form.prefix
+    fields=form.fields
+    visiblz=form.draws
     if 'x' not in cfg.steps:
-        return fields,visiblz
+        return
     pathprefix='%s/%s'%(dirName,prefix)
     def xmlFromPdf(pathprefix):
         outname='%s.xml'%(pathprefix)
@@ -350,15 +359,11 @@ def extractFields(prefix='fields',dirName='.'):
                 text=text,
                 parentForm=prefix,
                 ))
-        class El:
+        class El(dict):
             '''
                 delegate to dict but override __str__
-                '''
                 # todo generalize at least the keys selected
-            def __init__(self,d):
-                self.d=d
-            def __getattr__(self,arg):
-                return getattr(self.d,arg)
+                '''
             def __str__(self):
                 speaklinecol=self.d.get('speak','<<speakless>>')
                 try:
@@ -373,33 +378,27 @@ def extractFields(prefix='fields',dirName='.'):
                         col=parenchars[0]
                 except: pass
                 def shortname():
-                    name=self.d.get('name','<<nameless>>')
+                    name=self.get('name','<<nameless>>')
                     if '.' in name:
                         name='....'+[n for n in name.split('.') if n][-1]
                     return name
-                if self.d.get('tag','').endswith('draw'):
-                    return "{name=%s,text=%s}"%(shortname(),self.d.get('text','--'))
+                if self.get('tag','').endswith('draw'):
+                    return "{name=%s,text=%s}"%(shortname(),self.get('text','--'))
                 else:
-                    return "{name=%s,speak=%s%s,unit=%s...}"%(shortname(),speaklinecol[:13],col,self.d.get('unit','--'))
-            def __repr__(self):
-                return self.__str__()
+                    return "{name=%s,speak=%s%s,unit=%s...}"%(shortname(),speaklinecol[:13],col,self.get('unit','--'))
         d=El(d)
         if isfield:
             fields.append(d)
             visiblz.append(d)  # because captionText is visible
         else:
             visiblz.append(d)
-    # ensure paths are uniq
-    fieldsbyid=set()
-    for f in fields:
-        if f['path'] in fieldsbyid:
-            log.error('dup paths [%s]'%(f['path']))
-        fieldsbyid.add(f['path'])
-    assert len(fields)==len(fieldsbyid),'dup paths?  see log'
+    ensurePathsAreUniq(fields)
     log.info('found [{}] fields, [{}] visiblz'.format(len(fields),len(visiblz)))
     with open(dirName+'/'+prefix+'-visiblz.txt','w') as f:
         f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
-    return fields,visiblz
+    # fields refers to fillable fields only; draws are all (fillable and read-only/non-fillable) fields
+    form.fields=fields
+    form.draws=visiblz
 
 def saveFields(fields,prefix):
     from cPickle import dump
@@ -441,11 +440,16 @@ def main():
         f=sys.stdin
     else:
         f=open(infile)
-    fields=extractFields(prefix)
+    class Form: pass
+    form=Form()
+    form.prefix=prefix
+    form.fields=[]
+    form.draws=[]
+    extractFields(form)
     if infile!='stdin':
         f.close()
-    saveFields(fields,prefix)
-    log.info(pf(fields))
+    saveFields(form.fields,prefix)
+    log.info(pf(form.fields))
 
 if __name__ == '__main__': main()
 
