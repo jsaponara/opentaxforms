@@ -18,7 +18,7 @@ import traceback
 import re
 from os import remove as removeFile
 from extractFillableFields import extractFields
-import link,schema,html,math,refs
+import link,schema,html,cmds,refs
 
 failurls=ut.unpickle('failurls',set())
 
@@ -135,7 +135,7 @@ def opentaxforms(**args):
             extractFields(form,dirName)
             form.fixBugs()
             link.linkfields(form)
-            math.computeMath(form)
+            cmds.computeMath(form)
             refs.findRefs(form,dirName)
             schema.writeFormToDb(form,cfg.formyear)
             html.writeEmptyHtmlPages(form,dirName)
