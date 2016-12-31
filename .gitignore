@@ -2,7 +2,8 @@
 tmp.*
 
 # using README.md for git but pypi needs an rst README
-README
+# oops apparently gotta incl README for travis build to succeed.
+#README
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
