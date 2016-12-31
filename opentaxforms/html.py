@@ -4,8 +4,8 @@ from ut import Qnty,NL
 from os import remove as removeFile
 import re
 from itertools import chain
-import config
-from domain import computeTitle,computeFormId,sortableFieldname
+from config import cfg,log
+from irs import computeTitle,computeFormId,sortableFieldname
 
 def computeFormFilename(form,parentForm=None):
     try:
@@ -220,12 +220,15 @@ def textbox(f,fv,pageinfo,imgw,imgh,tooltip=0):
         endtag='</textarea>' if f.multiline else '</label>' if f.typ=='checkbox' else '',
         )
 
-def writeEmptyHtmlPages(formName,dirName,prefix,fv,formrefs,pageinfo):
-    global cfg,log
-    from config import cfg,log
+def writeEmptyHtmlPages(form,dirName):
     # generate html form fields overlaid on image of the form
     if 'h' not in cfg.steps:
         return
+    formName=form.formName
+    prefix=form.prefix
+    pageinfo=form.pageinfo
+    formrefs=form.refs
+    fv=form
     npages=len(pageinfo)
     template=ut.Resource('opentaxforms','template/form.html').content()
     emptyHtml=template.replace('{','{{').replace('}','}}').replace('[=[','{').replace(']=]','}')
@@ -378,7 +381,7 @@ def writeEmptyHtmlPages(formName,dirName,prefix,fv,formrefs,pageinfo):
                 storeDeps=[alreadyDefined.add(depfield['uniqlinenum']) for depfield in cfield['deps'] if depfield['unit']!='cents' and depfield.get('typ')!='constant'],
                 storeComputdz=alreadyDefined.add(cfield['uniqlinenum']),
                 )
-                for cfield in sorted(fv.computedFields.values(),key=lambda cf:cf.d['ypos'])
+                for cfield in sorted(fv.computedFields.values(),key=lambda cf:cf['ypos'])
                     if cfield['unit']=='dollars' and cfield['npage']==npage
             ]
         inputdeps='\n'.join(chain(inputdepsSingle,inputdepsPair))

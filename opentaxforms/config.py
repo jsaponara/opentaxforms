@@ -136,7 +136,9 @@ def setup(**overrideArgs):
     dirName=cfg.dirName
     rootForms=cfg.rootForms
     if rootForms:
-        logname=rootForms[0]+'etc'
+        logname=rootForms[0]
+        if len(rootForms)>1:
+            logname+='etc'
     elif dirName:
         logname=dirName.replace('/','_').strip('._')
     else:
@@ -146,12 +148,13 @@ def setup(**overrideArgs):
     logg('logfilename is "{}"'.format(cfg.logfilename))
     logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
 
+    from Form import Form
     if rootForms:
-        cfg.formsRequested=[(rootForm,RecursionRootLevel) for rootForm in rootForms]
+        cfg.formsRequested=[Form(rootForm,RecursionRootLevel) for rootForm in rootForms]
     else:
         from os import listdir
         from os.path import isfile, join as joinpath
-        cfg.formsRequested=[(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
+        cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
     if not cfg.formsRequested and not cfg.relaxRqmts:
         raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
 

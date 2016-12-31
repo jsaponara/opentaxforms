@@ -1,3 +1,6 @@
+# so that release.sh temp files dont affect git status
+tmp.*
+
 # using README.md for git but pypi needs an rst README
 README
 
