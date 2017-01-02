@@ -11,6 +11,7 @@ RecurseInfinitely=-1
 RecursionRootLevel=0
 SkippableSteps=ut.ChainablyUpdatableOrderedDict() \
     (x='xfaParsing') \
+    (i='docinfo') \
     (m='mathParsing') \
     (r='referenceParsing') \
     (d='databaseOutput') \
@@ -157,6 +158,7 @@ def setup(**overrideArgs):
         cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
     if not cfg.formsRequested and not cfg.relaxRqmts:
         raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
+    cfg.indicateProgress=cfg.recurse or len(cfg.formsRequested)>1
 
     # log entire config .before. getFileList makes it huge
     logg('config:'+str(cfg),[log.warn])

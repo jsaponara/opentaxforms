@@ -119,11 +119,9 @@ def indicateProgress(form):
 def opentaxforms(**args):
     global cfg,log
     cfg,log=setup(**args)
-    dirName=cfg.dirName
     
     formstodo,formsdone,formsfail=[],[],[]
     formstodo.extend(cfg.formsRequested)
-    cfg.indicateProgress=cfg.recurse or len(formstodo)>1
     status=Bag()
     
     while formstodo:
@@ -132,13 +130,13 @@ def opentaxforms(**args):
         try:
             form.getFile(failurls)
             form.readInfo()
-            extractFields(form,dirName)
+            extractFields(form)
             form.fixBugs()
             link.linkfields(form)
             cmds.computeMath(form)
-            refs.findRefs(form,dirName)
-            schema.writeFormToDb(form,cfg.formyear)
-            html.writeEmptyHtmlPages(form,dirName)
+            refs.findRefs(form)
+            schema.writeFormToDb(form)
+            html.writeEmptyHtmlPages(form)
             cleanupFiles(form)
             formsdone.append(form)
             formstodo=addFormsTodo(form,formsdone,formstodo,formsfail)

@@ -16,9 +16,10 @@ nonforms=[str(yr) for yr in range(2000,2050)]
     2015/f1040sd: Box A
     '''
 nonformcontexts='box line lines through pub part parts to the copy copies code'.split()
-def findRefs(form,dirName):
+def findRefs(form):
     global cfg,log
     from config import cfg,log
+    dirName=cfg.dirName
     if 'r' not in cfg.steps:
         return
     formName=form.formName

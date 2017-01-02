@@ -97,6 +97,9 @@ class Form(object):
         return destfname,url
     def pdfInfo(self):
         # collect metadata from pdf file at document and page levels
+        if 'i' not in cfg.steps:
+            docinfo,pageinfo={},{}
+            return docinfo,pageinfo
         from pdfminer.pdfparser import PDFParser
         from pdfminer.pdfdocument import PDFDocument
         from pdfminer.pdfpage import PDFPage
