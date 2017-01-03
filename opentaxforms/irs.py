@@ -2,7 +2,6 @@
 # domain-specific code
 
 import re
-from config import cfg,log
 
 # ignore employer forms: 1099's, 1098's, w2, w4, etc
 excludedformsPttn=re.compile(r'109\d.*|w.*',re.I)
@@ -85,8 +84,9 @@ def sortableFieldname(fieldname):
         segs=[intify(seg) for seg in segs]
         return segs
     except Exception as e:
-        log.error('sortableFieldname: exception: fieldname= '+fieldname)
-        raise
+        excclass,exc,tb=sys.exc_info()
+        new_exc = Exception('sortableFieldname: new exception: fieldname= '+fieldname)
+        raise new_exc.__class__,new_exc,tb
 
 # todo eliminate guesswork in setup()/allpdfnames and possibleFilePrefixes by
 #      reading document metadata as in pdfInfo() and mapping formName<->filename.

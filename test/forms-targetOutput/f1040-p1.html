@@ -207,11 +207,18 @@ s.f1_108=koc(zz(cc(s.line37)));
 	data=inputs();
 	ko.applyBindings(data);
 
+document.onkeydown = function(evt) { evt = evt || window.event;
+    switch (evt.keyCode) {
+        case 37:
+            el=document.getElementById('prevpagelink');if(el)el.click();break;
+        case 39:
+            el=document.getElementById('nextpagelink');if(el)el.click();break;
+    }
+};
 window.onbeforeunload=function(e) {
 	for (var i=0;i<oz.length;i++) {
 		if (rz.indexOf(oz[i])==-1) {
 			vals[oz[i]]=opentaxforms.getval(oz[i]);
-			//console.log(i+' '+oz[i]+' '+vals[oz[i]]);
 		}
 	}
 	for (var i=0;i<nz.length;i++) {

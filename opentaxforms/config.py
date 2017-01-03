@@ -5,13 +5,10 @@ from ut import Bag,setupLogging,logg,NL
 
 from version import appname,appversion
 
-cfg,log=None,None
-
 RecurseInfinitely=-1
 RecursionRootLevel=0
 SkippableSteps=ut.ChainablyUpdatableOrderedDict() \
     (x='xfaParsing') \
-    (i='docinfo') \
     (m='mathParsing') \
     (r='referenceParsing') \
     (d='databaseOutput') \
@@ -22,9 +19,11 @@ defaults=Bag(dict(
     # todo separate dirName into pdfInputDir,htmlOutputDir: #pdfInputDir='pdf', htmlOutputDir='html',
     dirName='forms',
     checkFileList=True,
+    computeOverlap=True,
     debug=False,
     rootForms=None,
     formyear=None,
+    ignoreCaches=False,
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho could be incomplete
     #      eg during dec2016 the 2016 1040 and 400ish other forms are ready but not schedule D and 200ish others
     latestTaxYear=2016,
@@ -67,6 +66,7 @@ def parseCmdline():
     parser.add_argument('-r', '--recurse', help='recurse thru all referenced forms', action="store_true")
     parser.add_argument('-R', '--recurselevel', type=int, help='number of levels to recurse thru, defaults to infinite', dest='maxrecurselevel', default=defaults.maxrecurselevel)
     parser.add_argument('-k', '--skip', nargs='?', default=[], help='steps to skip, can be any combination of: '+' '.join('='.join((k,v)) for k,v in SkippableSteps.items()), dest='skip')
+    parser.add_argument('-C', '--ignoreCaches', help='recompute cached intermediate results', action="store_true")
     parser.add_argument('-P', '--postgres', help='use postgres database [default=sqlite]', action="store_true")
     parser.add_argument('-V', '--version', help='report version and exit', default=False, action="store_true")
     parser.add_argument('-Z', '--dropall', help='drop all database tables', action="store_true")
@@ -131,7 +131,12 @@ def setup(**overrideArgs):
     if cfg.debug:
         cfg.loglevel='DEBUG'
         cfg.verbose=True
-    cfg.steps=[step for step in SkippableSteps if step not in cfg.skip]
+    if 'steps' in cfg:
+        if cfg.steps and len(cfg.steps[0])>1:
+            assert len(cfg.steps)==1
+            cfg.steps=cfg.steps[0].split()
+    else:
+        cfg.steps=[step for step in SkippableSteps if step not in cfg.skip]
     if cfg.formyear is None:
         cfg.formyear=cfg.latestTaxYear
     dirName=cfg.dirName

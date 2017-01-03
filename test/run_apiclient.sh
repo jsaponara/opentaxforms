@@ -1,3 +1,4 @@
+# similar tests are run automatically in test_opentaxforms.py / TestOtfApi without needing to run_apiserver.sh
 
 # for more details:  https://flask-restless.readthedocs.io/en/stable/index.html
 pip install httpie
