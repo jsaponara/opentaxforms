@@ -1,43 +1,67 @@
 #! /usr/bin/env python
 
+# 'Otf' below [eg TestOtfSteps]  is 'OpenTaxForms'
+
 from opentaxforms import ut
 
 class TestOtfBase(object):
     def setup_method(self, _):
-        self.dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
+        dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
+        self.defaultArgs=dict(
+            # skip cleanupFiles to allow comparison with target output
+            #skip=['c'],
+            dirName='forms',
+            # todo change dbpath to dburl
+            dbpath=dbpath,
+            )
     def teardown_method(self, _):
         pass
-class TestOtfSteps(TestOtfBase):
-    '''
-        these tests actually run the script
-        they dont start with 'test_' because
-        they each take several seconds to run
-        '''
-    def run_1040(self):
+    def run(self,**kw):
+        rootForms=kw.get('rootForms') or ['1040']
+        filesToCheck=kw.get('filesToCheck') or ['f%s-p1.html'%(form,) for form in rootForms]
+        kw.update(self.defaultArgs)
         from opentaxforms import opentaxforms as otf
-        # skip cleanupFiles to allow comparison with target output
         returnval=otf.opentaxforms(
-            dirName='forms',rootForms=['1040'],
-            okToDownload=False,skip=['c'],
-            # todo change dbpath to dburl
-            dbpath=self.dbpath,
-            )
+            okToDownload=False,
+            **kw)
         if returnval!=0:
             raise Exception('run failed, no output to compare against target')
         import filecmp
         shallow=False
-        fileToCheck='f1040-p1.html'
         outdir,targetdir='forms/','forms-targetOutput/'
-        filesMatch=filecmp.cmp(outdir+fileToCheck,targetdir+fileToCheck,shallow)
         def fmtmsg(result,verb):
             return '{}: output file "{}" in "{}" {} target in "{}"'.format(
                 result,fileToCheck,outdir,verb,targetdir)
-        if filesMatch:
-            result,verb='PASS','matches'
-            print fmtmsg(result,verb)
-        else:
-            result,verb='FAIL','does NOT match'
-            raise Exception(fmtmsg(result,verb))
+        for fileToCheck in filesToCheck:
+            filesMatch=filecmp.cmp(outdir+fileToCheck,targetdir+fileToCheck,shallow)
+            if filesMatch:
+                result,verb='PASS','matches'
+                print fmtmsg(result,verb)
+            else:
+                result,verb='FAIL','does NOT match'
+                raise Exception(fmtmsg(result,verb))
+class TestOtfSteps(TestOtfBase):
+    '''
+        These 'steps' tests actually run the script.
+        run_1040_full runs 'all steps' and thus doesnt
+        start with 'test_' because it runs for several seconds
+        '''
+    # todo use a less complex form than 1040 to speed testing
+    def run_1040_full(self):
+        self.run(
+            rootForms=['1040'],
+            filesToCheck=['f1040-p1.html'],
+            )
+    def test_run_1040_xfa(self):
+        self.run(
+            rootForms=['1040'],
+            filesToCheck=['f1040-fmt.xml'],
+            steps=['x'],
+            # speeds testing
+            computeOverlap=False,
+            )
+    # todo add tests of further steps,
+    # todo   made fast via pickled results of previous step
 
 class TestOtfApiBase(object):
     def setup_method(self, _):
@@ -94,7 +118,7 @@ def main(args):
             testRunner=TestOtfSteps()
             testRunner.setup_method(0)
 
-            testRunner.run_1040()
+            testRunner.run_1040_full()
         else:
             usage()
 

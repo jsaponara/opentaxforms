@@ -4,7 +4,7 @@ from ut import Qnty,NL
 from os import remove as removeFile
 import re
 from itertools import chain
-from config import cfg,log
+import config
 from irs import computeTitle,computeFormId,sortableFieldname
 
 def computeFormFilename(form,parentForm=None):
@@ -220,11 +220,13 @@ def textbox(f,fv,pageinfo,imgw,imgh,tooltip=0):
         endtag='</textarea>' if f.multiline else '</label>' if f.typ=='checkbox' else '',
         )
 
-def writeEmptyHtmlPages(form,dirName):
+def writeEmptyHtmlPages(form):
     # generate html form fields overlaid on image of the form
+    cfg,log=config.setup()
     if 'h' not in cfg.steps:
         return
     formName=form.formName
+    dirName=cfg.dirName
     prefix=form.prefix
     pageinfo=form.pageinfo
     formrefs=form.refs
@@ -433,8 +435,7 @@ def writeEmptyHtmlPages(form,dirName):
             ))
 
 if __name__=="__main__":
-    from config import setup
-    cfg,log=setup()
+    cfg,log=config.setup()
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)
 

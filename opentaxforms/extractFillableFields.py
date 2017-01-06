@@ -133,10 +133,11 @@ def ensurePathsAreUniq(fields):
         fieldsbyid.add(f['path'])
     assert len(fields)==len(fieldsbyid),'dup paths?  see log'
 
-def extractFields(form,dirName='.'):
+def extractFields(form):
     # create <form>.xml, single-line <form>-text.xml, and formatted <form>-fmt.xml
     global cfg,log
     from config import cfg,log
+    dirName=cfg.dirName
     prefix=form.prefix
     fields=form.fields
     visiblz=form.draws

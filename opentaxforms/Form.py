@@ -4,6 +4,10 @@ from ut import ntuple,jj,logg,stdout,Qnty,NL
 import irs
 from config import cfg,log
 
+# global so that theyre pickle-able
+PageInfo=ntuple('PageInfo','pagenum pagewidth pageheight textpoz')
+TextPozStruct=ntuple('TextPozStruct','text bbox chars charobjs')
+
 class Form(object):
     def __init__(self,name,recurselevel):
         self.formName=name
@@ -11,6 +15,11 @@ class Form(object):
         self.recurselevel=recurselevel
         self.fields=[]
         self.draws=[]
+        self.refs=[]
+    def __str__(self):
+        return self.__repr__()
+    def __repr__(self):
+        return '<Form %s>'%(self.name,)
     def getFile(self,failurls):
         if type(self.name)==str and self.name.endswith('.pdf'):
             # pdf suffix means the file is local
@@ -26,7 +35,13 @@ class Form(object):
         log.name=prefix
         self.prefix=prefix
         self.fpath=cfg.dirName+'/'+prefix+'.pdf'
-        self.docinfo,self.pageinfo=self.pdfInfo()
+        cacheprefix=cfg.dirName+'/'+prefix+'-pdfinfo'
+        infocache=ut.unpickle(cacheprefix)
+        if infocache is None:
+            self.docinfo,self.pageinfo=self.pdfInfo()
+            ut.pickle((self.docinfo,self.pageinfo),cacheprefix)
+        else:
+            self.docinfo,self.pageinfo=infocache
         # todo should store this separately from self.name?
         self.name=self.docinfo['formName']
     def fixBugs(self):
@@ -112,7 +127,7 @@ class Form(object):
                 docinfo['titl']=xmpdict['dc']['title']['x-default']
                 docinfo['desc']=xmpdict['dc']['description']['x-default']
                 docinfo['isfillable']=xmpdict['pdf'].get('Keywords','').lower()=='fillable'
-                m=re.search(r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$',docinfo['titl'])
+                titlePttn1=r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
                     # eg 2016 Form W-2 AS 
                     # eg 2015 Form 1120 S (Schedule D) 
                     # eg 2015 Form 990 or 990-EZ (Schedule E)
@@ -121,14 +136,16 @@ class Form(object):
                     # eg Form 1066 (Schedule Q) (Rev. December 2013)
                     # eg Form 1120S Schedule B-1 (December 2013)
                     # 'Rev' means 'revised'
+                m=re.search(titlePttn1,docinfo['titl'])
                 if m:
                     taxyr,form1,form2,sched=m.groups()
                 else:
-                    m=re.search(r'(?:(\d\d\d\d) )?Schedule ([-\w]+) \(Form ([\w-]+)(?: or ([\w-]+))? ?\)(?: \((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$',docinfo['titl'])
+                    titlePttn2=r'(?:(\d\d\d\d) )?Schedule ([-\w]+) \(Form ([\w-]+)(?: or ([\w-]+))? ?\)(?: \((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
                         # eg 2015 Schedule M-3 (Form 1065)
                         # eg 2015 Schedule O (Form 990 or 990-EZ)
                         # eg Schedule O (Form 1120) (Rev. December 2012)
                         # eg Schedule C (Form 1065 ) (Rev. December 2014)
+                    m=re.search(titlePttn2,docinfo['titl'])
                     if m:
                         taxyr,sched,form1,form2=m.groups()
                     else:
@@ -144,7 +161,6 @@ class Form(object):
             # Check if the document allows text extraction. If not, abort.
             if not doc.is_extractable:
                 raise Exception('PDFTextExtractionNotAllowed')
-            PageInfo=ntuple('PageInfo','pagenum pagewidth pageheight textpoz')
             pageinfo={}
             rr=Renderer()
             #for ipage,page in enumerate(doc.get_pages()):
@@ -183,10 +199,10 @@ class Renderer:
 
 from pdfminer.layout import LTChar,LTTextLineHorizontal
 class TextPoz:
+    # text positions
     FormPos=ntuple('FormPos','itxt ichar chrz bbox')
     def __init__(self):
         self.textPoz=[]
-        self.Struct=ntuple('Struct','text bbox chars charobjs')
     def add(self,ltobj):
         def quantify(tupl,unit): return [Qnty(qnty,unit) for qnty in tupl]
         def accum(ltobj,ltchars,chars):
@@ -199,7 +215,7 @@ class TextPoz:
                     accum(lto,ltchars,chars)
         ltchars=[];chars=[]
         accum(ltobj,ltchars,chars)
-        self.textPoz.append(self.Struct(
+        self.textPoz.append(TextPozStruct(
             ltobj.get_text(),
             ut.Bbox(*quantify(ltobj.bbox,'printers_point')),
             ''.join(chars),
