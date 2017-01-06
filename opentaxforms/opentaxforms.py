@@ -145,10 +145,6 @@ def opentaxforms(**args):
             refs.findRefs(form)
             schema.writeFormToDb(form)
             html.writeEmptyHtmlPages(form)
-            cleanupFiles(form)
-            formsdone.append(form)
-            formstodo=addFormsTodo(form,formsdone,formstodo,formsfail)
-            status[form.prefix]=logFormStatus(form)
         except irs.CrypticXml as e:
             # eg 1040 older than 2012 fails here
             log.error(jj('EEEError',e.__class__.__name__,str(e)))
@@ -157,6 +153,11 @@ def opentaxforms(**args):
             log.error(jj('EEEError',traceback.format_exc()))
             if cfg.debug: raise
             formsfail.append(form.name)
+        else:
+            formsdone.append(form)
+            formstodo=addFormsTodo(form,formsdone,formstodo,formsfail)
+            status[form.prefix]=logFormStatus(form)
+            cleanupFiles(form)
     logRunStatus(formsdone,formsfail,status)
     ut.pickle(failurls,'failurls')
     atLeastSomeFormsSucceeded=(len(formsdone)>0) ; Success=0 ; Failure=1
