@@ -8,10 +8,10 @@ deploy:
     secure: HFAbm5KIQqz9G9niA8OY1FEk2C5SzB7wYPwZ5vnCFahL4LwPjfs7WKLi+w87d0GC1k+LAA+UmKMa7p+B7GCmVtEofSLUsRsnhtQ1OJ8diToV5O2oIdxsPsPdoAw12WrNGVyEqCwCyk0bEqtL6tkB8KyjTrtCbZneMGxRvQI+YWCZkf0lVFEQy3bCy4agI62xqoIkIwsXHw3CmxKC+rIzxPyUNgVrUSdpcurEWTPhUAo0OZ7Z9nr7u6R7vEtqaDBxTFE4QFNg7aLspuybyTOa60/fYw5tMe4TOi8OpeUd6XX3Q+94dhOZ7vGTRljuY+Uc4uKyizloiG72eirHK+o58wb5IsbnCl8J37xKFrWBQjI+is7zk043GZK5rbJzapSpVcFM19CgBXkt9geDFiMJC4B7r1tG/dMO+zyNIAZ0UqbNDMcIOivTtHbZ7dLueL3NpAaIydaP7KfCX2zoCMA9zEgvTunzaA3sxXKxImR6CvsHmUK1HN9Zy+aXVib3G+GT0dxospxBiq8x8wLxgTmbjphaiepvmmDGi6EHlHLZihJhk84hWzMEfw5gYmxYTwAtmD61FazjGJt+cSf1JNqXMtmTevZQoiSwYGIfw2/kEsYlDMUj2rQPOvBtiE6TzO2RDbp+IS38b/tG28kMHusFYl45QyMfT48hcwJ0A7pVCOE=
   provider: pypi
   user: johnsaponara
-before_script:
-# are these available with language:python?
-- phantomjs --version
-- casperjs --version
+#before_script:
+# are these available with language:python? > no!  see v0.4.15
+#- phantomjs --version
+#- casperjs --version
 env:
 - TOXENV=py27
 install: pip install -U tox
