@@ -114,6 +114,11 @@ def main(args):
             testRunner.test_api_noresults()
             testRunner.test_api_filterslots()
 
+            testRunner=TestOtfSteps()
+            testRunner.setup_method(0)
+
+            test_run_1040_xfa()
+
         elif args[1]=='-s': # run slow tests
             testRunner=TestOtfSteps()
             testRunner.setup_method(0)

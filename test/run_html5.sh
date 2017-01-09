@@ -10,5 +10,6 @@
 # node_modules/casperjs/bin/casperjs selftest
 # sudo ln -sf `pwd`/node_modules/casperjs/bin/casperjs /usr/local/bin/casperjs
 
+# just a single manual test file for now
 casperjs --local-storage-path=. test forms/f1040.js
 
