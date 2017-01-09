@@ -154,30 +154,32 @@ def setup(**overrideArgs):
     logg('logfilename is "{}"'.format(cfg.logfilename))
     logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
 
-    from Form import Form
-    if rootForms:
-        cfg.formsRequested=[Form(rootForm,RecursionRootLevel) for rootForm in rootForms]
-    else:
-        from os import listdir
-        from os.path import isfile, join as joinpath
-        cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
-    if not cfg.formsRequested and not cfg.relaxRqmts:
-        raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
-    cfg.indicateProgress=cfg.recurse or len(cfg.formsRequested)>1
+    if dirName is not None:
+        from Form import Form
+        if rootForms:
+            cfg.formsRequested=[Form(rootForm,RecursionRootLevel) for rootForm in rootForms]
+        else:
+            from os import listdir
+            from os.path import isfile, join as joinpath
+            cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
+        if not cfg.formsRequested and not cfg.relaxRqmts:
+            raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
+        cfg.indicateProgress=cfg.recurse or len(cfg.formsRequested)>1
 
-    # log entire config .before. getFileList makes it huge
-    logg('config:'+str(cfg),[log.warn])
+        # log entire config .before. getFileList makes it huge
+        logg('config:'+str(cfg),[log.warn])
 
-    if not ut.exists(dirName):
-        makedirs(dirName)
-    staticDir=ut.Resource(appname,'static').path()
-    staticLink=dirName+'/static'
-    import os.path
-    if not os.path.lexists(staticLink):
-        symlink(staticDir,staticLink)
+        import os
+        if not ut.exists(dirName):
+            makedirs(dirName)
+        staticDir=ut.Resource(appname,'static').path()
+        staticLink=dirName+'/static'
+        import os.path
+        if not os.path.lexists(staticLink):
+            symlink(staticDir,staticLink)
 
-    if cfg.checkFileList:
-        getFileList(dirName)
+        if cfg.checkFileList:
+            getFileList(dirName)
 
     alreadySetup=True
     return cfg,log

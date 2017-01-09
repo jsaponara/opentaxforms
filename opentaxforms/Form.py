@@ -36,7 +36,7 @@ class Form(object):
         self.prefix=prefix
         self.fpath=cfg.dirName+'/'+prefix+'.pdf'
         cacheprefix=cfg.dirName+'/'+prefix+'-pdfinfo'
-        infocache=ut.unpickle(cacheprefix)
+        infocache=None if cfg.ignoreCaches else ut.unpickle(cacheprefix)
         if infocache is None:
             self.docinfo,self.pageinfo=self.pdfInfo()
             ut.pickle((self.docinfo,self.pageinfo),cacheprefix)

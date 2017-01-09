@@ -2,24 +2,35 @@
 
 # 'Otf' below [eg TestOtfSteps]  is 'OpenTaxForms'
 
+import os
+from os.path import join as pathjoin
+from shutil import copy
 from opentaxforms import ut
 
 class TestOtfBase(object):
     def setup_method(self, _):
-        dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
+        self.testdir=ut.Resource('test','').path()
+        dbpath='sqlite:///'+self.testdir+'/opentaxforms.sqlite3'
         self.defaultArgs=dict(
             # skip cleanupFiles to allow comparison with target output
             #skip=['c'],
-            dirName='forms',
             # todo change dbpath to dburl
             dbpath=dbpath,
             )
     def teardown_method(self, _):
         pass
+    def ensureDir(self,folder):
+        if not ut.exists(folder):
+            os.makedirs(folder)
     def run(self,**kw):
         rootForms=kw.get('rootForms') or ['1040']
         filesToCheck=kw.get('filesToCheck') or ['f%s-p1.html'%(form,) for form in rootForms]
         kw.update(self.defaultArgs)
+        self.dirName=kw['dirName']
+        inputpdf=pathjoin(self.testdir,'forms-common','f1040.pdf')
+        outdir=pathjoin(self.testdir,self.dirName,'')
+        self.ensureDir(outdir)
+        copy(inputpdf,outdir)
         from opentaxforms import opentaxforms as otf
         returnval=otf.opentaxforms(
             okToDownload=False,
@@ -28,12 +39,15 @@ class TestOtfBase(object):
             raise Exception('run failed, no output to compare against target')
         import filecmp
         shallow=False
-        outdir,targetdir='forms/','forms-targetOutput/'
+        targetdir=pathjoin(self.testdir,'forms-targetOutput','')
         def fmtmsg(result,verb):
             return '{}: output file "{}" in "{}" {} target in "{}"'.format(
                 result,fileToCheck,outdir,verb,targetdir)
         for fileToCheck in filesToCheck:
-            filesMatch=filecmp.cmp(outdir+fileToCheck,targetdir+fileToCheck,shallow)
+            filesMatch=filecmp.cmp(
+                pathjoin(outdir,fileToCheck),
+                pathjoin(targetdir,fileToCheck),
+                shallow)
             if filesMatch:
                 result,verb='PASS','matches'
                 print fmtmsg(result,verb)
@@ -51,11 +65,19 @@ class TestOtfSteps(TestOtfBase):
         self.run(
             rootForms=['1040'],
             filesToCheck=['f1040-p1.html'],
+            dirName='forms_1040_full',
+            ignoreCaches=True,
             )
     def test_run_1040_xfa(self):
+        dirName=pathjoin(self.testdir,'forms_1040_xfa')
+        self.ensureDir(dirName)
+        # use cached pdf info to speed the run
+        pdfinfo=pathjoin(self.testdir,'forms-common','f1040-pdfinfo.pickl')
+        copy(pdfinfo,dirName)
         self.run(
             rootForms=['1040'],
             filesToCheck=['f1040-fmt.xml'],
+            dirName=dirName,
             steps=['x'],
             # speeds testing
             computeOverlap=False,
@@ -67,7 +89,8 @@ class TestOtfApiBase(object):
     def setup_method(self, _):
         from opentaxforms.serve import createApp
         dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
-        self.app=createApp(dbpath=dbpath)
+        # dirName=None means dont look for a forms/ directory
+        self.app=createApp(dbpath=dbpath,dirName=None)
         self.client=self.app.test_client()
     def teardown_method(self, _):
         pass
@@ -103,9 +126,20 @@ class TestOtfApi(TestOtfApiBase):
 
 def main(args):
     def usage():
-        print 'usage: "%s -f" for fasttests or "%s -s" for slow tests'%(args[0],args[0])
+        print 'usage: "%s [-q|-s|-f|-x|-a]"\n-q=quick script tests\n-s=slow script tests\n-f=full 1040\n-x=xfa-only 1040\n-a=api tests'%(args[0],)
     if len(args)==2:
-        if args[1]=='-f':
+        if args[1] in ('-q','-s','-f','-x'):
+            testRunner=TestOtfSteps()
+            testRunner.setup_method(0)
+            if args[1]=='-q':
+                testRunner.test_run_1040_xfa()
+            elif args[1]=='-s':
+                testRunner.run_1040_full()
+            elif args[1]=='-x':
+                testRunner.test_run_1040_xfa()
+            elif args[1]=='-f':
+                testRunner.run_1040_full()
+        elif args[1]=='-a': # run api tests
             testRunner=TestOtfApi()
             testRunner.setup_method(0)
 
@@ -114,16 +148,6 @@ def main(args):
             testRunner.test_api_noresults()
             testRunner.test_api_filterslots()
 
-            testRunner=TestOtfSteps()
-            testRunner.setup_method(0)
-
-            test_run_1040_xfa()
-
-        elif args[1]=='-s': # run slow tests
-            testRunner=TestOtfSteps()
-            testRunner.setup_method(0)
-
-            testRunner.run_1040_full()
         else:
             usage()
 

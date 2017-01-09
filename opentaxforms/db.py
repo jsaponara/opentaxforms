@@ -29,7 +29,9 @@ def connect(appname,**kw):
 def connect_(**kw):
     # consumes keys from kw: user pw db
     global conn,engine,metadata
-    cfg,log=config.setup()
+    cfg,log=config.setup(**kw)
+    if 'dirName' in kw:
+        del kw['dirName']
     usepostgres=kw.get('postgres',False) if cfg is None else cfg.postgres
     if usepostgres:
         kw.setdefault('user','postgres')

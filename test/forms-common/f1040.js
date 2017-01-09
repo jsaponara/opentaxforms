@@ -13,7 +13,7 @@ casper.on("exit", function(code){
 });
 
 var cwd = fs.absolute(''),
-	formpath=cwd+'/forms/f1040-p1.html';
+	formpath=cwd+'/forms_1040_full/f1040-p1.html';
 casper.echo('starting test at '+formpath);
 if (!fs.exists(formpath)) {
 	casper.echo('ERR formpath doesnt exist');

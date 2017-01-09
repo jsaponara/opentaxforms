@@ -421,6 +421,7 @@ def exists(fname):
         False
     '''
     from os import access,F_OK
+    fname=fname.rstrip('/')
     return access(fname,F_OK)
 
 def now(**kw):

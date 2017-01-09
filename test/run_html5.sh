@@ -10,6 +10,10 @@
 # node_modules/casperjs/bin/casperjs selftest
 # sudo ln -sf `pwd`/node_modules/casperjs/bin/casperjs /usr/local/bin/casperjs
 
+# generate the html file first
+. run_slowtests.sh
+
 # just a single manual test file for now
-casperjs --local-storage-path=. test forms/f1040.js
+cp forms-common/f1040.js forms_1040_full/
+casperjs --local-storage-path=. test forms_1040_full/f1040.js
 
