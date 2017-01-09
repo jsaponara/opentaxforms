@@ -5,8 +5,6 @@ from ut import Bag,setupLogging,logg,NL
 
 from version import appname,appversion
 
-cfg,log=None,None
-
 RecurseInfinitely=-1
 RecursionRootLevel=0
 SkippableSteps=ut.ChainablyUpdatableOrderedDict() \
@@ -21,9 +19,11 @@ defaults=Bag(dict(
     # todo separate dirName into pdfInputDir,htmlOutputDir: #pdfInputDir='pdf', htmlOutputDir='html',
     dirName='forms',
     checkFileList=True,
+    computeOverlap=True,
     debug=False,
     rootForms=None,
     formyear=None,
+    ignoreCaches=False,
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho could be incomplete
     #      eg during dec2016 the 2016 1040 and 400ish other forms are ready but not schedule D and 200ish others
     latestTaxYear=2016,
@@ -66,6 +66,7 @@ def parseCmdline():
     parser.add_argument('-r', '--recurse', help='recurse thru all referenced forms', action="store_true")
     parser.add_argument('-R', '--recurselevel', type=int, help='number of levels to recurse thru, defaults to infinite', dest='maxrecurselevel', default=defaults.maxrecurselevel)
     parser.add_argument('-k', '--skip', nargs='?', default=[], help='steps to skip, can be any combination of: '+' '.join('='.join((k,v)) for k,v in SkippableSteps.items()), dest='skip')
+    parser.add_argument('-C', '--ignoreCaches', help='recompute cached intermediate results', action="store_true")
     parser.add_argument('-P', '--postgres', help='use postgres database [default=sqlite]', action="store_true")
     parser.add_argument('-V', '--version', help='report version and exit', default=False, action="store_true")
     parser.add_argument('-Z', '--dropall', help='drop all database tables', action="store_true")
@@ -130,7 +131,12 @@ def setup(**overrideArgs):
     if cfg.debug:
         cfg.loglevel='DEBUG'
         cfg.verbose=True
-    cfg.steps=[step for step in SkippableSteps if step not in cfg.skip]
+    if 'steps' in cfg:
+        if cfg.steps and len(cfg.steps[0])>1:
+            assert len(cfg.steps)==1
+            cfg.steps=cfg.steps[0].split()
+    else:
+        cfg.steps=[step for step in SkippableSteps if step not in cfg.skip]
     if cfg.formyear is None:
         cfg.formyear=cfg.latestTaxYear
     dirName=cfg.dirName
@@ -148,29 +154,32 @@ def setup(**overrideArgs):
     logg('logfilename is "{}"'.format(cfg.logfilename))
     logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
 
-    from Form import Form
-    if rootForms:
-        cfg.formsRequested=[Form(rootForm,RecursionRootLevel) for rootForm in rootForms]
-    else:
-        from os import listdir
-        from os.path import isfile, join as joinpath
-        cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
-    if not cfg.formsRequested and not cfg.relaxRqmts:
-        raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
+    if dirName is not None:
+        from Form import Form
+        if rootForms:
+            cfg.formsRequested=[Form(rootForm,RecursionRootLevel) for rootForm in rootForms]
+        else:
+            from os import listdir
+            from os.path import isfile, join as joinpath
+            cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
+        if not cfg.formsRequested and not cfg.relaxRqmts:
+            raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
+        cfg.indicateProgress=cfg.recurse or len(cfg.formsRequested)>1
 
-    # log entire config .before. getFileList makes it huge
-    logg('config:'+str(cfg),[log.warn])
+        # log entire config .before. getFileList makes it huge
+        logg('config:'+str(cfg),[log.warn])
 
-    if not ut.exists(dirName):
-        makedirs(dirName)
-    staticDir=ut.Resource(appname,'static').path()
-    staticLink=dirName+'/static'
-    import os.path
-    if not os.path.lexists(staticLink):
-        symlink(staticDir,staticLink)
+        import os
+        if not ut.exists(dirName):
+            makedirs(dirName)
+        staticDir=ut.Resource(appname,'static').path()
+        staticLink=dirName+'/static'
+        import os.path
+        if not os.path.lexists(staticLink):
+            symlink(staticDir,staticLink)
 
-    if cfg.checkFileList:
-        getFileList(dirName)
+        if cfg.checkFileList:
+            getFileList(dirName)
 
     alreadySetup=True
     return cfg,log

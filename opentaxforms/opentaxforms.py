@@ -75,13 +75,19 @@ def layoutStatus(fields):
             bb1.y1<=bb2.y0)    # box1 is above box2
     def overlaps(field,fieldz):
         # returns true if field overlaps w/ any in fieldz
+        # n-squared loop is v slow!
+        # todo compute fieldNeighbors on adjacent lines to limit loop in layoutStatus/overlaps
         for f in fieldz:
             if overlap(f,field):
                 return True
         return False
-    nOverlappingFields=sum(overlaps(f,fields[i:]) for i,f in enumerate(fields))
-    nNonoverlappingFields=len(fields)-nOverlappingFields
-    return nNonoverlappingFields,nOverlappingFields
+    if cfg.computeOverlap:
+        nOverlappingFields=sum(overlaps(f,fields[i:]) for i,f in enumerate(fields))
+        nNonoverlappingFields=len(fields)-nOverlappingFields
+        return nNonoverlappingFields,nOverlappingFields
+    else:
+        nFields=len(fields)
+        return nFields,-100
 
 statusmsgtmpl='layoutBoxes: {}found,{}overlapping,?missing,?spurious; refs: {}found,{}unrecognized,?missing,?spurious; computedFields: {}found,{}empty,?missing,?spurious'
 def logFormStatus(form):
@@ -89,8 +95,10 @@ def logFormStatus(form):
     z.lgood,z.lerrs=layoutStatus(form.fields)
     z.rgood,z.rerrs=form.refs.status() if form.refs else (0,0)
     z.mgood,z.merrs=mathStatus(form.computedFields)
+    def neg2unkn(list):
+        return [l if l>0 else '?' for l in list]
     statusmsg='form {} status: '.format(form.name)+statusmsgtmpl.format(
-        *z(*('lgood','lerrs','rgood','rerrs','mgood','merrs'))
+        *neg2unkn(z(*('lgood','lerrs','rgood','rerrs','mgood','merrs')))
         )
     logg(statusmsg,[log.warn,stdout])
     return z.__dict__
@@ -119,11 +127,9 @@ def indicateProgress(form):
 def opentaxforms(**args):
     global cfg,log
     cfg,log=setup(**args)
-    dirName=cfg.dirName
     
     formstodo,formsdone,formsfail=[],[],[]
     formstodo.extend(cfg.formsRequested)
-    cfg.indicateProgress=cfg.recurse or len(formstodo)>1
     status=Bag()
     
     while formstodo:
@@ -132,17 +138,13 @@ def opentaxforms(**args):
         try:
             form.getFile(failurls)
             form.readInfo()
-            extractFields(form,dirName)
+            extractFields(form)
             form.fixBugs()
             link.linkfields(form)
             cmds.computeMath(form)
-            refs.findRefs(form,dirName)
-            schema.writeFormToDb(form,cfg.formyear)
-            html.writeEmptyHtmlPages(form,dirName)
-            cleanupFiles(form)
-            formsdone.append(form)
-            formstodo=addFormsTodo(form,formsdone,formstodo,formsfail)
-            status[form.prefix]=logFormStatus(form)
+            refs.findRefs(form)
+            schema.writeFormToDb(form)
+            html.writeEmptyHtmlPages(form)
         except irs.CrypticXml as e:
             # eg 1040 older than 2012 fails here
             log.error(jj('EEEError',e.__class__.__name__,str(e)))
@@ -151,6 +153,11 @@ def opentaxforms(**args):
             log.error(jj('EEEError',traceback.format_exc()))
             if cfg.debug: raise
             formsfail.append(form.name)
+        else:
+            formsdone.append(form)
+            formstodo=addFormsTodo(form,formsdone,formstodo,formsfail)
+            status[form.prefix]=logFormStatus(form)
+            cleanupFiles(form)
     logRunStatus(formsdone,formsfail,status)
     ut.pickle(failurls,'failurls')
     atLeastSomeFormsSucceeded=(len(formsdone)>0) ; Success=0 ; Failure=1

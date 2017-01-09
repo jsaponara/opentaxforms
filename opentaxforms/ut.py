@@ -1,7 +1,7 @@
 from collections import namedtuple as ntuple, defaultdict as ddict, OrderedDict as odict
 from decimal import Decimal as dc
 from pprint import pprint as pp,pformat as pf
-from sys import exit,stdout
+from sys import exit,stdout,exc_info
 NL='\n'
 TAB='\t'
 
@@ -29,22 +29,28 @@ def numerify(s):
     except ValueError:
         return s
 
+class NoSuchPickle(Exception): pass
+class PickleException(Exception): pass
 def pickle(data,pickleFilePrefix):
     from cPickle import dump
     picklname='%s.pickl'%(pickleFilePrefix)
     with open(picklname,'w') as pickl:
         dump(data,pickl)
-def unpickle(pickleFilePrefix,default):
+def unpickle(pickleFilePrefix,default=None):
     from cPickle import load
     picklname='%s.pickl'%(pickleFilePrefix)
     try:
         with open(picklname) as pickl:
             data=load(pickl)
     except IOError as e:
+        clas,exc,tb=exc_info()
         if e.errno==2:  # no such file
-            data=default
+            if default=='raise':
+                raise NoSuchPickle,NoSuchPickle(exc.args),tb
+            else:
+                data=default
         else:
-            raise
+            raise PickleException,PickleException(exc.args),tb
     return data
 
 def flattened(l):
@@ -415,6 +421,7 @@ def exists(fname):
         False
     '''
     from os import access,F_OK
+    fname=fname.rstrip('/')
     return access(fname,F_OK)
 
 def now(**kw):

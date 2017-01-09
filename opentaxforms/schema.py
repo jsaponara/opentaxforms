@@ -176,12 +176,14 @@ def qntyToStr(q):
         '''
     return str(q.magnitude)+str(q.units)
 
-def writeFormToDb(form,year):
+def writeFormToDb(form,year=None):
     # write form data to db tables form and slot
     # todo maybe write formrefs data as well [to a new table]
     # todo generate both code and title from form.name [no need for prefix arg]
     from config import cfg
     if 'd' not in cfg.steps: return
+    if year is None:
+        year=cfg.formyear
     prefix=form.prefix
     fields=form.bfields
     pageinfo=form.pageinfo

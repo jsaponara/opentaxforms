@@ -47,7 +47,7 @@ def createApi(**kw):
             )[tabl]
         colsToShow=[c.name for c in tablobj.columns]
         colsToShow.extend(colsToAdd)
-        print tabl,colsToShow
+        #print tabl,colsToShow
         apimanager.create_api(tablcls,
             url_prefix='/api/v%s'%(apiVersion,),
             include_columns = colsToShow,
