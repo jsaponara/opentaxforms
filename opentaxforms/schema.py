@@ -5,19 +5,16 @@ form=blank forms
 orgn=organization that publishes the form
 slot=fillable slot in a form
 '''
-from sys import exit
-from ut import Bag,CharEnum
+#from sys import exit  # exit is builtin??
+from ut import Bag,CharEnum,Qnty
+from config import cfg
 import db
 from irs import computeTitle as computeFormTitle
 from version import appname
-from datetime import datetime
-from itertools import chain
-from sqlalchemy import \
-    Table, Column, Integer, SmallInteger, String, \
-    DateTime, Enum, ForeignKey, Float, Boolean, \
-    UniqueConstraint, CheckConstraint, CHAR, func
-from sqlalchemy.orm import relationship
-from sqlalchemy.schema import DropConstraint
+from sqlalchemy import (
+    Table, Column, Integer, SmallInteger, String,
+    DateTime, Enum, ForeignKey, Boolean,
+    UniqueConstraint, CheckConstraint, CHAR, func)
 from sqlalchemy.exc import ProgrammingError
 
 conn=None
@@ -40,8 +37,7 @@ class Op(CharEnum):
     copy='='
     unkn='?'
 
-def createdb():
-    print 'createdb',dbname
+def createdb(dbname):
     try:
         conn.execute('CREATE DATABASE %s'%(dbname))
     except ProgrammingError,exc:
@@ -72,7 +68,7 @@ def schema():
             from sqlalchemy.schema import CreateSchema
             engine.execute(CreateSchema('schema'))
         except ProgrammingError as e:
-            if not 'already exists' in str(e):
+            if 'already exists' not in str(e):
                 raise
     
     cols=dict(
@@ -141,8 +137,6 @@ def createAll():
 def ensureCodes():
     # make sure the needed codes/constants are in the db
     dbcodes={}
-    #try: except IntegrityError: # IntegrityError: (IntegrityError) duplicate key value violates unique constraint "orgn_code_key" / DETAIL:  Key (code)=(irs) already exists.
-    from sqlalchemy import select
     for tabl,col,seekval,insertvals in [
             ('orgn','code','us_irs',dict(title='Internal Revenue Service')),
             ]:
@@ -178,16 +172,14 @@ def qntyToStr(q):
 
 def writeFormToDb(form,year=None):
     # write form data to db tables form and slot
-    # todo maybe write formrefs data as well [to a new table]
+    # todo maybe write form.refs data as well [to a new table]
     # todo generate both code and title from form.name [no need for prefix arg]
-    from config import cfg
     if 'd' not in cfg.steps: return
     if year is None:
         year=cfg.formyear
     prefix=form.prefix
     fields=form.bfields
     pageinfo=form.pageinfo
-    formrefs=form.refs
     conn,engine,metadata,dbt,dbc=setup(cfg)
     code=generateFormCode(form.name)
     title=computeFormTitle(prefix)
@@ -236,17 +228,17 @@ def writeFormToDb(form,year=None):
 
 if __name__=="__main__":
     from config import setup as appsetup
-    cfg,log=appsetup(relaxRqmts=True,checkFileList=False)
+    appsetup(relaxRqmts=True,checkFileList=False)
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)
     elif cfg.dropall:
         response=raw_input('are you sure you want to drop all tables?  if so enter "yes": ')
         if response=='yes':
-            conn,engine,metadata,md=connect(appname)
+            conn,engine,metadata,md=db.connect(appname)
             dropAll(metadata,conn)
             print "dropall done"
         else:
             print 'dropall NOT done, quitting'
     else:
-        setup()
+        setup(cfg)
 

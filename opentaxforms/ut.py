@@ -1,13 +1,13 @@
 from collections import namedtuple as ntuple, defaultdict as ddict, OrderedDict as odict
 from decimal import Decimal as dc
 from pprint import pprint as pp,pformat as pf
-from sys import exit,stdout,exc_info
+from sys import stdout,exc_info
 NL='\n'
 TAB='\t'
 
 quiet=False
 
-class Pass:
+class Pass(object):
     def __getattr__(self,*args,**kw):
         print 'Pass',args,kw
         return lambda *args,**kw:None
@@ -28,6 +28,46 @@ def numerify(s):
         return int(''.join(d for d in s if d.isdigit()))
     except ValueError:
         return s
+
+def compactify(multilineRegex):
+    # to avoid having to replace spaces in multilineRegex's with less readable '\s' etc
+    # no re.VERBOSE flag needed
+    r"""
+    line too long:
+        titlePttn1=re.compile(r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$')
+    re.VERBOSE with spaces removed (otherwise theyll be ignored in VERBOSE mode, right?):
+        pttn=re.compile(
+            r'''(?:(\d\d\d\d)\s)?       # 2016
+                Form\s([\w-]+           # Form 1040
+                (?:\s\w\w?)?)           # AS
+                (?:\sor\s([\w-]+))?     # or 1040A
+                (?:\s\s?\(?(?:Schedule\s([\w-]+))\)?)?  # (Schedule B)
+                (?:\s\s?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$''',re.VERBOSE)
+    using compactify:
+        >>> compactify(
+        ... '''(?:(\d\d\d\d) )?       # 2016
+        ...     Form ([\w-]+           # Form 1040
+        ...     (?: \w\w?)?)           # AS
+        ...     (?: or ([\w-]+))?      # or 1040A
+        ...     (?:  ?\(?(?:Schedule ([\w-]+))\)?)?  # (Schedule B)
+        ...     (?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$''')
+        '(?:(\\d\\d\\d\\d) )?Form ([\\w-]+(?: \\w\\w?)?)(?: or ([\\w-]+))?(?:  ?\\(?(?:Schedule ([\\w-]+))\\)?)?(?:  ?\\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\\))?\\s*$'
+
+        todo how can i get this more readable expected string to work with doctest?
+        r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
+
+        # todo what should compactify return for these? [but note this entire docstring is raw]
+        #>>> compactify(r'\   # comment')
+        #>>> compactify(r'\\  # comment')
+        #>>> compactify( '\   # comment')
+        #>>> compactify( '\\  # comment')
+        #print len(multilineRegex),'[%s%s]'%(multilineRegex[0],multilineRegex[1])
+    """
+    import re
+    def crunch(seg):
+        return re.sub(' *#.*$','',seg.lstrip())
+    segs=multilineRegex.split(NL)
+    return ''.join(crunch(seg) for seg in segs)
 
 class NoSuchPickle(Exception): pass
 class PickleException(Exception): pass
@@ -81,10 +121,11 @@ def uniqify2(l):
     return l
 
 import logging
+log=logging.getLogger()
 defaultLoglevel='WARN'
 alreadySetupLogging=False
 def setupLogging(loggerId,args=None):
-    global log,alreadySetupLogging
+    global alreadySetupLogging
     if alreadySetupLogging:
         log.warn('ignoring extra call to setupLogging')
         return log
@@ -99,16 +140,16 @@ def setupLogging(loggerId,args=None):
     fname=loggerId+'.log'
     logging.basicConfig(filename=fname,filemode='w',level=loglevel)
     alreadySetupLogging=True
-    log=logger=logging.getLogger(loggerId)
-    return logger,fname
+    log.name=loggerId
+    return log,fname
 
 defaultOutput=stdout
 def logg(msg,outputs=None):
     '''
-        >>> log=setupLogging('test')
-        >>> logg('just testing',[stdout,log.warn])
+        log=setupLogging('test')
+        logg('just testing',[stdout,log.warn])
         '''
-    if outputs==None:
+    if outputs is None:
         outputs=[defaultOutput]
     for o in outputs:
         m=msg
@@ -128,7 +169,7 @@ def jj(*args,**kw):
     delim=kw.get('delim',' ')
     try:
         return delim.join(str(x) for x in args)
-    except Exception as e:
+    except Exception:
         return delim.join(unicode(x) for x in args)
 def jdb(*args,**kw):
     logg(jj(*args,**kw),[log.debug])
@@ -143,7 +184,7 @@ def run0(cmd):
         err=str(exc)
         out=None
     return out,err
-def run(cmd,*kw):
+def run(cmd,**kw):
     logprefix='run' if 'logprefix' not in kw else kw['logprefix']
     loglevel=logging.INFO if 'loglevel' not in kw else getattr(logging,kw['loglevel'].upper(),None)
     out,err=run0(cmd)
@@ -156,7 +197,8 @@ def run(cmd,*kw):
         log.log(loglevel,msg)
     return out,err
 
-def enc(s): return ''.join([chr(158-ord(c)) for c in s])
+def enc(s):
+    return ''.join([chr(158-ord(c)) for c in s])
 
 class Resource(object):
     def __init__(self,pkgname,fpath=None):
@@ -169,7 +211,7 @@ class Resource(object):
         import pkg_resources
         return pkg_resources.resource_string(self.pkgname,self.fpath)
 
-class CharEnum:
+class CharEnum(object):
     # unlike a real enum, no order guarantee
     # the simplest one from this url:  http://stackoverflow.com/questions/2676133/
     @classmethod
@@ -185,7 +227,7 @@ class CharEnum:
 class ChainablyUpdatableOrderedDict(odict):
     '''
         handy for ordered initialization
-        >>> d=ChainablyUpdatableDict()(a=0)(b=1)(c=2)
+        >>> d=ChainablyUpdatableOrderedDict()(a=0)(b=1)(c=2)
         >>> assert d.keys()==['a','b','c']
         '''
     def __init__(self):
@@ -241,7 +283,7 @@ class Bag(object):
         '''
             >>> b=Bag(a=1,b=2)
             >>> b.update(Bag(a=1,b=1,c=0))
-            >>> assert b('a','b','c')==(1,2,0)
+            Bag({'a': 1, 'b': 1, 'c': 0})
             '''
         for mapp in maps:
             mapp,getitems=self._getGetitems(mapp)
@@ -291,7 +333,8 @@ from pint import UnitRegistry
 ureg = UnitRegistry()
 # interactive use: from pint import UnitRegistry as ureg; ur=ureg(); qq=ur.Quantity
 qq=ureg.Quantity
-def notequalpatch(self,o): return not self.__eq__(o)
+def notequalpatch(self,o):
+    return not self.__eq__(o)
 setattr(qq,'__ne__',notequalpatch)
 assert qq(1,'mm')==qq(1,'mm')
 assert not qq(1,'mm')!=qq(1,'mm')
@@ -439,9 +482,6 @@ def readImgSize(fname,dirName):
     f.close()
     return imgw,imgh
 
-def ipysession():
-    return '\\n'.join('>>> '+str(In[i])+'\\n'+str(Out.get(i)) for i in range(max(len(In),max(Out.keys()))))
-
 # simple server that allows injection of http response headers
 #from http.server import SimpleHTTPRequestHandler  #py3?
 import BaseHTTPServer  #py2
@@ -478,7 +518,6 @@ def nestedFunctionTest():
             'b'
         '''
         pass
-    pass
 '''
 
 def parse_cli():
@@ -492,8 +531,8 @@ def parse_cli():
 if __name__=='__main__':
     # this code is not used here in ut.py cuz ut.py must stand alone.
     # for all modules:
-    from config import setup
-    cfg,log=setup()
+    from config import cfg,setup
+    setup()
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)
     # for main module, add:

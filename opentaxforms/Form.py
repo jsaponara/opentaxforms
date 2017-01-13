@@ -1,8 +1,8 @@
 import re
 import ut
-from ut import ntuple,jj,logg,stdout,Qnty,NL
+from ut import log,ntuple,logg,stdout,Qnty,NL
 import irs
-from config import cfg,log
+from config import cfg
 
 # global so that theyre pickle-able
 PageInfo=ntuple('PageInfo','pagenum pagewidth pageheight textpoz')
@@ -127,24 +127,35 @@ class Form(object):
                 docinfo['titl']=xmpdict['dc']['title']['x-default']
                 docinfo['desc']=xmpdict['dc']['description']['x-default']
                 docinfo['isfillable']=xmpdict['pdf'].get('Keywords','').lower()=='fillable'
-                titlePttn1=r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
-                    # eg 2016 Form W-2 AS 
-                    # eg 2015 Form 1120 S (Schedule D) 
-                    # eg 2015 Form 990 or 990-EZ (Schedule E)
-                    # eg Form 8818  (Rev. December 2007)
-                    # eg Form 8849  (Schedule 2)  (Rev. January 2009)
-                    # eg Form 1066 (Schedule Q) (Rev. December 2013)
-                    # eg Form 1120S Schedule B-1 (December 2013)
-                    # 'Rev' means 'revised'
+                titlePttn1=re.compile(ut.compactify(
+                    r'''(?:(\d\d\d\d) )?       # 2016
+                        Form ([\w-]+           # Form 1040
+                        (?: \w\w?)?)           # AS
+                        (?: or ([\w-]+))?      # or 1040A
+                        (?:  ?\(?(?:Schedule ([\w-]+))\)?)?  # (Schedule B)
+                        (?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'''))
+                # eg 2016 Form W-2 AS 
+                # eg 2015 Form 1120 S (Schedule D) 
+                # eg 2015 Form 990 or 990-EZ (Schedule E)
+                # eg Form 8818  (Rev. December 2007)
+                # eg Form 8849  (Schedule 2)  (Rev. January 2009)
+                # eg Form 1066 (Schedule Q) (Rev. December 2013)
+                # eg Form 1120S Schedule B-1 (December 2013)
+                # 'Rev' means 'revised'
                 m=re.search(titlePttn1,docinfo['titl'])
                 if m:
                     taxyr,form1,form2,sched=m.groups()
                 else:
-                    titlePttn2=r'(?:(\d\d\d\d) )?Schedule ([-\w]+) \(Form ([\w-]+)(?: or ([\w-]+))? ?\)(?: \((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
-                        # eg 2015 Schedule M-3 (Form 1065)
-                        # eg 2015 Schedule O (Form 990 or 990-EZ)
-                        # eg Schedule O (Form 1120) (Rev. December 2012)
-                        # eg Schedule C (Form 1065 ) (Rev. December 2014)
+                    titlePttn2=re.compile(
+                        r'''(?:(\d\d\d\d) )?       # 2016
+                            Schedule ([-\w]+)[ ]   # Schedule B
+                            \(Form ([\w-]+)        # (Form 1040
+                            (?: or ([\w-]+))? ?\)  # or 1040A)
+                            (?: \((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$''',re.VERBOSE)
+                    # eg 2015 Schedule M-3 (Form 1065)
+                    # eg 2015 Schedule O (Form 990 or 990-EZ)
+                    # eg Schedule O (Form 1120) (Rev. December 2012)
+                    # eg Schedule C (Form 1065 ) (Rev. December 2014)
                     m=re.search(titlePttn2,docinfo['titl'])
                     if m:
                         taxyr,sched,form1,form2=m.groups()
@@ -173,12 +184,11 @@ class Form(object):
                 pageinfo[pagenum]=PageInfo(pagenum,pagewidth,pageheight,rr.renderPage(page))
         return docinfo,pageinfo
 
-class Renderer:
+class Renderer(object):
     def __init__(self):
         from pdfminer.layout import LAParams
         from pdfminer.converter import PDFPageAggregator
         from pdfminer.pdfinterp import PDFResourceManager,PDFPageInterpreter
-        from pdfminer.pdfdevice import PDFDevice
         # Create a PDF resource manager object that stores shared resources.
         rsrcmgr=PDFResourceManager()
         # la=layout analysis
@@ -187,7 +197,7 @@ class Renderer:
         self.interpreter=PDFPageInterpreter(rsrcmgr,self.device)
         self.textPoz=None
     def renderPage(self,page):
-        from pdfminer.layout import LTTextBox,LTTextLine,LTFigure,LTTextBoxHorizontal
+        from pdfminer.layout import LTTextBox,LTTextLine,LTTextBoxHorizontal
         self.interpreter.process_page(page)
         layout=self.device.get_result()
         # http://denis.papathanasiou.org/2010/08/04/extracting-text-images-from-pdf-files/
@@ -198,13 +208,14 @@ class Renderer:
         return textPoz
 
 from pdfminer.layout import LTChar,LTTextLineHorizontal
-class TextPoz:
+class TextPoz(object):
     # text positions
     FormPos=ntuple('FormPos','itxt ichar chrz bbox')
     def __init__(self):
         self.textPoz=[]
     def add(self,ltobj):
-        def quantify(tupl,unit): return [Qnty(qnty,unit) for qnty in tupl]
+        def quantify(tupl,unit):
+            return [Qnty(qnty,unit) for qnty in tupl]
         def accum(ltobj,ltchars,chars):
             for lto in ltobj:
                 if isinstance(lto,LTChar):
@@ -229,7 +240,8 @@ class TextPoz:
         def findstr(sl,found):
             for itxt,(txt,bbx,chrz,charobjs) in enumerate(self.textPoz):
                 chrz=chrz.lower()
-                # require target to be bordered by start/end of string, whitespace, or punctuation to avoid matching a mere subset of the actual form referenced
+                # require target to be bordered by start/end of string, whitespace, or punctuation
+                #   to avoid matching a mere subset of the actual form referenced
                 #   [eg to avoid finding '1040' in '1040EZ']
                 slsafe=re.escape(sl)
                 for m in re.finditer(r'(?:^|[\s\W])('+slsafe+r')(?:$|[\s\W])',chrz):
@@ -255,7 +267,8 @@ class TextPoz:
         if not found:
             log.warn('textNotFound: '+s+' in '+self.alltext().replace(NL,' [newline] '))
         if len(found)>1:
-            log.warn('textRepeats: found too many (returning all of them), seeking '+s+' in '+self.alltext().replace(NL,'  ')[:60]+' ... [run in debug mode for fulltext]: '+str(found) )
+            msgtmpl='textRepeats: found too many (returning all of them), seeking %s in %s ... [run in debug mode for fulltext]: %s'
+            log.warn(msgtmpl,s,self.alltext().replace(NL,'  ')[:60],str(found))
             log.debug(' fulltext: seeking '+s+' in '+self.alltext().replace(NL,'  '))
         return found
     def alltext(self):

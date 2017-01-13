@@ -10,8 +10,8 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 import ut
-from ut import jj,ddict,Bag,logg,stdout,Qnty
-from config import setup,RecurseInfinitely
+from ut import log,jj,ddict,Bag,logg,stdout,Qnty
+from config import cfg,setup,RecurseInfinitely
 import irs
 from decimal import Decimal as decim
 import traceback
@@ -125,8 +125,7 @@ def indicateProgress(form):
         logg(msg,[stdout,log.warn])  # use warn level so that transition to new form is logged by default
 
 def opentaxforms(**args):
-    global cfg,log
-    cfg,log=setup(**args)
+    setup(**args)
     
     formstodo,formsdone,formsfail=[],[],[]
     formstodo.extend(cfg.formsRequested)
@@ -164,7 +163,6 @@ def opentaxforms(**args):
     return Success if atLeastSomeFormsSucceeded else Failure
 
 if __name__=='__main__':
-    from config import setup
     cfg,log=setup(readCmdlineArgs=True)
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)

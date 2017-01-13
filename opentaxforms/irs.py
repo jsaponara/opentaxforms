@@ -2,6 +2,7 @@
 # domain-specific code
 
 import re
+import sys
 
 # ignore employer forms: 1099's, 1098's, w2, w4, etc
 excludedformsPttn=re.compile(r'109\d.*|w.*',re.I)
@@ -72,7 +73,7 @@ def sortableFieldname(fieldname):
     '''
         to avoid lexicographic malordering: f1_19,f1_2,f1_20 
         >>> sortableFieldname('f1_43_L0T')
-        ('f1',43,'_L',0,'T')
+        ['f', 1, '_', 43, '_L', 0, 'T']
         '''
     def intify(s):
         try:
