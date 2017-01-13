@@ -178,7 +178,8 @@ class Form(object):
             for ipage,page in enumerate(PDFPage.create_pages(doc)):
                 pagenum=1+ipage
                 if page.cropbox!=page.mediabox:
-                    log.warn('boxesDontMatch: cropbox!=mediabox on page %d: cropbox=%s; mediabox=%s'%(pagenum,page.cropbox,page.mediabox))
+                    log.warn('boxesDontMatch: cropbox!=mediabox on page %d: cropbox=%s; mediabox=%s',
+                      pagenum,page.cropbox,page.mediabox)
                 pagewidth=Qnty(page.cropbox[2]-page.cropbox[0],'printers_point')
                 pageheight=Qnty(page.cropbox[3]-page.cropbox[1],'printers_point')
                 pageinfo[pagenum]=PageInfo(pagenum,pagewidth,pageheight,rr.renderPage(page))
@@ -250,7 +251,7 @@ class TextPoz(object):
                         bbox1=charobjs[ichar][1]
                         bbox2=charobjs[ichar+len(sl)-1][1]
                         if not (bbox1.y0==bbox2.y0 and bbox1.y1==bbox2.y1):
-                            log.info('bbox.y coords dont match for [{}]'.format(sl))
+                            log.info('bbox.y coords dont match for [%s]',sl)
                         bbox=ut.merge(bbox1,bbox2)
                         found.append(TextPoz.FormPos(itxt,ichar,chrz[ichar:ichar+len(sl)],bbox))
                     else:

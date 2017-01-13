@@ -80,13 +80,14 @@ def findRefs(form):
         # check excludedformsPttn before allpdfnames cuz excludedforms are included in allpdfnames
         m=re.match(irs.excludedformsPttn,form)
         if m:
-            log.debug('ignoring excludedform: {}'.format(m.group()))
+            log.debug('ignoring excludedform: %s',m.group())
             return ['excludedform']
         for formFname in formFnames:
             if formFname in cfg.allpdfnames:
                 context['fprefix']=formFname
                 return (form,sched),context
-        log.warn('unrecognizedRefs: not in allpdfnames: {} from {} originally {} eg {}'.format(formFnames,formish,context,cfg.allpdfnames[:4]))
+        log.warn('unrecognizedRefs: not in allpdfnames: %s from %s originally %s eg %s',
+            formFnames,formish,context,cfg.allpdfnames[:4])
         return ['err']
     def relaxRegex(pttnstr):
         # convert spaces in regex to string of [xfa] whitespace [and pipe chars]

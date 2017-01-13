@@ -133,7 +133,7 @@ def linkfields(form):
                 # occasionally dollars fields are not so labeled, eg 2015/f1040sse/line7 and 2015/f8814/line5
                 #   [hmm, both are pre-filled fields...; speak has the amt but not always with a "$"]
                 msgtmpl='expectedDollars: expected field [%s] to have unit==dollars, instead got [%s] from previous speak: [%s]'
-                log.warn(msgtmpl%(dd['uniqname'],dd['unit'],dd['speak']))
+                log.warn(msgtmpl,dd['uniqname'],dd['unit'],dd['speak'])
                 dd['unit']='dollars'
             dd['centfield']=cc
             cc['dollarfieldname']=dd['uniqname']

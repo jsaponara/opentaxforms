@@ -6,7 +6,7 @@ orgn=organization that publishes the form
 slot=fillable slot in a form
 '''
 #from sys import exit  # exit is builtin??
-from ut import Bag,CharEnum,Qnty
+from ut import Bag,CharEnum
 from config import cfg
 import db
 from irs import computeTitle as computeFormTitle
@@ -62,7 +62,6 @@ def schema():
     # todo try connecting to db postgres and creating new db from there; grant privs too
 
     from db import engine,metadata
-    from config import cfg
     if cfg.postgres:
         try:
             from sqlalchemy.schema import CreateSchema
@@ -164,6 +163,7 @@ def generateFormCode(formName):
 
 def qntyToStr(q):
     '''
+        >>> from ut import Qnty
         >>> qnty=Qnty.fromstring('3mm')
         >>> qntyToStr(qnty)
         '3millimeter'

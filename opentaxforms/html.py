@@ -153,7 +153,8 @@ def ratio(qnty1,qnty2):
         '''
     return (qnty1.to_base_units()/qnty2.to_base_units()).magnitude
 checklift=-2
-def checkbox(f,form,pageinfo,imgw,imgh,tooltip=0):
+def checkbox(f,form,pageinfo,imgsize,tooltip=0):
+    imgw,imgh=imgsize
     # checkboxes: <input type='checkbox' id='c1_01'><label for='c1_01' style='top:358px; left:1022px; width:31px; height:24px; text-align:center' ></label> 
     return \
     "<input type='checkbox' id='{name}' {etc}>" \
@@ -166,16 +167,17 @@ def checkbox(f,form,pageinfo,imgw,imgh,tooltip=0):
         val='%s %s(%s) %sx%s xy=%s,%s'%(f.name,f.linenum if f.linenum else '',f.__dict__.get('coltitle',''),shorten(f.wdim),shorten(f.hdim),shorten(f.xpos),shorten(f.ypos)) if tooltip else '',
         etc=' '.join([
             "data-bind='checked:%(name)s'"%dict(name=jsvar(f.uniqname))
-                if f.name in form.upstreamFields or f.name in form.computedFields
-                else ''
+            if f.name in form.upstreamFields or f.name in form.computedFields
+            else ''
             ]).strip(),
         top=checklift+imgh*ratio(adjustypos(f),pageinfo.pageheight),
         left=imgw*ratio(adjustxpos(f),pageinfo.pagewidth),
         width=imgw*ratio(f.wdim,pageinfo.pagewidth),
         height=imgh*ratio(f.hdim,pageinfo.pageheight),
         )
-def textbox(f,form,pageinfo,imgw,imgh,tooltip=0):
+def textbox(f,form,pageinfo,imgsize,tooltip=0):
     # textboxes: <input id='f1_01' type='text' style='top:120px; left:451px; width:182px; height:24px' >
+    imgw,imgh=imgsize
     def linemath(f):
         if f.uniqname in form.computedFields:
             uniqname=f.uniqname
@@ -192,8 +194,10 @@ def textbox(f,form,pageinfo,imgw,imgh,tooltip=0):
         try:
             # moved this to sep func so that exception in mere html/title doesnt error the entire form
             return math(form.computedFields[f.uniqname]) \
-                if f.uniqname in form.computedFields \
-                else '%s %s(%s) %sx%s xy=%s,%s'%(f.name,f.linenum if f.linenum else '',f.__dict__.get('coltitle',''),shorten(f.wdim),shorten(f.hdim),shorten(f.xpos),shorten(f.ypos)) \
+                if f.uniqname in form.computedFields     \
+                else '%s %s(%s) %sx%s xy=%s,%s'%(        \
+                f.name,f.linenum if f.linenum else '',f.__dict__.get('coltitle',''),  \
+                shorten(f.wdim),shorten(f.hdim),shorten(f.xpos),shorten(f.ypos))      \
                 if tooltip \
                 else ''
         except Exception:
@@ -217,10 +221,10 @@ def textbox(f,form,pageinfo,imgw,imgh,tooltip=0):
             '%s'%('readonly placeholder="%s"'%(linemath(f)) if f.uniqname in form.computedFields and f.deps else ''),
             "data-bind='value:%(name)s'"%dict(
                 name=jsvar(f.uniqname))
-                    if f.uniqname in form.upstreamFields or f.uniqname in form.computedFields or \
-                      dollarfieldname(f) in form.upstreamFields  \
-                      or dollarfieldname(f) in form.computedFields
-                    else ''
+                if f.uniqname in form.upstreamFields or f.uniqname in form.computedFields or \
+                  dollarfieldname(f) in form.upstreamFields  \
+                  or dollarfieldname(f) in form.computedFields
+                else ''
             ]).strip(),
         top=imgh*ratio(adjustypos(f),pageinfo.pageheight),
         left=imgw*ratio(adjustxpos(f),pageinfo.pagewidth),
@@ -268,8 +272,8 @@ def computeSteps(cfield):
                     # todo check against the full list of available variables, not just the variables on current line of form
                 else:
                     # eg cannot yet generate math for f8880/line5 [implicitly for cols a and b]
-                    log.error('computeSteps: zcond term %s [%s] matches w/ more than one of deps [%s] in field [%s]'%(
-                        whichside,sideval,uniqlinenums,cfield['speak']))
+                    log.error('computeSteps: zcond term %s [%s] matches w/ more than one of deps [%s] in field [%s]',
+                        whichside,sideval,uniqlinenums,cfield['speak'])
             if sideval!=sideval0:
                 ut.jdb('<uniqifyDep',sideval)
             return sideval
@@ -343,9 +347,9 @@ def writeEmptyHtmlPages(form):
         #   checkboxes: <input type='checkbox' id='c1_01' '><label for='c1_01' style='top:358px; ...; text-align:center' ></label> 
         #   or textboxes: <input id='f1_01' type='text' style='top:120px; left:451px; width:182px; height:24px' >
         inputboxes='\n'.join(
-            checkbox(f,form,pageinfo[npage],imgw,imgh,cfg.verbose) \
-                if f.typ=='checkbox' \
-                else textbox(f,form,pageinfo[npage],imgw,imgh,cfg.verbose)
+            checkbox(f,form,pageinfo[npage],(imgw,imgh),cfg.verbose) \
+            if f.typ=='checkbox' \
+            else textbox(f,form,pageinfo[npage],(imgw,imgh),cfg.verbose)
             for f in form.bfields if f.npage==npage and not f.isReadonly)
         # generate js code for automath
         # math dependencies [examples from f1040]
@@ -399,8 +403,8 @@ def writeEmptyHtmlPages(form):
                 signs=getSigns(cfield),
                 math='//'+math(cfield) if cfg.debug else '',
                 )
-                for cfield in form.computedFields.values()
-                if cfield['unit'] is None and cfield['npage']==npage #and cfield['op']!='?'
+            for cfield in form.computedFields.values()
+            if cfield['unit'] is None and cfield['npage']==npage #and cfield['op']!='?'
             ]
         alreadyDefined=set()
         # inputdepsPair are computed from dollars and cents pairs of boxes
@@ -427,7 +431,7 @@ def writeEmptyHtmlPages(form):
                     # unit may be dollars or none [as in 1040/line42 = line6d x $4000] but not cents
                     for depfield in cfield['deps']
                     if depfield['unit']!='cents' and depfield.get('typ')!='constant' and \
-                        depfield['uniqlinenum'] not in alreadyDefined),
+                    depfield['uniqlinenum'] not in alreadyDefined),
                 steps=computeSteps(cfield),
                 dname=jsvar(cfield['uniqname']),
                 centfieldOptional='s.%(cname)s=koc(zz(cc(s.%(line)s)));'%dict(
@@ -439,24 +443,24 @@ def writeEmptyHtmlPages(form):
                         depfield.get('typ')!='constant'],
                 storeComputdz=alreadyDefined.add(cfield['uniqlinenum']),
                 )
-                for cfield in sorted(form.computedFields.values(),key=lambda cf:cf['ypos'])
-                    if cfield['unit']=='dollars' and cfield['npage']==npage
+            for cfield in sorted(form.computedFields.values(),key=lambda cf:cf['ypos'])
+            if cfield['unit']=='dollars' and cfield['npage']==npage
             ]
         inputdeps='\n'.join(chain(inputdepsSingle,inputdepsPair))
         pagelinks=pagelinkhtml(prefix,npage,npages,imgw)
         formlinks='\n'.encode('utf8').join(
             "<a id='{name}' href='{fname}-p1.html' title='{tip}' " \
-                "style='font-color:orange; top:{top:.0f}px; left:{left:.0f}px; width:{width:.0f}px; height:{height:.0f}px; '></a>".format(
-                # \n\t<!--{comment:.0f}-->                  # for embedding comment in the html output
-                #comment=bbox.y0.to_base_units().magnitude, # for filling said comment
-                name=data['draw']['name'],
-                fname=computeFormFilename(form),
-                tip=computeFormTitle(form,formName)+('[match:%s]'%(data['match']) if cfg.debug else ''),
-                top=imgh*(1-(bbox.y1/pageinfo[npage].pageheight).magnitude),
-                left=imgw*(bbox.x0/pageinfo[npage].pagewidth).magnitude,
-                width=imgw*((bbox.x1-bbox.x0)/pageinfo[npage].pagewidth).magnitude,
-                height=imgh*((bbox.y1-bbox.y0)/pageinfo[npage].pageheight).magnitude,
-                ).encode('utf8')
+            "style='font-color:orange; top:{top:.0f}px; left:{left:.0f}px; width:{width:.0f}px; height:{height:.0f}px; '></a>".format(
+            # \n\t<!--{comment:.0f}-->                  # for embedding comment in the html output
+            #comment=bbox.y0.to_base_units().magnitude, # for filling said comment
+            name=data['draw']['name'],
+            fname=computeFormFilename(form),
+            tip=computeFormTitle(form,formName)+('[match:%s]'%(data['match']) if cfg.debug else ''),
+            top=imgh*(1-(bbox.y1/pageinfo[npage].pageheight).magnitude),
+            left=imgw*(bbox.x0/pageinfo[npage].pagewidth).magnitude,
+            width=imgw*((bbox.x1-bbox.x0)/pageinfo[npage].pagewidth).magnitude,
+            height=imgh*((bbox.y1-bbox.y0)/pageinfo[npage].pageheight).magnitude,
+            ).encode('utf8')
             for form,data in formrefs.items()
             if data['draw']['npage']==npage and 'bboxz' in data
             for bbox in data['bboxz'])
@@ -476,7 +480,7 @@ def writeEmptyHtmlPages(form):
             ))
 
 if __name__=="__main__":
-    cfg,log=config.setup()
+    config.setup()
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)
 

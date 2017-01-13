@@ -322,7 +322,7 @@ def extractFields(form):
         if not npage:
             continue  # skip draw elements not assoc'd w/ a page; they are in some header
         if npage<1:
-            log.warn('rejecting visibl [{}] on invalid page [{}]'.format(elname,npage))
+            log.warn('rejecting visibl [%s] on invalid page [%d]',elname,npage)
             continue
         d=dict(el.attrib.iteritems())  # todo is el.attrib needed here?
         d.update(dict(
@@ -389,7 +389,7 @@ def extractFields(form):
         else:
             visiblz.append(d)
     ensurePathsAreUniq(fields)
-    log.info('found [{}] fields, [{}] visiblz'.format(len(fields),len(visiblz)))
+    log.info('found [%d] fields, [%d] visiblz',len(fields),len(visiblz))
     with open(dirName+'/'+prefix+'-visiblz.txt','w') as f:
         f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
     # fields refers to fillable fields only; draws are all (fillable and read-only/non-fillable) fields

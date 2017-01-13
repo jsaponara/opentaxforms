@@ -113,7 +113,7 @@ alreadySetup=False
 def setup(**overrideArgs):
     from os import makedirs,symlink
     # note formyear will default to latestTaxYear even if dirName=='2014'
-    global alreadySetup,log,cfg
+    global alreadySetup,log
     if alreadySetup:
         return cfg,log
     args=None
@@ -187,7 +187,7 @@ def setup(**overrideArgs):
     return cfg,log
 
 if __name__=="__main__":
-    cfg,log=setup()
+    setup()
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)
 

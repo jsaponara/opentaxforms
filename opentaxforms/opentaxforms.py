@@ -117,7 +117,7 @@ def logRunStatus(formsdone,formsfail,status):
     status.update({'f'+irs.computeFormId(f).lower():None for f in formsfail})
     statusStr=json.dumps(status.__dict__)
     # status is partial because missing,spurious values are unknown and thus omitted
-    log.warn('status partial data: %s'%(statusStr))
+    log.warn('status partial data: %s',statusStr)
 
 def indicateProgress(form):
     if cfg.indicateProgress:
@@ -163,7 +163,7 @@ def opentaxforms(**args):
     return Success if atLeastSomeFormsSucceeded else Failure
 
 if __name__=='__main__':
-    cfg,log=setup(readCmdlineArgs=True)
+    setup(readCmdlineArgs=True)
     if cfg.doctests:
         import doctest; doctest.testmod(verbose=cfg.verbose)
     else:

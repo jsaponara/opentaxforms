@@ -180,7 +180,7 @@ def computeMath(form):
                     )[cmd]
                 terms=re.split(delim,s,re.I)
                 if len(terms)!=2:
-                    log.error('oops, expected 2 terms for cmd [{}] using delim [{}] in [{}], found [{}]: [{}]'.format(cmd,delim,s,len(terms),terms))
+                    log.error('oops, expected 2 terms for cmd [%s] using delim [%s] in [%s], found [%d]: [%s]',cmd,delim,s,len(terms),str(terms))
                     continue
                 if ' and ' in terms[1]:
                     m=re.search(r' and combine the result with (.*)$',terms[1],re.I)
