@@ -23,6 +23,7 @@ class TestOtfBase(object):
         if not ut.exists(folder):
             os.makedirs(folder)
     def run(self,**kw):
+        # note debug=True in kw will cause output mismatch because html pages get debug output
         rootForms=kw.get('rootForms') or ['1040']
         filesToCheck=kw.get('filesToCheck') or ['f%s-p1.html'%(form,) for form in rootForms]
         kw.update(self.defaultArgs)
@@ -61,14 +62,15 @@ class TestOtfSteps(TestOtfBase):
         start with 'test_' because it runs for several seconds
         '''
     # todo use a less complex form than 1040 to speed testing
-    def run_1040_full(self):
+    def run_1040_full(self,**kw):
         self.run(
             rootForms=['1040'],
             filesToCheck=['f1040-p1.html'],
             dirName='forms_1040_full',
             ignoreCaches=True,
+            **kw
             )
-    def test_run_1040_xfa(self):
+    def test_run_1040_xfa(self,**kw):
         dirName=pathjoin(self.testdir,'forms_1040_xfa')
         self.ensureDir(dirName)
         # use cached pdf info to speed the run
@@ -79,11 +81,10 @@ class TestOtfSteps(TestOtfBase):
             filesToCheck=['f1040-fmt.xml'],
             dirName=dirName,
             steps=['x'],
-            # speeds testing
-            computeOverlap=False,
+            computeOverlap=False,  # speeds testing
+            **kw
             )
-    # todo add tests of further steps,
-    # todo   made fast via pickled results of previous step
+    # todo add tests of further steps, made fast via pickled results of previous step
 
 class TestOtfApiBase(object):
     def setup_method(self, _):
@@ -127,19 +128,19 @@ class TestOtfApi(TestOtfApiBase):
 def main(args):
     def usage():
         print 'usage: "%s [-q|-s|-f|-x|-a]"\n-q=quick script tests\n-s=slow script tests\n-f=full 1040\n-x=xfa-only 1040\n-a=api tests'%(args[0],)
-    if len(args)==2:
-        if args[1] in ('-q','-s','-f','-x'):
+    if len(args)>=2:
+        if any(arg in args for arg in ('-q','-s','-f','-x')):
             testRunner=TestOtfSteps()
             testRunner.setup_method(0)
-            if args[1]=='-q':
+            if '-q' in args:
                 testRunner.test_run_1040_xfa()
-            elif args[1]=='-s':
+            elif '-s' in args:
                 testRunner.run_1040_full()
-            elif args[1]=='-x':
+            elif '-x' in args:
                 testRunner.test_run_1040_xfa()
-            elif args[1]=='-f':
+            elif '-f' in args:
                 testRunner.run_1040_full()
-        elif args[1]=='-a': # run api tests
+        elif '-a' in args: # run api tests
             testRunner=TestOtfApi()
             testRunner.setup_method(0)
 

@@ -1,7 +1,7 @@
 
 import sys
 import ut
-from ut import Bag,setupLogging,logg,NL
+from ut import log,Bag,setupLogging,logg,NL
 
 from version import appname,appversion
 
@@ -40,6 +40,7 @@ defaults=Bag(dict(
     verbose=False,
     version=False,
 ))
+cfg=Bag(defaults)
 
 from argparse import ArgumentParser
 def parseCmdline():
@@ -115,7 +116,6 @@ def setup(**overrideArgs):
     global alreadySetup,log,cfg
     if alreadySetup:
         return cfg,log
-    cfg=Bag(defaults)
     args=None
     if overrideArgs.get('readCmdlineArgs'):
         args=parseCmdline()
@@ -151,8 +151,10 @@ def setup(**overrideArgs):
         logname=appname
     loginfo=setupLogging(logname,cfg)
     log,cfg.logfilename=loginfo
-    logg('logfilename is "{}"'.format(cfg.logfilename))
-    logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
+    cfg.log=log
+    if not cfg.quiet:
+        logg('logfilename is "{}"'.format(cfg.logfilename))
+        logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
 
     if dirName is not None:
         from Form import Form

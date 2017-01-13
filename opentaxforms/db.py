@@ -2,7 +2,8 @@
 import ut
 import config
 from sqlalchemy import MetaData, create_engine, select
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy import UniqueConstraint
+#from sqlalchemy.exc import ProgrammingError
 from itertools import chain
 
 engine,metadata,conn=None,None,None
@@ -29,6 +30,7 @@ def connect(appname,**kw):
 def connect_(**kw):
     # consumes keys from kw: user pw db
     global conn,engine,metadata
+    global cfg,log
     cfg,log=config.setup(**kw)
     if 'dirName' in kw:
         del kw['dirName']
@@ -75,17 +77,16 @@ def queryIdx(table):
         >>> tq.id,tq.name,tq.addr
         (0, 1, 2)
         '''
-    return ntuple('I'+table.name,[c.name for c in table.columns])(*range(len(table.columns)))
+    return ut.ntuple('I'+table.name,[c.name for c in table.columns])(*range(len(table.columns)))
 
 def deleteall():
     # ideally would compute graph of ForeignKey deps via table.foreign_keys
-    # needed because metadata.drop_all() doesnt wk for tables w/ foreign keys but fails silently!
-    # todo doesnt wk cuz didnt declare the cascade?  ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in http://docs.sqlalchemy.org/en/latest/core/constraints.html  [tho CASCADE not supported in sqlite before Cascading delete isn't supported by sqlite until version 3.6.19]
+    # todo doesnt wk cuz didnt declare the cascade?  see dropall
     for i in range(len(metadata.tables)):
         for tname,t in metadata.tables.iteritems():
             try:
                 conn.execute(t.delete())
-            except:
+            except Exception:
                 pass
         metadata.clear()
         metadata.reflect()
@@ -96,12 +97,14 @@ def deleteall():
 def dropall():
     # ideally would compute graph of ForeignKey deps via table.foreign_keys
     # needed because metadata.drop_all() doesnt wk for tables w/ foreign keys but fails silently!
-    # todo doesnt wk cuz didnt declare the cascade?  ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in http://docs.sqlalchemy.org/en/latest/core/constraints.html  [tho CASCADE not supported in sqlite before Cascading delete isn't supported by sqlite until version 3.6.19]
+    # todo this doesnt wk cuz didnt declare the cascade?
+    #   ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in http://docs.sqlalchemy.org/en/latest/core/constraints.html
+    #   [tho cascading delete isn't supported by sqlite until version 3.6.19]
     for i in range(len(metadata.tables)):
         for tname,t in metadata.tables.iteritems():
             try:
                 t.drop()
-            except:
+            except Exception:
                 pass
         metadata.clear()
         metadata.reflect()
@@ -109,11 +112,33 @@ def dropall():
     if metadata.tables:
         raise Exception('cannot drop tables [%s]'%(metadata.tables.keys()))
 
+def getUniqueConstraints(table):
+    uniqconstraints=chain(
+        (c for c in table.constraints if type(c)==UniqueConstraint),
+        table.indexes,
+        )
+    return uniqconstraints
+
+def firstCompleteConstraint(table,kw):
+    # return first constraint all of whose fields are in kw, otherwise return kw
+    uniqconstraints=getUniqueConstraints(table)
+    for ucon in uniqconstraints:
+        uniqfields=[c.key for c in ucon.columns]
+        if all([field in kw for field in uniqfields]):
+            seekfields=[(getattr(table.c,field),kw[field]) for field in uniqfields]
+            break
+    else:
+        # found no such constraint, so use all kw entries
+        seekfields=[(getattr(table.c,k),v) for k,v in kw.iteritems()]
+    return seekfields
+
 def upsert(table,**kw):
     '''
         >>> from sqlalchemy import MetaData, Table, Column, \
                                    Integer, String, select
-        >>> conn,engine,metadata,md=connect()
+        >>> from config import setup
+        >>> ignoreReturnValue=setup(quiet=True,dirName=None)
+        >>> conn,engine,metadata,md=connect('upsert-doctest',dbpath='blah')
         >>> if 'test' in metadata.tables:
         ...   metadata.drop_all(tables=[md.test])
         ...   metadata.remove(md.test)
@@ -130,20 +155,7 @@ def upsert(table,**kw):
         >>> conn.execute(select([test.c.addr])).first()
         (u'addr2',)
     '''
-    from sqlalchemy import UniqueConstraint
-    uniqconstraints=chain(
-        (c for c in table.constraints if type(c)==UniqueConstraint),
-        table.indexes,
-        )
-    # use first constraint all of whose fields are in kw 
-    for ucon in uniqconstraints:
-        uniqfields=[c.key for c in ucon.columns]
-        if all([field in kw for field in uniqfields]):
-            seekfields=[(getattr(table.c,field),kw[field]) for field in uniqfields]
-            break
-    else:
-        # found no such constraint, so use all kw entries
-        seekfields=[(getattr(table.c,k),v) for k,v in kw.iteritems()]
+    seekfields=firstCompleteConstraint(table,kw)
     datafields=unicodify(kw)
     col,val=seekfields[0]
     where=(col==val)
@@ -161,13 +173,15 @@ def upsert(table,**kw):
         msg='too many rows [%d] in table [%s]' \
             ' match allegedly unique values [%s]' \
             %(matches.rowcount,table,seekfields)
-        raise Exception()
+        raise Exception(msg)
     return insertedpk
 
 def selsert(table,**kw):
     '''
         >>> from sqlalchemy import MetaData, Table, Column, Integer, String
-        >>> conn,engine,metadata,md=connect()
+        >>> from config import setup
+        >>> ignoreReturnValue=setup(quiet=True,dirName=None)
+        >>> conn,engine,metadata,md=connect('selsert-doctest',dbpath='blah')
         >>> if 'test' in metadata.tables: metadata.remove(md.test)
         >>> test=Table('test', metadata, \
            Column('id', Integer, primary_key=True), \
@@ -180,20 +194,7 @@ def selsert(table,**kw):
         >>> selsert(test, name='name1', addr='addr1' )
         1
     '''
-    from sqlalchemy import UniqueConstraint
-    uniqconstraints=chain(
-        (c for c in table.constraints if type(c)==UniqueConstraint),
-        table.indexes,
-        )
-    # use first constraint all of whose fields are in kw 
-    for ucon in uniqconstraints:
-        uniqfields=[c.key for c in ucon.columns]
-        if all([field in kw for field in uniqfields]):
-            seekfields=[(getattr(table.c,field),kw[field]) for field in uniqfields]
-            break
-    else:
-        # found no such constraint, so use all kw entries
-        seekfields=[(getattr(table.c,k),v) for k,v in kw.iteritems()]
+    seekfields=firstCompleteConstraint(table,kw)
     col,val=seekfields[0]
     where=(col==val)
     for col,val in seekfields[1:]:
@@ -218,7 +219,7 @@ def getbycode(table,mem=mem,**kw):
     def stripifstring(s):
         try:
             return s.strip("\" '")
-        except:
+        except Exception:
             return s
     kw=dict([(k,stripifstring(v)) for k,v in kw.iteritems()])
     if kw['code'] in mem[table.name]:
@@ -229,7 +230,7 @@ def getbycode(table,mem=mem,**kw):
         if matches.returns_rows:
             i,=matches.first()
         else:
-            ppr(kw)
+            log.debug(kw)
             i=conn.execute(table.insert(),**kw).inserted_primary_key[0]
         mem[table.name][kw['code']]=i
     return i
@@ -237,7 +238,7 @@ def getbyname(table,mem=mem,**kw):
     def stripifstring(s):
         try:
             return s.strip("\" '")
-        except:
+        except Exception:
             return s
     kw=dict([(k,stripifstring(v)) for k,v in kw.iteritems()])
     if kw['name'] in mem[table.name]:

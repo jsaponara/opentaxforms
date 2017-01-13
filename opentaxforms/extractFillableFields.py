@@ -1,18 +1,19 @@
 
-from ut import setupLogging,exists,skip,NL,Qnty,pf,run
+from config import cfg
+from ut import log,setupLogging,exists,skip,NL,Qnty,pf,run
 from irs import commandPtn,possibleColTypes,CrypticXml
 from sys import exc_info
 import re
+from itertools import chain
 
-from re import compile
-ESC_PAT = compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
+ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 def escape(s):
     '''
         >>> escape('<field name="blah">')
         '&#60;field name=&#34;blah&#34;&#62;'
         '''
     return ESC_PAT.sub(lambda m:'&#%d;' % ord(m.group(0)), s)
-UNESC_PAT=compile(r'&#(\d+);')
+UNESC_PAT=re.compile(r'&#(\d+);')
 def unescape(s):
     '''
         >>> unescape('&#60;field name=&#34;blah&#34;&#62;')
@@ -27,7 +28,7 @@ def getRawXml(prefix,path='.'):
         log.debug('xml text file already exists [{}]'.format(xmltextfname))
         xmlAsStr=open(xmltextfname).read()
     else:
-        log.debug('creating xml text file [{}]'.format(xmltextfname))
+        log.debug('creating xml text file [%s]',xmltextfname)
         f=open('%s/%s.xml'%(path,prefix),'rb')
         datanamespace='xfa-template'
         fieldFrags=[]
@@ -37,7 +38,7 @@ def getRawXml(prefix,path='.'):
                 # must not give multiple toplevel elements to lxml to avoid 'lxml.etree.XMLSyntaxError: Extra content at the end of the document'
                 log.debug( 'found datanamespace' )
                 if fieldFrags:
-                    log.warn('skipping [{}] chars of xml, already have [{}] chars'.format(len(line),len(fieldFrags[0])))
+                    log.warn('skipping [%d] chars of xml, already have [%d] chars',len(line),len(fieldFrags[0]))
                 else:
                     fieldFrags.append(unescapeline(line))
         xmlAsStr='\n'.join(f for f in fieldFrags if f and 'form checksum' not in f)
@@ -53,11 +54,11 @@ def collectTables(tree,namespaces):
     tableEls=tree.xpath('//*[@layout="table"]',namespaces=namespaces)
     tables={}
     for el in tableEls:
-        tablename=el.attrib.get('name','nameless')
+        #tablename=el.attrib.get('name','nameless')
         key=computePath(el,namespaces)
         maxhs=[]
         for iele,ele in enumerate(el.xpath('.//*[@layout="row"]',namespaces=namespaces)):
-            rowname=ele.attrib.get('name','nameless')
+            #rowname=ele.attrib.get('name','nameless')
             # todo for maxheight in each row, assuming just need 'h' attrib, but f1040/line6ctable also has node w/ lineHeight attrib
             cells=ele.xpath('./*[@h or @minH]',namespaces=namespaces)
             if iele==0:
@@ -93,7 +94,6 @@ def collectTables(tree,namespaces):
                 )
     return tables
 
-from itertools import chain
 def computePath(el,namespaces):
     return '.'.join(reversed(list(ele.attrib.get('name','%s#%d'%(ele.tag,indexAmongSibs(ele,ele.tag,namespaces))) for ele in chain([el],el.iterancestors()))))
 def indexAmongSibs(el,tag=None,namespaces=None):
@@ -135,8 +135,6 @@ def ensurePathsAreUniq(fields):
 
 def extractFields(form):
     # create <form>.xml, single-line <form>-text.xml, and formatted <form>-fmt.xml
-    global cfg,log
-    from config import cfg,log
     dirName=cfg.dirName
     prefix=form.prefix
     fields=form.fields
@@ -157,19 +155,19 @@ def extractFields(form):
     fieldEls=tree.xpath('//t:draw[t:value]|//t:field',namespaces=namespaces)
     prevTable=None
     for iel,el in enumerate(fieldEls):
-        def getvar(varname):
+        def getvar(el,varname):
             varnames=varname.split()
             for varname in varnames:
                 try:
                     # in some draws, eg in 1040a, "h='=0mm'"
                     q=Qnty.fromstring(el.attrib[varname])
                     break  # to avoid trying 2nd varname, if any
-                except:
+                except Exception:
                     q=Qnty.fromstring('0mm')
             return q
-        xpos,ypos,hdim,wdim=[getvar(varname) for varname in ('x','y','h minH','w')]
+        xpos,ypos,hdim,wdim=[getvar(el,varname) for varname in ('x','y','h minH','w')]
         isfield=el.tag.endswith('field')
-        isdraw=not isfield
+        #isdraw=not isfield
         if isfield:
             # caption node isnt v.informative (or even common), at least for f1040schedB
             istextbox=bool(el.xpath('t:ui/t:textEdit',namespaces=namespaces))
@@ -244,13 +242,11 @@ def extractFields(form):
             else:
                 continue
         # climb node ancestry for relative position info
-        from itertools import chain
         # to see entire subtree of field nodes, xmllint --format --recover form.xml [where form.xml is written above]
         path=[]
         # for fields in tables [if any]--typically in the table ancestor element
         currTable=None
         npage=None
-        from itertools import chain
         for a in chain([el],el.iterancestors()):
             p=a.getparent()
             # todo are these two conditions the same?  if so, not-p is likely more general
@@ -270,7 +266,6 @@ def extractFields(form):
                 idxOfNamedNode='[%d]'%(sibsOfSameName.index(a))
                 idx=idxOfNamedNode
             else:
-                import re
                 tag=re.sub(r'{.*}','',a.tag)
                 ancname='#%s'%(tag)
                 idx=idxfornamelessnode
@@ -366,18 +361,18 @@ def extractFields(form):
                 # todo generalize at least the keys selected
                 '''
             def __str__(self):
-                speaklinecol=self.d.get('speak','<<speakless>>')
+                speaklinecol=self.get('speak','<<speakless>>')
                 try:
                     lineidx=speaklinecol.lower().index('line ')
                     speaklinecol=speaklinecol[lineidx:]
-                except: pass
+                except Exception: pass
                 col=''
                 try:
                     # seek cols a-r since 's' occurs often as "Form(s)" and 18 cols is plenty!
                     parenchars=re.findall(r'\([a-r]\)',speaklinecol)
                     if parenchars and parenchars[0] not in speaklinecol[:13]:
                         col=parenchars[0]
-                except: pass
+                except Exception: pass
                 def shortname():
                     name=self.get('name','<<nameless>>')
                     if '.' in name:
@@ -441,7 +436,7 @@ def main():
         f=sys.stdin
     else:
         f=open(infile)
-    class Form: pass
+    class Form(object): pass
     form=Form()
     form.prefix=prefix
     form.fields=[]

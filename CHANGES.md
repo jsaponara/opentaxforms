@@ -1,3 +1,9 @@
+0.4.16 (2017-01-13)
+
+- linting via landscape.io, including shortening long lines, removing unused variables, and refactoring some long functions.
+- fixed all broken doctests.
+- both cross-module globals, log and cfg, are now importable.
+
 0.4.15 (2017-01-09)
 
 - bugfix: the ignoreCaches option now works.

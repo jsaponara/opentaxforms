@@ -1,7 +1,8 @@
 import re
 import ut
-from ut import jj,numerify
+from ut import log,jj,numerify
 import irs
+from config import cfg
 
 formcondPtn=re.compile(r'form (\w+)(?: and (\w+))? filers: (\w+)',re.I)
 ifcondPtn  =re.compile(r'if (.+?), (.+?)(?: otherwise,? (.+))?$')
@@ -22,8 +23,6 @@ def condtopy(cond):
     raise Exception('dunno condition [%s]'%(cond,))
 
 def computeMath(form):
-    global cfg,log
-    from config import cfg,log
     fields,draws,fieldsByLine,prefix=form.fields,form.draws,form.fieldsByLine,form.prefix
     # determines which fields are computed from others
     # 'dep' means dependency
@@ -68,9 +67,10 @@ def computeMath(form):
             if m:
                 form1,form2,s=m.groups()
                 assert form1,'formcondPtn w/o form1!'
-                forms=[form1,form2] if form2 else [form1]
+                #forms=[form1,form2] if form2 else [form1]
             else:
-                forms=None
+                #forms=None
+                pass
             m=re.match(ifcondPtn,s)
             if m:
                 cond,s,s2=m.groups()

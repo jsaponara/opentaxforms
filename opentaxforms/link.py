@@ -1,11 +1,12 @@
 
-import ut
-from ut import jj,ddict
+from ut import log,jj,ddict
 import irs
 import re
 
 def findLineAndUnit(s):
     '''
+        >>> import logging
+        >>> log.addHandler(logging.NullHandler())
         >>> findLineAndUnit('Payments, Credits, and Tax. Line 7. Federal income tax withheld. Dollars.')
         ('line7', 'dollars')
         >>> findLineAndUnit('Line 7. Cents.')
@@ -41,24 +42,67 @@ def findLineAndUnit(s):
     unit=units[-1].lower().strip(' .') if units else ''
     return linenum,unit
 
+def computeUniqname(f,fieldsSofarByName):
+    # [0] becomes L0T cuz L,T look like square brackets to me
+    pathsegs=f['path'].replace('[','L').replace(']','T').split('.')
+    i=-1
+    name=f['name']
+    uniqname=name
+    while uniqname in fieldsSofarByName:
+        uniqname='_'. join(seg for seg in pathsegs[i:])
+        i-=1
+        if i<-len(pathsegs):
+            msg='cannot generate unique key from path segments %s in keys %s'%(pathsegs,fieldsSofarByName.keys())
+            log.error(msg)
+            raise Exception(msg)
+    return uniqname
+
+def unifyTableRows(fieldsByRow):
+    # force cells in each row to have same linenum as leftmost cell
+    # todo give example [form/line] of where this is needed
+    # todo consider adding tolerance, eg if y,y+ht overlap >=90% for two cells then theyre in the same row
+    def byPageAndYpos(((pg,ypos),val)):
+        '''
+            >>> byPageAndYpos((1,'67.346 mm'),['et','cetera'])
+            (1,67.346)
+            '''
+        return (pg,float(ypos.split(None,1)[0]))
+    for row,fs in sorted(fieldsByRow.items(),key=byPageAndYpos):
+        page,ht=row
+        fs.sort(key=lambda f:f['xpos'])
+        if fs[0].get('currTable'):
+            ll0=fs[0]['linenum']
+            for f in fs[1:]:
+                if f['linenum']!=ll0:
+                    f['linenum-orig']=f['linenum']
+                    f['linenum']=ll0
+                    msgtmpl='leftmostCellOverride: p%d: changed %s in field %s to %s from leftmost field %s'
+                    log.info(msgtmpl,page,f['linenum-orig'],f['uniqname'],ll0,fs[0]['uniqname'])
+
+def uniqifyLinenums(ypozByLinenum,fieldsByLine,fieldsByLinenumYpos):
+    # compute and assign unique linenums
+    for lnum,ypoz in ypozByLinenum.items():
+        # using noncentFields to ensure just one field per ypos
+        # eg dollar-and-cent pair usu at same ypos
+        # newcode but wks for 1040,1040sb
+        pg,linenumm=lnum
+        noncentFields=[ff for ff in fieldsByLine[lnum] if ff['unit']!='cents']
+        dupLinenumz=len(noncentFields)>1
+        ypozz=[ff['ypos'] for ff in noncentFields]
+        for iypos,ypos in enumerate(sorted(ypozz)):
+            for ff in fieldsByLinenumYpos[(pg,linenumm,ypos)]:
+                if linenumm is None:
+                    uniqlinenum=None
+                elif dupLinenumz:
+                    # todo ensure the delimiter char ['_'] doesnt occur in any linenum
+                    uniqlinenum=ff['linenum']+'_'+str(1+iypos)
+                else:
+                    uniqlinenum=ff['linenum']
+                ff['uniqlinenum']=uniqlinenum
+
 def linkfields(form):
-    global cfg,log
-    from config import cfg,log
     # link and classify fields: dollar and cent; by line; by name
     fields=form.fields
-    def computeUniqname(f,fieldsSofarByName):
-        # [0] becomes L0T cuz L,T look like square brackets to me
-        pathsegs=f['path'].replace('[','L').replace(']','T').split('.')
-        i=-1
-        uniqname=name
-        while uniqname in fieldsSofarByName:
-            uniqname='_'. join(seg for seg in pathsegs[i:])
-            i-=1
-            if i<-len(pathsegs):
-                msg='cannot generate unique key from path segments %s in keys %s'%(pathsegs,fieldsSofarByName.keys())
-                log.error(msg)
-                raise Exception(msg)
-        return uniqname
     ypozByLinenum=ddict(set)
     fieldsByLinenumYpos=ddict(list)
     fieldsByName={}
@@ -66,7 +110,6 @@ def linkfields(form):
     fieldsByRow=ddict(list)
     fprev=None
     for f in fields:
-        name=f['name']
         uniqname=computeUniqname(f,fieldsByName)
         fieldsByName[uniqname]=f
         f['uniqname']=uniqname
@@ -87,51 +130,17 @@ def linkfields(form):
             # todo should check abit more, eg approx dollars.ypos==cents.ypos and dollars.xpos+dollars.wdim==cents.xpos
             cc,dd=f,fprev
             if dd['unit']!='dollars':
-                # occasionally dollars fields are not so labeled, eg 2015/f1040sse/line7 and 2015/f8814/line5 [hmm, both are pre-filled fields...; speak has the amt but not always with a "$"]
-                log.warn('expectedDollars: expected field [%s] to have unit==dollars, instead got [%s] from previous speak: [%s]'%(dd['uniqname'],dd['unit'],dd['speak']))
+                # occasionally dollars fields are not so labeled, eg 2015/f1040sse/line7 and 2015/f8814/line5
+                #   [hmm, both are pre-filled fields...; speak has the amt but not always with a "$"]
+                msgtmpl='expectedDollars: expected field [%s] to have unit==dollars, instead got [%s] from previous speak: [%s]'
+                log.warn(msgtmpl%(dd['uniqname'],dd['unit'],dd['speak']))
                 dd['unit']='dollars'
             dd['centfield']=cc
             cc['dollarfieldname']=dd['uniqname']
         fieldsByRow[(pg,str(f['ypos']))].append(f)
         fprev=f
-    def byPageAndYpos(((pg,ypos),val)):
-        '''
-            >>> byPageAndYpos((1,'67.346 mm'),['et','cetera'])
-            (1,67.346)
-            '''
-        return (pg,float(ypos.split(None,1)[0]))
-    # force cells in each row to have same linenum as leftmost cell
-    # todo give example [form/line] of where this is needed
-    # todo consider adding tolerance, eg if y,y+ht overlap >=90% for two cells then theyre in the same row
-    for row,fs in sorted(fieldsByRow.items(),key=byPageAndYpos):
-        page,ht=row
-        fs.sort(key=lambda f:f['xpos'])
-        if fs[0].get('currTable'):
-            ll0=fs[0]['linenum']
-            for f in fs[1:]:
-                if f['linenum']!=ll0:
-                    f['linenum-orig']=f['linenum']
-                    f['linenum']=ll0
-                    log.warn(jj('leftmostCellOverride: p%d: changed'%(page),f['linenum-orig'],'in field',f['uniqname'],'to',ll0,'from leftmost field',fs[0]['uniqname']))
-    # compute and assign unique linenumz
-    for lnum,ypoz in ypozByLinenum.items():
-        # using noncentFields to ensure just one field per ypos
-        # eg dollar-and-cent pair usu at same ypos
-        # newcode but wks for 1040,1040sb
-        pg,linenumm=lnum
-        noncentFields=[ff for ff in fieldsByLine[lnum] if ff['unit']!='cents']
-        dupLinenumz=len(noncentFields)>1
-        ypozz=[ff['ypos'] for ff in noncentFields]
-        for iypos,ypos in enumerate(sorted(ypozz)):
-            for ff in fieldsByLinenumYpos[(pg,linenumm,ypos)]:
-                if linenumm is None:
-                    uniqlinenum=None
-                elif dupLinenumz:
-                    # todo ensure the delimiter char ['_'] doesnt occur in any linenum
-                    uniqlinenum=ff['linenum']+'_'+str(1+iypos)
-                else:
-                    uniqlinenum=ff['linenum']
-                ff['uniqlinenum']=uniqlinenum
+    unifyTableRows(fieldsByRow)
+    uniqifyLinenums(ypozByLinenum,fieldsByLine,fieldsByLinenumYpos)
     form.fieldsByName=fieldsByName
     form.fieldsByLine=fieldsByLine
 
