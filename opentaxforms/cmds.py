@@ -398,25 +398,3 @@ class CommandParser(object):
         except CannotParse:
             raise
 
-def computeMath(form):
-    # determines which fields are computed from others
-    # 'dep' means dependency
-    fields,draws=(form.fields,form.draws) if 'm' in cfg.steps else ([],[])
-    for field in fields:
-        math=CommandParser(field,form)
-        speak=normalize(field['speak'])
-        adjustNegativeField(field,speak)
-        colinstruction=normalize(field['colinstruction'])
-        instruction=colinstruction if colinstruction else speak
-        sentences=re.split(r'\.\s*',instruction)
-        for s in sentences:
-            try:
-                math.parseInstruction(s,field)
-            except CannotParse:
-                continue
-        if math and math.terms:
-            math.assembleFields()
-        field['math']=math
-    form.orderDependencies()
-    form.bfields=[ut.Bag(f) for f in fields]  # just to shorten field['a'] to field.a
-

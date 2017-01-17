@@ -199,6 +199,29 @@ class Form(object):
             val=computedFields[name]
             del computedFields[name]
             computedFields[name]=val
+    def computeMath(self):
+        # determines which fields are computed from others
+        # 'dep' means dependency
+        from cmds import CommandParser,normalize,adjustNegativeField,CannotParse
+        fields,draws=(self.fields,self.draws) if 'm' in cfg.steps else ([],[])
+        for field in fields:
+            math=CommandParser(field,self)
+            speak=normalize(field['speak'])
+            adjustNegativeField(field,speak)
+            colinstruction=normalize(field['colinstruction'])
+            instruction=colinstruction if colinstruction else speak
+            sentences=re.split(r'\.\s*',instruction)
+            for s in sentences:
+                try:
+                    math.parseInstruction(s,field)
+                except CannotParse:
+                    continue
+            if math and math.terms:
+                math.assembleFields()
+            field['math']=math
+        self.orderDependencies()
+        self.bfields=[ut.Bag(f) for f in fields]  # just to shorten field['a'] to field.a
+
 
 class Renderer(object):
     def __init__(self):
