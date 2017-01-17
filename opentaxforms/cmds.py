@@ -81,23 +81,23 @@ def adjustNegativeField(field,speak):
         dx=.05*field['wdim']  # shift field rightward to make room for '('
         field['dx']=dx
 
-def couldBeCommand(sentence):
-    couldBeCommand=True
+def checkCouldBeCommand(sentence):
     if sentence.startswith('this is the amount'):
         # eg 1040/line75  this is the amount you overpaid
         #    'amount' here is not a cmd [and thus op is not '+']
-        couldBeCommand=False
+        raise NoCommand('sentence.startswith "this is the amount": [%s]'%(sentence,))
     elif 'total number of exemptions claimed' in sentence:
         # eg 1040a/line6d Total number of exemptions claimed.  Boxes checked on 6a and 6b 
         # todo
-        couldBeCommand=False
+        raise NoCommand('sentence.contains "total number of exemptions claimed": [%s]'%(sentence,))
     # could be elim'd by allowing multi-word cmds
     elif 'amount' in sentence and 'amount from line ' not in sentence:
         # eg 2015/f5329/line3 Amount subject to additional tax. Subtract line 2 from line 1
-        couldBeCommand=False
-    return couldBeCommand
+        raise NoCommand('sentence.contains "amount" but not "amount from line": [%s]'%(sentence,))
 
-def editCommand(sentence,ll):
+def editCommand(sentence,field):
+    ll=field['linenum']
+    sentence=sentence.lower()
     if sentence.startswith('boxes checked on'):
         # insert implicit command
         sentence='howmany '+sentence
@@ -133,9 +133,20 @@ def extractCondition(s):
         cond=s2=None
     return cond,s
 
-def parseAdd(cmd,s,terms,field,form):
+class NoCommand(BaseException):
+    pass
+def parseCommand(s):
+    m=re.match(irs.commandPtn,s)
+    if m:
+        cmd,s=m.groups()
+    else:
+        raise NoCommand('no command found in [%s]'%(s,))
+    return cmd,s
+
+def parseAdd(cmd,s,math,field,form):
     fieldsByLine=form.fieldsByLine
     ll,uu,nn,pg=[field[key] for key in Term._fields]
+    terms=math.get('terms')
     op='+'
     if s.startswith('lines '):
         # eg f1040sd: Combine lines 1a through 6 in column (h).
@@ -163,12 +174,11 @@ def parseAdd(cmd,s,terms,field,form):
         if terms is None:
             op='?'
             terms=[]
-    math=dict(op=op,terms=terms)
-    return math,terms
+    math.update(dict(op=op,terms=terms))
 
 class TooManyTerms(BaseException):
     pass
-def parseSubOrMult(cmd,s,field,form):
+def parseSubOrMult(cmd,s,math,field,form):
     # eg 1040/line43 Subtract line 42 from line 41
     # eg 1040/line42 Multiply $3,800 by the number on line 6d
     # todo eg Subtract column (e) from column (d) and combine the result with column (g).
@@ -207,8 +217,7 @@ def parseSubOrMult(cmd,s,field,form):
         # swap 1st two terms cuz 'subtract a from b' means 'b-a'
         terms[0],terms[1]=terms[1],terms[0]
     terms=[re.sub(r'[\s\$,]','',term) for term in terms]
-    math=dict(op=op,terms=terms)
-    return math
+    math.update(dict(op=op,terms=terms))
 
 class CannotParse(BaseException):
     pass
@@ -228,16 +237,18 @@ def parseEnter(s,cond,math):
                 terms=[lineA,lineB]
             else:
                 terms=[lineB,lineA]
+            math['terms']=terms
         else:
             msg=jj('cannotParseMath: cannot parse math: cmd,s,cond:',cmd,cond,s,delim='|')
             log.warn(msg)
             raise CannotParse(msg)
-    return op,terms,s
+    return s
 
-def parseCond(cmd,s,cond,terms,math):
+def parseCondition(cmd,s,cond,math):
     # 1040/line43 line 42 is more than line 41
     # 1040/line42 line 38 is $154,950 or less
     # 1040/line4  the qualifying person is a child but not your dependent
+    terms=math.get('terms')
     if cond.startswith('zero or') and terms and len(terms)==2:
         # 4684/line9: Subtract line 3 from line 8. If zero or less, enter -0-
         cond=terms[0].replace('line','line ')+' is more than '+terms[1].replace('line','line ')
@@ -277,7 +288,6 @@ def parseCond(cmd,s,cond,terms,math):
         else:
             log.debug(jj('397 how interpret condition?  assuming zcond=flipcondition',cond))
             math['zcond']=flipcondition(condparse)
-    return math,cond
 
 def getFieldFromTerm(term,parentline,pgnum,fieldsByLine):
     # find fields that correspond to the term; parentline is lhs
@@ -318,7 +328,7 @@ def assembleFields(math,field,form):
     myFieldUnit=field[unitk]
     fieldsByLine=form.fieldsByLine
     ll,uu,nn,pg=[field[key] for key in Term._fields]
-    if op=='*' and math['constantUnit']=='dollars':
+    if op=='*' and math.get('constantUnit')=='dollars':
         # eg 1040/line42 our dep fields are unitless cuz our constant is in dollars
         myFieldUnit=None
     upfields=[getFieldFromTerm(term,ll,pg,fieldsByLine) for term in terms]
@@ -345,51 +355,36 @@ def computeMath(form):
     # determines which fields are computed from others
     # 'dep' means dependency
     fields,draws=(form.fields,form.draws) if 'm' in cfg.steps else ([],[])
-    fieldsByLine=form.fieldsByLine
-    computedFields=ut.odict()
-    upstreamFields=set()
     for field in fields:
-        ll,uu,nn,pg=[field[key] for key in Term._fields]
+        math=dict(
+            op=None,
+            terms=None,
+            )
         speak=normalize(field['speak'])
-        colinstruction=normalize(field['colinstruction'])
-        if colinstruction:
-            instruction=colinstruction
-        else:
-            instruction=speak
-        math={}
         adjustNegativeField(field,speak)
+        colinstruction=normalize(field['colinstruction'])
+        instruction=colinstruction if colinstruction else speak
         sentences=re.split(r'\.\s*',instruction)
-        op=None
-        terms=None
-        math['constantUnit']=None
         for s in sentences:
-            s=s.lower()
-            s=editCommand(s,ll)
-            if not couldBeCommand(s):
-                continue
-            cond,s=extractCondition(s)
-            m=re.match(irs.commandPtn,s)
-            if m:
-                cmd,s=m.groups()
-            else:
-                continue
-            if cmd in ('add','combine','howmany','total','amount'):
-                math,terms=parseAdd(cmd,s,terms,field,form)
-            elif cmd in ('subtract','multiply'):
-                try:
-                    math=parseSubOrMult(cmd,s,field,form)
-                    terms=math['terms']
-                except TooManyTerms:
+            try:
+                s=editCommand(s,field)
+                checkCouldBeCommand(s)
+                cond,s=extractCondition(s)
+                cmd,s=parseCommand(s)
+                if cmd in ('add','combine','howmany','total','amount'):
+                    parseAdd(cmd,s,math,field,form)
+                elif cmd in ('subtract','multiply'):
+                    parseSubOrMult(cmd,s,math,field,form)
+                elif cmd in ('enter',):
+                    s=parseEnter(s,cond,math)
+                else:
+                    log.warn(jj('cannotParseCmd: cannot parse command: cmd s cond:',cmd,s,cond,delim='|'))
                     continue
-            elif cmd in ('enter',):
-                op,terms,s=parseEnter(s,cond,math)
-            else:
-                log.warn(jj('cannotParseCmd: cannot parse command: cmd s cond:',cmd,s,cond,delim='|'))
+                if cond:
+                    parseCondition(cmd,s,cond,math)
+            except (TooManyTerms,NoCommand,CannotParse):
                 continue
-            if cond:
-                math,cond=parseCond(cmd,s,cond,terms,math)
-        # this assumes terms can be parsed from the 1st sentence of the instructions in the speak element
-        if math and terms:
+        if math and math.get('terms'):
             assembleFields(math,field,form)
         field['math']=math
     computedFields=form.computedFields
