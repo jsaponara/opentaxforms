@@ -185,6 +185,20 @@ class Form(object):
                 pageheight=Qnty(page.cropbox[3]-page.cropbox[1],'printers_point')
                 pageinfo[pagenum]=PageInfo(pagenum,pagewidth,pageheight,rr.renderPage(page))
         return docinfo,pageinfo
+    def orderDependencies(self):
+        # reorder by deps to avoid undefined vars
+        computedFields=self.computedFields
+        self.upstreamFields.difference_update(computedFields.keys())
+        delays=[]
+        upstreamFieldsList=list(self.upstreamFields)
+        for name,f in computedFields.iteritems():
+            for depfield in f['deps']:
+                if depfield['uniqname'] not in upstreamFieldsList:
+                    delays.append(name)
+        for name in delays:
+            val=computedFields[name]
+            del computedFields[name]
+            computedFields[name]=val
 
 class Renderer(object):
     def __init__(self):
@@ -275,6 +289,4 @@ class TextPoz(object):
         return found
     def alltext(self):
         return NL.join(o.text for o in self.textPoz)
-
-
 

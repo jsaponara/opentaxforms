@@ -209,7 +209,7 @@ def writeFormToDb(form,year=None):
             xmltyp='f',  # f=field
             maxlen=f.maxchars,
             unit=f.unit[0].lower() if f.unit else None,  # d or c (dollars or cents)
-            math=repr(f.math.get('text',[])),
+            math=repr(f.math.text if f.math.text else []),
             #op=f.op,
             xpos=qntyToStr(f.xpos),
             ypos=qntyToStr(f.ypos),

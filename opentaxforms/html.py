@@ -240,13 +240,13 @@ def computeSteps(cfield):
             'var result=%s;'%(cfield['op'].join(
                 jsterm(dep,'uniqlinenum')+('()' if dep.get('typ')!='constant' else '')
                 for dep in cfield['deps'])))
-    if cfield['math'].get('zcond'):
+    if cfield['math'].zcond:
         def termify(linenum):
             if linenum.startswith('line'):
                 return 's.%s()'%(linenum,)
             else:
                 return linenum+'00'  # eg constant
-        op,left,right=cfield['math'].get('zcond')
+        op,left,right=cfield['math'].zcond
         steps.append(('if(%s)result="-0-";'%(op.join((termify(left),termify(right))),)))
         def uniqifyDep(sideval,whichside,deps):
             '''
