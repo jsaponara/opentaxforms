@@ -81,57 +81,70 @@ def adjustNegativeField(field,speak):
         dx=.05*field['wdim']  # shift field rightward to make room for '('
         field['dx']=dx
 
-def requireCouldBeCommand(sentence):
-    if sentence.startswith('this is the amount'):
-        # eg 1040/line75  this is the amount you overpaid
-        #    'amount' here is not a cmd [and thus op is not '+']
-        raise NoCommand('sentence.startswith "this is the amount": [%s]'%(sentence,))
-    elif 'total number of exemptions claimed' in sentence:
-        # eg 1040a/line6d Total number of exemptions claimed.  Boxes checked on 6a and 6b 
-        # todo
-        raise NoCommand('sentence.contains "total number of exemptions claimed": [%s]'%(sentence,))
-    # could be elim'd by allowing multi-word cmds
-    elif 'amount' in sentence and 'amount from line ' not in sentence:
-        # eg 2015/f5329/line3 Amount subject to additional tax. Subtract line 2 from line 1
-        raise NoCommand('sentence.contains "amount" but not "amount from line": [%s]'%(sentence,))
+class Parser(object):
 
-def editCommand(sentence,field):
-    ll=field['linenum']
-    sentence=sentence.lower()
-    if sentence.startswith('boxes checked on'):
-        # insert implicit command
-        sentence='howmany '+sentence
-    # 'Total of all amounts reported on line 3 for ...'  f1040se/23
-    # 'Combine lines 7 and 15 and enter the result'      f1040sd/16
-    # 'Boxes checked on 6a and 6b'   f1040/line6d [we prepend 'howmany'] 
-    sentence=sentence.replace('the amounts in the far right column for ','') \
-       .replace('of all amounts reported on line ','lines ') \
-       .replace(' and enter the result','') \
-       .replace('boxes checked on ','lines ') \
-       .replace('boxes checked','lines '+(ll if ll else ''))
-    # remove "for all rental properties", "for all royalty properties", "for all properties"  f1040se/23
-    sentence=re.sub(r' for all(?: \S+)? properties','',sentence,re.I)
-    return sentence
+    def __init__(self,sentence):
+        self.sentence=sentence
+        self.cond=None
 
-def extractCondition(s):
-    # todo complete this function--forms,s2 are unused
-    # eg Form 1040 and 1040A filers: complete section B  [just made that up]
-    formcondPtn=re.compile(r'form (\w+)(?: and (\w+))? filers: (\w+)',re.I)
-    ifcondPtn  =re.compile(r'if (.+?), (.+?)(?: otherwise,? (.+))?$')
-    m=re.match(formcondPtn,s)
-    if m:
-        form1,form2,s=m.groups()
-        assert form1,'formcondPtn w/o form1!'
-        #forms=[form1,form2] if form2 else [form1]
-    else:
-        #forms=None
-        pass
-    m=re.match(ifcondPtn,s)
-    if m:
-        cond,s,s2=m.groups()
-    else:
-        cond=s2=None
-    return cond,s
+    def requireCouldBeCommand(self):
+        if self.sentence.startswith('this is the amount'):
+            # eg 1040/line75  this is the amount you overpaid
+            #    'amount' here is not a cmd [and thus op is not '+']
+            raise NoCommand('sentence.startswith "this is the amount": [%s]'%(self.sentence,))
+        elif 'total number of exemptions claimed' in self.sentence:
+            # eg 1040a/line6d Total number of exemptions claimed.  Boxes checked on 6a and 6b 
+            # todo
+            raise NoCommand('sentence.contains "total number of exemptions claimed": [%s]'%(self.sentence,))
+        # could be elim'd by allowing multi-word cmds
+        elif 'amount' in self.sentence and 'amount from line ' not in self.sentence:
+            # eg 2015/f5329/line3 Amount subject to additional tax. Subtract line 2 from line 1
+            raise NoCommand('sentence.contains "amount" but not "amount from line": [%s]'%(self.sentence,))
+
+    def editCommand(self,field):
+        ll=field['linenum']
+        self.sentence=self.sentence.lower()
+        if self.sentence.startswith('boxes checked on'):
+            # insert implicit command
+            self.sentence='howmany '+self.sentence
+        # 'Total of all amounts reported on line 3 for ...'  f1040se/23
+        # 'Combine lines 7 and 15 and enter the result'      f1040sd/16
+        # 'Boxes checked on 6a and 6b'   f1040/line6d [we prepend 'howmany'] 
+        self.sentence=self.sentence.replace('the amounts in the far right column for ','') \
+           .replace('of all amounts reported on line ','lines ') \
+           .replace(' and enter the result','') \
+           .replace('boxes checked on ','lines ') \
+           .replace('boxes checked','lines '+(ll if ll else ''))
+        # remove "for all rental properties", "for all royalty properties", "for all properties"  f1040se/23
+        self.sentence=re.sub(r' for all(?: \S+)? properties','',self.sentence,re.I)
+
+    def extractCondition(self):
+        # todo complete this function--forms,s2 are unused
+        # eg Form 1040 and 1040A filers: complete section B  [just made that up]
+        formcondPtn=re.compile(r'form (\w+)(?: and (\w+))? filers: (\w+)',re.I)
+        ifcondPtn  =re.compile(r'if (.+?), (.+?)(?: otherwise,? (.+))?$')
+        m=re.match(formcondPtn,self.sentence)
+        if m:
+            form1,form2,self.sentence=m.groups()
+            assert form1,'formcondPtn w/o form1!'
+            #forms=[form1,form2] if form2 else [form1]
+        else:
+            #forms=None
+            pass
+        m=re.match(ifcondPtn,self.sentence)
+        if m:
+            self.cond,self.sentence,s2=m.groups()
+        else:
+            cond=s2=None
+
+    def parseCommand(self):
+        m=re.match(irs.commandPtn,self.sentence)
+        if m:
+            self.cmd,self.sentence=m.groups()
+            return self.cmd,self.sentence
+        else:
+            raise NoCommand('no command found in [%s]'%(self.sentence,))
+
 
 class TooManyTerms(BaseException):
     pass
@@ -139,14 +152,6 @@ class CannotParse(BaseException):
     pass
 class NoCommand(BaseException):
     pass
-
-def parseCommand(s):
-    m=re.match(irs.commandPtn,s)
-    if m:
-        cmd,s=m.groups()
-    else:
-        raise NoCommand('no command found in [%s]'%(s,))
-    return cmd,s
 
 class Commands(object):
     def __init__(self,field,form):
@@ -379,10 +384,12 @@ def computeMath(form):
         sentences=re.split(r'\.\s*',instruction)
         for s in sentences:
             try:
-                s=editCommand(s,field)
-                requireCouldBeCommand(s)
-                cond,s=extractCondition(s)
-                cmd,s=parseCommand(s)
+                parser=Parser(s)
+                parser.editCommand(field)
+                parser.requireCouldBeCommand()
+                parser.extractCondition()
+                cmd,s=parser.parseCommand()
+                cond=parser.cond
                 if cmd in ('add','combine','howmany','total','amount'):
                     math.parseAdd(cmd,s)
                 elif cmd in ('subtract','multiply'):
