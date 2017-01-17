@@ -210,6 +210,137 @@ def parseSubOrMult(cmd,s,field,form):
     math=dict(op=op,terms=terms)
     return math
 
+class CannotParse(BaseException):
+    pass
+def parseEnter(s,cond,math):
+    # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line 41. If line 42 is more than line 41, enter zero. Dollars.  [[topmostSubform[0].Page2[0].p2-t10[0]]]
+    # eg 4684/line4 : If line 3 is more than line 2, enter the difference here and skip lines 5 through 9 for that column. 
+    # eg 1040ez/line43: Line 6. ... If line 5 is larger than line 4, enter -0-.
+    op,terms=math.get('op'),math.get('terms')
+    if s=='zero':
+        s='-0-'
+    elif cond and s.startswith('the difference here'):
+        op='-'
+        m1=re.match(r'(line \w+) is (less|more|larger|smaller|greater) than (line \w+)',cond)
+        if m1:
+            lineA,cmpOp,lineB=m1.groups()
+            if cmpOp in ('more','larger','greater'):
+                terms=[lineA,lineB]
+            else:
+                terms=[lineB,lineA]
+        else:
+            msg=jj('cannotParseMath: cannot parse math: cmd,s,cond:',cmd,cond,s,delim='|')
+            log.warn(msg)
+            raise CannotParse(msg)
+    return op,terms,s
+
+def parseCond(cmd,s,cond,terms,math):
+    # 1040/line43 line 42 is more than line 41
+    # 1040/line42 line 38 is $154,950 or less
+    # 1040/line4  the qualifying person is a child but not your dependent
+    if cond.startswith('zero or') and terms and len(terms)==2:
+        # 4684/line9: Subtract line 3 from line 8. If zero or less, enter -0-
+        cond=terms[0].replace('line','line ')+' is more than '+terms[1].replace('line','line ')
+    m1=re.match(r'(line \w+) is (less|more|larger|smaller|greater) than (line \w+)',cond)
+    m2=re.match(r'(line \w+) is ([$\d,]+) or (less|more)',cond)
+    condparse=None
+    if m1:
+        lineA,cmpOp,lineB=m1.groups()
+        condparse=(
+            '<' if cmpOp in ('less','smaller') else '>',
+            lineA.replace(' ',''),
+            lineB.replace(' ',''),
+            )
+    elif m2:
+        line,amt,cmpOp=m2.groups()
+        if '$' in amt:
+            math['constantUnit']='dollars'
+        condparse=(
+            '<=' if cmpOp=='less' else '>=',
+            line.replace(' ',''),
+            amt.replace('$','').replace(',',''),
+            )
+    else:
+        log.warn(jj('cannotParseCond: cannot parse condition',cond))
+    if condparse is not None:
+        def flipcondition(cond):
+            cmpOp,x,y=cond
+            cmpOp={
+                '<':'>=',
+                '<=':'>',
+                '>':'<=',
+                '>=':'<',
+                }[cmpOp]
+            return (cmpOp,x,y)
+        if cmd=='enter' and s=='-0-':
+            math['zcond']=condparse
+        else:
+            log.debug(jj('397 how interpret condition?  assuming zcond=flipcondition',cond))
+            math['zcond']=flipcondition(condparse)
+    return math,cond
+
+def getFieldFromTerm(term,parentline,pgnum,fieldsByLine):
+    # find fields that correspond to the term; parentline is lhs
+    # typically returns the dollar and cent fields corresponding to a term such as 'line7'
+    if term.isdigit():
+        return [dict(typ='constant',uniqname=term,unit=None,val=term,npage=pgnum,linenum=term,centfield='centfield_of_constant')]
+    if '.col.' in term:
+        # field is in a table
+        line,col=term.split('.col.')
+        if not line:
+            line=parentline
+        returnFields=[field for field in fieldsByLine[(pgnum,line)] if field.get('coltitle')==col]
+        if returnFields:
+            return returnFields
+        else:
+            # if coltitle restricts fields down to zero, ignore it [eg 1040sd/line4-6 called 'column h'in line7]
+            term=line
+    found=fieldsByLine[(pgnum,term)]
+    if not found:
+        canGetValuesFromOtherPages=True
+        if canGetValuesFromOtherPages:
+            # assuming that most recent occurrence of term is intended
+            #   term [eg 'line3'] may occur on multiple pages of the form
+            sourcepage=pgnum-1
+            while not found and sourcepage>=1:
+                found=fieldsByLine[(sourcepage,term)]
+                sourcepage-=1
+        else:
+            # let the user fill the computed-from-other-page field manually
+            found=[]
+    return found
+
+def assembleFields(math,field,form):
+    op=math['op']
+    terms=math['terms']
+    math['text']=''
+    myFieldName=field[namek]
+    myFieldUnit=field[unitk]
+    fieldsByLine=form.fieldsByLine
+    ll,uu,nn,pg=[field[key] for key in Term._fields]
+    if op=='*' and math['constantUnit']=='dollars':
+        # eg 1040/line42 our dep fields are unitless cuz our constant is in dollars
+        myFieldUnit=None
+    upfields=[getFieldFromTerm(term,ll,pg,fieldsByLine) for term in terms]
+    upfields=[upf for upfs in upfields for upf in upfs if upf[namek]!=myFieldName and upf[unitk]==myFieldUnit]
+    if op=='*':
+        # todo revisit: here we assume that
+        #      1. we want to multiply only two fields, and specifically
+        #      2. we want the first and the last [and thus most derived/computed] field
+        #      for 1040/line42, this gives a constant and the [computed] line6d
+        if len(upfields)>1:
+            upfields=[upfields[0],upfields[-1]]
+    form.upstreamFields.update([upf['uniqname'] for upf in upfields if upf.get('typ')!='constant'])
+    #form.upstreamFields.remove(myFieldName)  # do this later in case fields are not in dependency order [see laterIsHere]
+    form.computedFields[myFieldName]=field
+    field['deps']=upfields
+    field['op']=op
+    mathstr=op.join(terms)
+    if 'cond' in math:
+        math['cond']=' if not %s else %s'%(condtopy(math['cond']),s)
+    mathstr='='+mathstr
+    math['text']=mathstr
+
 def computeMath(form):
     # determines which fields are computed from others
     # 'dep' means dependency
@@ -230,7 +361,7 @@ def computeMath(form):
         sentences=re.split(r'\.\s*',instruction)
         op=None
         terms=None
-        constantUnit=None
+        math['constantUnit']=None
         for s in sentences:
             s=s.lower()
             s=editCommand(s,ll)
@@ -251,127 +382,18 @@ def computeMath(form):
                 except TooManyTerms:
                     continue
             elif cmd in ('enter',):
-                # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line 41. If line 42 is more than line 41, enter zero. Dollars.  [[topmostSubform[0].Page2[0].p2-t10[0]]]
-                # eg 4684/line4 : If line 3 is more than line 2, enter the difference here and skip lines 5 through 9 for that column. 
-                # eg 1040ez/line43: Line 6. ... If line 5 is larger than line 4, enter -0-.
-                if s=='zero':
-                    s='-0-'
-                elif cond and s.startswith('the difference here'):
-                    op='-'
-                    m1=re.match(r'(line \w+) is (less|more|larger|smaller|greater) than (line \w+)',cond)
-                    if m1:
-                        lineA,cmpOp,lineB=m1.groups()
-                        if cmpOp in ('more','larger','greater'):
-                            terms=[lineA,lineB]
-                        else:
-                            terms=[lineB,lineA]
-                    else:
-                        log.warn(jj('cannotParseMath: cannot parse math: cmd,s,cond:',cmd,cond,s,delim='|'))
-                        continue
+                op,terms,s=parseEnter(s,cond,math)
             else:
                 log.warn(jj('cannotParseCmd: cannot parse command: cmd s cond:',cmd,s,cond,delim='|'))
                 continue
             if cond:
-                # 1040/line43 line 42 is more than line 41
-                # 1040/line42 line 38 is $154,950 or less
-                # 1040/line4  the qualifying person is a child but not your dependent
-                if cond.startswith('zero or') and terms and len(terms)==2:
-                    # 4684/line9: Subtract line 3 from line 8. If zero or less, enter -0-
-                    cond=terms[0].replace('line','line ')+' is more than '+terms[1].replace('line','line ')
-                m1=re.match(r'(line \w+) is (less|more|larger|smaller|greater) than (line \w+)',cond)
-                m2=re.match(r'(line \w+) is ([$\d,]+) or (less|more)',cond)
-                condparse=None
-                if m1:
-                    lineA,cmpOp,lineB=m1.groups()
-                    condparse=(
-                        '<' if cmpOp in ('less','smaller') else '>',
-                        lineA.replace(' ',''),
-                        lineB.replace(' ',''),
-                        )
-                elif m2:
-                    line,amt,cmpOp=m2.groups()
-                    if '$' in amt:
-                        constantUnit='dollars'
-                    condparse=(
-                        '<=' if cmpOp=='less' else '>=',
-                        line.replace(' ',''),
-                        amt.replace('$','').replace(',',''),
-                        )
-                else:
-                    log.warn(jj('cannotParseCond: cannot parse condition',cond))
-                if condparse is not None:
-                    def flipcondition(cond):
-                        cmpOp,x,y=cond
-                        cmpOp={
-                            '<':'>=',
-                            '<=':'>',
-                            '>':'<=',
-                            '>=':'<',
-                            }[cmpOp]
-                        return (cmpOp,x,y)
-                    if cmd=='enter' and s=='-0-':
-                        math['zcond']=condparse
-                    else:
-                        log.debug(jj('397 how interpret condition?  assuming zcond=flipcondition',cond))
-                        math['zcond']=flipcondition(condparse)
+                math,cond=parseCond(cmd,s,cond,terms,math)
         # this assumes terms can be parsed from the 1st sentence of the instructions in the speak element
         if math and terms:
-            op=math['op']
-            terms=math['terms']
-            math['text']=''
-            myFieldName=field[namek]
-            myFieldUnit=field[unitk]
-            if op=='*' and constantUnit=='dollars':
-                # eg 1040/line42 our dep fields are unitless cuz our constant is in dollars
-                myFieldUnit=None
-            def findin(term,parentline,pgnum,fieldsByLine):
-                # find fields that correspond to the term; parentline is lhs
-                # typically returns the dollar and cent fields corresponding to a term such as 'line7'
-                if term.isdigit():
-                    return [dict(typ='constant',uniqname=term,unit=None,val=term,npage=pgnum,linenum=term,centfield='centfield_of_constant')]
-                if '.col.' in term:
-                    # field is in a table
-                    line,col=term.split('.col.')
-                    if not line:
-                        line=parentline
-                    returnFields=[field for field in fieldsByLine[(pgnum,line)] if field.get('coltitle')==col]
-                    if returnFields:
-                        return returnFields
-                    else:
-                        # if coltitle restricts fields down to zero, ignore it [eg 1040sd/line4-6 called 'column h'in line7]
-                        term=line
-                found=fieldsByLine[(pgnum,term)]
-                if not found:
-                    canGetValuesFromOtherPages=True
-                    if canGetValuesFromOtherPages:
-                        # assuming that most recent occurrence of term is intended
-                        #   term [eg 'line3'] may occur on multiple pages of the form
-                        sourcepage=pgnum-1
-                        while not found and sourcepage>=1:
-                            found=fieldsByLine[(sourcepage,term)]
-                            sourcepage-=1
-                    else:
-                        # let the user fill the computed-from-other-page field manually
-                        found=[]
-                return found
-            upfields=[findin(term,ll,pg,fieldsByLine) for term in terms]
-            upfields=[upf for upfs in upfields for upf in upfs if upf[namek]!=myFieldName and upf[unitk]==myFieldUnit]
-            if op=='*':
-                # todo yikes! here we assume that 1. we want to multiply only two fields, and 2. the first and the last [and thus most derived/computed] field
-                # for line42, this will give constant and computedline6d
-                if len(upfields)>1:
-                    upfields=[upfields[0],upfields[-1]]
-            upstreamFields.update([upf['uniqname'] for upf in upfields if upf.get('typ')!='constant'])
-            #upstreamFields.remove(myFieldName)  # do this later in case fields are not in dependency order [otherPlaceHere]
-            computedFields[myFieldName]=field
-            field['deps']=upfields
-            field['op']=op
-            mathstr=op.join(terms)
-            if 'cond' in math:
-                math['cond']=' if not %s else %s'%(condtopy(math['cond']),s)
-            mathstr='='+mathstr
-            math['text']=mathstr
+            assembleFields(math,field,form)
         field['math']=math
+    computedFields=form.computedFields
+    upstreamFields=form.upstreamFields
     upstreamFields.difference_update(computedFields.keys())  # do this here in case fields are not in dependency order [otherPlaceHere]
     # reorder by deps to avoid undefined vars
     delays=[]
@@ -384,7 +406,5 @@ def computeMath(form):
         val=computedFields[name]
         del computedFields[name]
         computedFields[name]=val
-    form.computedFields=computedFields
-    form.upstreamFields=upstreamFields
     form.bfields=[ut.Bag(f) for f in fields]  # just to shorten field['a'] to field.a
 

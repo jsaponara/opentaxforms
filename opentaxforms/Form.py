@@ -16,6 +16,8 @@ class Form(object):
         self.fields=[]
         self.draws=[]
         self.refs=[]
+        self.computedFields=ut.odict()
+        self.upstreamFields=set()
     def __str__(self):
         return self.__repr__()
     def __repr__(self):
