@@ -146,14 +146,14 @@ class Parser(object):
             raise NoCommand('no command found in [%s]'%(self.sentence,))
 
 
-class TooManyTerms(BaseException):
-    pass
 class CannotParse(BaseException):
     pass
-class NoCommand(BaseException):
+class TooManyTerms(CannotParse):
+    pass
+class NoCommand(CannotParse):
     pass
 
-class Commands(object):
+class CommandParser(object):
     def __init__(self,field,form):
         self.op=None
         self.terms=None
@@ -371,12 +371,39 @@ class Commands(object):
         mathstr='='+mathstr
         math.text=mathstr
 
+    def parseSentence(self,sentence,field):
+        parser=Parser(sentence)
+        parser.editCommand(field)
+        parser.requireCouldBeCommand()
+        parser.extractCondition()
+        cmd,pred=parser.parseCommand()
+        cond=parser.cond
+        return cmd,cond,pred
+
+    def parseInstruction(self,sentence,field):
+        try:
+            cmd,cond,pred=self.parseSentence(sentence,field)
+            if cmd in ('add','combine','howmany','total','amount'):
+                self.parseAdd(cmd,pred)
+            elif cmd in ('subtract','multiply'):
+                self.parseSubOrMult(cmd,pred)
+            elif cmd in ('enter',):
+                pred=self.parseEnter(pred,cond)
+            else:
+                msg=jj('cannotParseCmd: cannot parse command: cmd pred cond:',cmd,pred,cond,delim='|')
+                log.warn(msg)
+                raise CannotParse(msg)
+            if cond:
+                self.parseCondition(cmd,pred,cond)
+        except CannotParse:
+            raise
+
 def computeMath(form):
     # determines which fields are computed from others
     # 'dep' means dependency
     fields,draws=(form.fields,form.draws) if 'm' in cfg.steps else ([],[])
     for field in fields:
-        math=Commands(field,form)
+        math=CommandParser(field,form)
         speak=normalize(field['speak'])
         adjustNegativeField(field,speak)
         colinstruction=normalize(field['colinstruction'])
@@ -384,24 +411,8 @@ def computeMath(form):
         sentences=re.split(r'\.\s*',instruction)
         for s in sentences:
             try:
-                parser=Parser(s)
-                parser.editCommand(field)
-                parser.requireCouldBeCommand()
-                parser.extractCondition()
-                cmd,s=parser.parseCommand()
-                cond=parser.cond
-                if cmd in ('add','combine','howmany','total','amount'):
-                    math.parseAdd(cmd,s)
-                elif cmd in ('subtract','multiply'):
-                    math.parseSubOrMult(cmd,s)
-                elif cmd in ('enter',):
-                    s=math.parseEnter(s,cond)
-                else:
-                    log.warn(jj('cannotParseCmd: cannot parse command: cmd s cond:',cmd,s,cond,delim='|'))
-                    continue
-                if cond:
-                    math.parseCondition(cmd,s,cond)
-            except (TooManyTerms,NoCommand,CannotParse):
+                math.parseInstruction(s,field)
+            except CannotParse:
                 continue
         if math and math.terms:
             math.assembleFields()
