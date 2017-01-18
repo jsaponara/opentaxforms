@@ -140,7 +140,7 @@ def opentaxforms(**args):
             extractFields(form)
             form.fixBugs()
             link.linkfields(form)
-            cmds.computeMath(form)
+            form.computeMath()
             refs.findRefs(form)
             schema.writeFormToDb(form)
             html.writeEmptyHtmlPages(form)
