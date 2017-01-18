@@ -2,7 +2,6 @@ import re
 import ut
 from ut import log,jj,numerify
 import irs
-from config import cfg
 
 Term=ut.ntuple('Term','linenum unit uniqname npage'); linenumk,unitk,namek,pagek=Term._fields
 
@@ -52,7 +51,8 @@ def lineOrRange(s,pg,fieldsByLine,col=None):
             # no matching xpos for start and end lines so just use rightmost xpos for each
             startxpos=max(startxpoz)
             endxpos  =max(endxpoz)
-        # todo make this less sensitive to adjustments in xpos--for now, moved dx adjustment from top of computeMath [where it wrecked havoc] to writeEmptyHtmlPages/adjustxpos
+        # todo make this less sensitive to adjustments in xpos
+        #      for now, moved dx adjustment from top of computeMath [where it wrecked havoc] to writeEmptyHtmlPages/adjustxpos
         lines=ut.uniqify([(f['linenum'],f['unit'],f['xpos'])
             for k,fs in fieldsByLine.iteritems()
                 for f in fs
@@ -134,8 +134,6 @@ class Parser(object):
         m=re.match(ifcondPtn,self.sentence)
         if m:
             self.cond,self.sentence,s2=m.groups()
-        else:
-            cond=s2=None
 
     def parseCommand(self):
         m=re.match(irs.commandPtn,self.sentence)
@@ -165,7 +163,7 @@ class CommandParser(object):
         self.form=form
     def parseAdd(math,cmd,s):
         fieldsByLine=math.form.fieldsByLine
-        ll,uu,nn,pg=[math.field[key] for key in Term._fields]
+        ll,pg=[math.field[key] for key in ('linenum','npage')]
         terms=math.terms
         op='+'
         if s.startswith('lines '):
@@ -242,10 +240,12 @@ class CommandParser(object):
         math.terms=terms
 
     def parseEnter(math,s,cond):
-        # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line 41. If line 42 is more than line 41, enter zero. Dollars.  [[topmostSubform[0].Page2[0].p2-t10[0]]]
+        # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line 41. If line 42 is more than line 41, enter zero. Dollars.
+        #                 [[topmostSubform[0].Page2[0].p2-t10[0]]]
         # eg 4684/line4 : If line 3 is more than line 2, enter the difference here and skip lines 5 through 9 for that column. 
         # eg 1040ez/line43: Line 6. ... If line 5 is larger than line 4, enter -0-.
         op,terms=math.op,math.terms
+        cmd='enter'
         if s=='zero':
             s='-0-'
         elif cond and s.startswith('the difference here'):
@@ -347,7 +347,7 @@ class CommandParser(object):
         myFieldName=math.field[namek]
         myFieldUnit=math.field[unitk]
         fieldsByLine=math.form.fieldsByLine
-        ll,uu,nn,pg=[math.field[key] for key in Term._fields]
+        ll,pg=[math.field[key] for key in ('linenum','npage')]
         if op=='*' and math.constantUnit=='dollars':
             # eg 1040/line42 our dep fields are unitless cuz our constant is in dollars
             myFieldUnit=None
@@ -367,7 +367,7 @@ class CommandParser(object):
         math.field['op']=op
         mathstr=op.join(terms)
         if math.cond:
-            math.cond=' if not %s else %s'%(condtopy(math.cond),s)
+            math.cond=' if not %s else %s'%(condtopy(math.cond),self.pred)
         mathstr='='+mathstr
         math.text=mathstr
 
@@ -395,6 +395,8 @@ class CommandParser(object):
                 raise CannotParse(msg)
             if cond:
                 self.parseCondition(cmd,pred,cond)
+            # just for line: math.cond=' if not %s else %s'%(condtopy(math.cond),self.pred)
+            self.pred=pred
         except CannotParse:
             raise
 

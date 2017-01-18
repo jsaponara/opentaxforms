@@ -33,7 +33,7 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
 	Each status error has a corresponding warning in the log file, so they're easy to find. Each bugfix will likely reduce errors across many forms.
 
-    [form status listing forthcoming]
+    [1040 form status listing](https://opentaxforms.org/pages/status-form-1040-family-and-immediate-references.html)
 
   - **API**
 
@@ -57,7 +57,7 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
     - references to other forms
 
     All this information is stored in a database (optionally [PostgreSQL](https://www.postgresql.org/) 
-	or the default (sqlite)[https://sqlite.org/]) and served according to
+	or the default [sqlite](https://sqlite.org/)) and served according to
     a [ReSTful](https://en.wikipedia.org/wiki/Representational_state_transfer)
     API.  For each tax form page, an html form (with javascript to express the
     formulas) is generated and overlaid on an svg rendering of the original PDF.
