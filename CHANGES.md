@@ -1,3 +1,10 @@
+0.4.17 (2017-01-17)
+
+- move cmds.computeMath to Form.computeMath.
+- refactoring cmds.computeMath to reduce function length:
+-   move sentence-level (instruction-level) parsing into class Parser.
+-   create class CommandParser.
+
 0.4.16 (2017-01-13)
 
 - linting via landscape.io, including shortening long lines, removing unused variables, and refactoring some long functions.
