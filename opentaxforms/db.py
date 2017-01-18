@@ -6,59 +6,64 @@ from sqlalchemy import UniqueConstraint
 #from sqlalchemy.exc import ProgrammingError
 from itertools import chain
 
-engine,metadata,conn=None,None,None
+engine, metadata, conn = None, None, None
+
 
 def unicodify(dic):
-    for k,v in dic.iteritems():
-        if type(v)==str:
-            dic[k]=unicode(v)
+    for k, v in dic.iteritems():
+        if type(v) == str:
+            dic[k] = unicode(v)
     return dic
 
-def connect(appname,**kw):
+
+def connect(appname, **kw):
     # default values
-    user=pw='user'
-    dbname=appname.lower()
+    user = pw = 'user'
+    dbname = appname.lower()
     # optionally override defaults
     import os
-    user=os.environ.get(appname.upper()+'_DBUSER',user)
-    pw=os.environ.get(appname.upper()+'_DBPASS',pw)
-    dbname=os.environ.get(appname.upper()+'_DBNAME',dbname)
+    user = os.environ.get(appname.upper() + '_DBUSER', user)
+    pw = os.environ.get(appname.upper() + '_DBPASS', pw)
+    dbname = os.environ.get(appname.upper() + '_DBNAME', dbname)
     global conn
-    conn,engine,metadata,md=connect_(user=user,pw=pw,db=dbname,**kw)
-    return conn,engine,metadata,md
+    conn, engine, metadata, md = connect_(user=user, pw=pw, db=dbname, **kw)
+    return conn, engine, metadata, md
+
 
 def connect_(**kw):
     # consumes keys from kw: user pw db
-    global conn,engine,metadata
-    global cfg,log
-    cfg,log=config.setup(**kw)
+    global conn, engine, metadata
+    global cfg, log
+    cfg, log = config.setup(**kw)
     if 'dirName' in kw:
         del kw['dirName']
-    usepostgres=kw.get('postgres',False) if cfg is None else cfg.postgres
+    usepostgres = kw.get('postgres', False) if cfg is None else cfg.postgres
     if usepostgres:
-        kw.setdefault('user','postgres')
-        kw.setdefault('pw',kw['user'])
-        kw.setdefault('db','postgres')
-        connstr='postgresql+psycopg2://%(user)s:%(pw)s@localhost/%(db)s'%kw
-        kw.setdefault('echo',False)
+        kw.setdefault('user', 'postgres')
+        kw.setdefault('pw', kw['user'])
+        kw.setdefault('db', 'postgres')
+        connstr = 'postgresql+psycopg2://%(user)s:%(pw)s@localhost/%(db)s' % kw
+        kw.setdefault('echo', False)
     else:
-        kw.setdefault('db','opentaxforms')
-        connstr=kw['dbpath']
+        kw.setdefault('db', 'opentaxforms')
+        connstr = kw['dbpath']
         if connstr is None:
-            connstr='opentaxforms.sqlite3'
-        sqlitePrefix='sqlite:///'
+            connstr = 'opentaxforms.sqlite3'
+        sqlitePrefix = 'sqlite:///'
         if not connstr.lower().startswith(sqlitePrefix):
-            connstr=sqlitePrefix+connstr
+            connstr = sqlitePrefix + connstr
         del kw['dbpath']
     del kw['user']
     del kw['pw']
     del kw['db']
-    if 'postgres' in kw: del kw['postgres']
-    engine=create_engine(connstr,**kw)
-    metadata=MetaData(engine)
-    conn=engine.connect()
+    if 'postgres' in kw:
+        del kw['postgres']
+    engine = create_engine(connstr, **kw)
+    metadata = MetaData(engine)
+    conn = engine.connect()
     metadata.reflect()
-    return conn,engine,metadata,ut.Bag(metadata.tables)
+    return conn, engine, metadata, ut.Bag(metadata.tables)
+
 
 def queryIdx(table):
     # nicer indexing for non-dict rows
@@ -77,13 +82,14 @@ def queryIdx(table):
         >>> tq.id,tq.name,tq.addr
         (0, 1, 2)
         '''
-    return ut.ntuple('I'+table.name,[c.name for c in table.columns])(*range(len(table.columns)))
+    return ut.ntuple('I' + table.name, [c.name for c in table.columns])(*range(len(table.columns)))
+
 
 def deleteall():
     # ideally would compute graph of ForeignKey deps via table.foreign_keys
     # todo doesnt wk cuz didnt declare the cascade?  see dropall
     for i in range(len(metadata.tables)):
-        for tname,t in metadata.tables.iteritems():
+        for tname, t in metadata.tables.iteritems():
             try:
                 conn.execute(t.delete())
             except Exception:
@@ -91,9 +97,11 @@ def deleteall():
         metadata.clear()
         metadata.reflect()
     # should be empty by now, else there's a problem
-    nonemptytables=[t for t in metadata.tables if conn.execute(t.count()).first()!=(0,)]
+    nonemptytables = [t for t in metadata.tables if conn.execute(t.count()).first() != (0, )]
     if nonemptytables:
-        raise Exception('failed to delete tables [%s]'%(nonemptytables,))
+        raise Exception('failed to delete tables [%s]' % (nonemptytables, ))
+
+
 def dropall():
     # ideally would compute graph of ForeignKey deps via table.foreign_keys
     # needed because metadata.drop_all() doesnt wk for tables w/ foreign keys but fails silently!
@@ -101,7 +109,7 @@ def dropall():
     #   ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in http://docs.sqlalchemy.org/en/latest/core/constraints.html
     #   [tho cascading delete isn't supported by sqlite until version 3.6.19]
     for i in range(len(metadata.tables)):
-        for tname,t in metadata.tables.iteritems():
+        for tname, t in metadata.tables.iteritems():
             try:
                 t.drop()
             except Exception:
@@ -110,29 +118,32 @@ def dropall():
         metadata.reflect()
     # should be empty by now, else there's a problem
     if metadata.tables:
-        raise Exception('cannot drop tables [%s]'%(metadata.tables.keys()))
+        raise Exception('cannot drop tables [%s]' % (metadata.tables.keys()))
+
 
 def getUniqueConstraints(table):
-    uniqconstraints=chain(
-        (c for c in table.constraints if type(c)==UniqueConstraint),
+    uniqconstraints = chain(
+        (c for c in table.constraints if type(c) == UniqueConstraint),
         table.indexes,
         )
     return uniqconstraints
 
-def firstCompleteConstraint(table,kw):
+
+def firstCompleteConstraint(table, kw):
     # return first constraint all of whose fields are in kw, otherwise return kw
-    uniqconstraints=getUniqueConstraints(table)
+    uniqconstraints = getUniqueConstraints(table)
     for ucon in uniqconstraints:
-        uniqfields=[c.key for c in ucon.columns]
+        uniqfields = [c.key for c in ucon.columns]
         if all([field in kw for field in uniqfields]):
-            seekfields=[(getattr(table.c,field),kw[field]) for field in uniqfields]
+            seekfields = [(getattr(table.c, field), kw[field]) for field in uniqfields]
             break
     else:
         # found no such constraint, so use all kw entries
-        seekfields=[(getattr(table.c,k),v) for k,v in kw.iteritems()]
+        seekfields = [(getattr(table.c, k), v) for k, v in kw.iteritems()]
     return seekfields
 
-def upsert(table,**kw):
+
+def upsert(table, **kw):
     '''
         >>> from sqlalchemy import MetaData, Table, Column, \
                                    Integer, String, select
@@ -155,28 +166,29 @@ def upsert(table,**kw):
         >>> conn.execute(select([test.c.addr])).first()
         (u'addr2',)
     '''
-    seekfields=firstCompleteConstraint(table,kw)
-    datafields=unicodify(kw)
-    col,val=seekfields[0]
-    where=(col==val)
-    for col,val in seekfields[1:]:
-        where&=(col==val)
-    matches=conn.execute(table.update().where(where).values(**datafields))
-    if matches.rowcount==1:
+    seekfields = firstCompleteConstraint(table, kw)
+    datafields = unicodify(kw)
+    col, val = seekfields[0]
+    where = (col == val)
+    for col, val in seekfields[1:]:
+        where &= (col == val)
+    matches = conn.execute(table.update().where(where).values(**datafields))
+    if matches.rowcount == 1:
         # this wasteful select is needed to return inserted_primary_key
         #   and thus be parallel with the insert [rowcount==0] branch
-        matches=conn.execute(select([table.c.id],where))
-        insertedpk,=matches.first()
-    elif matches.rowcount==0:
-        insertedpk,=conn.execute(table.insert(),**kw).inserted_primary_key
+        matches = conn.execute(select([table.c.id], where))
+        insertedpk, = matches.first()
+    elif matches.rowcount == 0:
+        insertedpk, = conn.execute(table.insert(), **kw).inserted_primary_key
     else:
-        msg='too many rows [%d] in table [%s]' \
+        msg = 'too many rows [%d] in table [%s]' \
             ' match allegedly unique values [%s]' \
-            %(matches.rowcount,table,seekfields)
+            % (matches.rowcount, table, seekfields)
         raise Exception(msg)
     return insertedpk
 
-def selsert(table,**kw):
+
+def selsert(table, **kw):
     '''
         >>> from sqlalchemy import MetaData, Table, Column, Integer, String
         >>> from config import setup
@@ -194,69 +206,72 @@ def selsert(table,**kw):
         >>> selsert(test, name='name1', addr='addr1' )
         1
     '''
-    seekfields=firstCompleteConstraint(table,kw)
-    col,val=seekfields[0]
-    where=(col==val)
-    for col,val in seekfields[1:]:
-        where&=(col==val)
-    matches=conn.execute(select([table.c.id],where))
-    allmatches=matches.fetchall()
-    if len(allmatches)==0:
-        insertedpk,=conn.execute(table.insert(),**unicodify(kw)).inserted_primary_key
-    elif len(allmatches)==1:
-        insertedpk,=allmatches[0]
+    seekfields = firstCompleteConstraint(table, kw)
+    col, val = seekfields[0]
+    where = (col == val)
+    for col, val in seekfields[1:]:
+        where &= (col == val)
+    matches = conn.execute(select([table.c.id], where))
+    allmatches = matches.fetchall()
+    if len(allmatches) == 0:
+        insertedpk, = conn.execute(table.insert(), **unicodify(kw)).inserted_primary_key
+    elif len(allmatches) == 1:
+        insertedpk, = allmatches[0]
     else:
-        msg='too many [%d] rows in table [%s]' \
+        msg = 'too many [%d] rows in table [%s]' \
             ' match allegedly unique values [%s]' \
-            %(len(allmatches),table,seekfields)
+            % (len(allmatches), table, seekfields)
         raise Exception(msg)
     return insertedpk
 
 # todo switch to a memoize decorator
-mem=ut.ddict(dict)
+mem = ut.ddict(dict)
 
-def getbycode(table,mem=mem,**kw):
+
+def getbycode(table, mem=mem, **kw):
     def stripifstring(s):
         try:
             return s.strip("\" '")
         except Exception:
             return s
-    kw=dict([(k,stripifstring(v)) for k,v in kw.iteritems()])
+    kw = dict([(k, stripifstring(v)) for k, v in kw.iteritems()])
     if kw['code'] in mem[table.name]:
-        i=mem[table.name][kw['code']]
+        i = mem[table.name][kw['code']]
     else:
-        whereclause=(table.c.code==kw['code'])
-        matches=conn.execute(select([table.c.id],whereclause))
+        whereclause = (table.c.code == kw['code'])
+        matches = conn.execute(select([table.c.id], whereclause))
         if matches.returns_rows:
-            i,=matches.first()
+            i, = matches.first()
         else:
             log.debug(kw)
-            i=conn.execute(table.insert(),**kw).inserted_primary_key[0]
-        mem[table.name][kw['code']]=i
+            i = conn.execute(table.insert(), **kw).inserted_primary_key[0]
+        mem[table.name][kw['code']] = i
     return i
-def getbyname(table,mem=mem,**kw):
+
+
+def getbyname(table, mem=mem, **kw):
     def stripifstring(s):
         try:
             return s.strip("\" '")
         except Exception:
             return s
-    kw=dict([(k,stripifstring(v)) for k,v in kw.iteritems()])
+    kw = dict([(k, stripifstring(v)) for k, v in kw.iteritems()])
     if kw['name'] in mem[table.name]:
-        i=mem[table.name][kw['name']]
+        i = mem[table.name][kw['name']]
     else:
-        whereclause=(table.c.name==kw['name'])
-        matches=conn.execute(select([table.c.id],whereclause))
+        whereclause = (table.c.name == kw['name'])
+        matches = conn.execute(select([table.c.id], whereclause))
         if matches.returns_rows:
-            i,=matches.first()
+            i, = matches.first()
         else:
-            i=conn.execute(table.insert(),**kw).inserted_primary_key[0]
-        mem[table.name][kw['name']]=i
+            i = conn.execute(table.insert(), **kw).inserted_primary_key[0]
+        mem[table.name][kw['name']] = i
     return i
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import sys
-    args=sys.argv
+    args = sys.argv
     if any([arg in args for arg in '-t --testing'.split()]):
-        import doctest; doctest.testmod()
-
+        import doctest
+        doctest.testmod()

@@ -1,21 +1,15 @@
 
 import sys
 import ut
-from ut import log,Bag,setupLogging,logg,NL
+from ut import log, Bag, setupLogging, logg, NL
 
-from version import appname,appversion
+from version import appname, appversion
 
-RecurseInfinitely=-1
-RecursionRootLevel=0
-SkippableSteps=ut.ChainablyUpdatableOrderedDict() \
-    (x='xfaParsing') \
-    (m='mathParsing') \
-    (r='referenceParsing') \
-    (d='databaseOutput') \
-    (h='htmlOutput') \
-    (c='cleanupFiles') # remove intermediate files
+RecurseInfinitely = -1
+RecursionRootLevel = 0
+SkippableSteps = ut.ChainablyUpdatableOrderedDict()(x='xfaParsing')(m='mathParsing')(r='referenceParsing')(d='databaseOutput')(h='htmlOutput')(c='cleanupFiles')  # remove intermediate files
 
-defaults=Bag(dict(
+defaults = Bag(dict(
     # todo separate dirName into pdfInputDir,htmlOutputDir: #pdfInputDir='pdf', htmlOutputDir='html',
     dirName='forms',
     checkFileList=True,
@@ -40,17 +34,19 @@ defaults=Bag(dict(
     verbose=False,
     version=False,
 ))
-cfg=Bag(defaults)
+cfg = Bag(defaults)
 
 from argparse import ArgumentParser
+
+
 def parseCmdline():
     '''Load command line arguments'''
-    parser=ArgumentParser(description='Automates tax forms and provides an API for new tax form interfaces; must specify either form or directory option')
+    parser = ArgumentParser(description='Automates tax forms and provides an API for new tax form interfaces; must specify either form or directory option')
     parser.add_argument('-f', '--form', dest='rootForms', nargs='*', help='form file name, eg f1040')
     # disallowing --year option for now
     #   the code currently assumes all forms are available at irs-prior/ [the collection of all past forms]
     #   for each year, eg f1040--2015.pdf; but some forms arent revised every year,
-    #   so eg the most recent 8903 is f8903--2010.pdf and indeed that's the revision seen in irs-pdf/ 
+    #   so eg the most recent 8903 is f8903--2010.pdf and indeed that's the revision seen in irs-pdf/
     #   [the current set of forms for tax year 2016]; fixing this is very doable* but not worthwhile
     #   unless users request past-year functionality.  [f8903 is referenced at f1040/line35]
     #   *very doable: eg for "--year 2015", either
@@ -66,7 +62,7 @@ def parseCmdline():
     parser.add_argument('-q', '--quiet', help='suppress stdout', action="store_true")
     parser.add_argument('-r', '--recurse', help='recurse thru all referenced forms', action="store_true")
     parser.add_argument('-R', '--recurselevel', type=int, help='number of levels to recurse thru, defaults to infinite', dest='maxrecurselevel', default=defaults.maxrecurselevel)
-    parser.add_argument('-k', '--skip', nargs='?', default=[], help='steps to skip, can be any combination of: '+' '.join('='.join((k,v)) for k,v in SkippableSteps.items()), dest='skip')
+    parser.add_argument('-k', '--skip', nargs='?', default=[], help='steps to skip, can be any combination of: ' + ' '.join('='.join((k, v)) for k, v in SkippableSteps.items()), dest='skip')
     parser.add_argument('-C', '--ignoreCaches', help='recompute cached intermediate results', action="store_true")
     parser.add_argument('-P', '--postgres', help='use postgres database [default=sqlite]', action="store_true")
     parser.add_argument('-V', '--version', help='report version and exit', default=False, action="store_true")
@@ -74,120 +70,124 @@ def parseCmdline():
     parser.add_argument('--calledFromCmdline', help='signals that script is run from commandline', default=True)
     return parser.parse_args()
 
+
 def getFileList(dirName):
     # todo replace this section in task formDictionary
-    allpdfpath='{dirName}/allpdfnames.txt'.format(**vars())
+    allpdfpath = '{dirName}/allpdfnames.txt'.format(**vars())
     if not ut.exists(allpdfpath):
         if 1:  # until resolve urllib2 code below
-            allpdfpath=ut.Resource(appname,'static/allpdfnames.txt').path()
-            allpdfLink=dirName+'/allpdfnames.txt'
+            allpdfpath = ut.Resource(appname, 'static/allpdfnames.txt').path()
+            allpdfLink = dirName + '/allpdfnames.txt'
             if not ut.exists(allpdfLink):
                 from os import symlink
-                symlink(allpdfpath,allpdfLink)
+                symlink(allpdfpath, allpdfLink)
         elif not cfg.okToDownload:
-            msg='allPdfNames file [%s] not found but dontDownload'%(allpdfpath)
+            msg = 'allPdfNames file [%s] not found but dontDownload' % (allpdfpath)
             raise Exception(msg)
         else:
             # todo why did this stop working?  my own env?
-            from urllib2 import urlopen,URLError
+            from urllib2 import urlopen, URLError
             try:
                 # could use https://www.irs.gov/pub/irs-pdf/pdfnames.txt but this way we avoid errors in that file
-                fin=urlopen('https://www.irs.gov/pub/irs-pdf/','rb')
-                if fin.getcode()!=200:
-                    raise Exception('getFileList/urlopen/getcode=[%d]'%(fin.getcode(),))
-                allpdffiles_html=fin.read()
+                fin = urlopen('https://www.irs.gov/pub/irs-pdf/', 'rb')
+                if fin.getcode() != 200:
+                    raise Exception('getFileList/urlopen/getcode=[%d]' % (fin.getcode(), ))
+                allpdffiles_html = fin.read()
                 fin.close()
                 import re
-                allpdfnames=re.findall(r'f[\w\d-]+\.pdf',allpdffiles_html)
-                allpdfnames=ut.uniqify(sorted(allpdfnames))
-                with open(allpdfpath,'w') as f:
+                allpdfnames = re.findall(r'f[\w\d-]+\.pdf', allpdffiles_html)
+                allpdfnames = ut.uniqify(sorted(allpdfnames))
+                with open(allpdfpath, 'w') as f:
                     f.write(NL.join(allpdfnames))
-            except URLError,e:
+            except URLError, e:
                 log.error(e)
                 log.error('Apparently the IRS website changed.  Seek: "expert interface to locating PDF documents. f11c.pdf f23.pdf f23ep.pdf"')
                 raise
     with open(allpdfpath) as f:
-        cfg.allpdfnames=[line.strip().rsplit('.',1)[0] for line in f]
+        cfg.allpdfnames = [line.strip().rsplit('.', 1)[0] for line in f]
 
-alreadySetup=False
+alreadySetup = False
+
+
 def setup(**overrideArgs):
-    from os import makedirs,symlink
+    from os import makedirs, symlink
     # note formyear will default to latestTaxYear even if dirName=='2014'
-    global alreadySetup,log,cfg
+    global alreadySetup, log, cfg
     if alreadySetup:
-        return cfg,log
-    args=None
+        return cfg, log
+    args = None
     if overrideArgs.get('readCmdlineArgs'):
-        args=parseCmdline()
-        cfg.update((args,lambda x:x.__dict__.items()))
+        args = parseCmdline()
+        cfg.update((args, lambda x: x.__dict__.items()))
     if cfg.version:
         print appversion
         sys.exit()
-    for k,v in overrideArgs.items():
-        cfg[k]=v
-    if not cfg.quiet and args is not None: logg('commandlineArgs:'+str(args),[ut.stdout])
+    for k, v in overrideArgs.items():
+        cfg[k] = v
+    if not cfg.quiet and args is not None:
+        logg('commandlineArgs:' + str(args), [ut.stdout])
     if cfg.quiet:
-        ut.quiet=True
+        ut.quiet = True
     if cfg.debug:
-        cfg.loglevel='DEBUG'
-        cfg.verbose=True
+        cfg.loglevel = 'DEBUG'
+        cfg.verbose = True
     if 'steps' in cfg:
-        if cfg.steps and len(cfg.steps[0])>1:
-            assert len(cfg.steps)==1
-            cfg.steps=cfg.steps[0].split()
+        if cfg.steps and len(cfg.steps[0]) > 1:
+            assert len(cfg.steps) == 1
+            cfg.steps = cfg.steps[0].split()
     else:
-        cfg.steps=[step for step in SkippableSteps if step not in cfg.skip]
+        cfg.steps = [step for step in SkippableSteps if step not in cfg.skip]
     if cfg.formyear is None:
-        cfg.formyear=cfg.latestTaxYear
-    dirName=cfg.dirName
-    rootForms=cfg.rootForms
+        cfg.formyear = cfg.latestTaxYear
+    dirName = cfg.dirName
+    rootForms = cfg.rootForms
     if rootForms:
-        logname=rootForms[0]
-        if len(rootForms)>1:
-            logname+='etc'
+        logname = rootForms[0]
+        if len(rootForms) > 1:
+            logname += 'etc'
     elif dirName:
-        logname=dirName.replace('/','_').strip('._')
+        logname = dirName.replace('/', '_').strip('._')
     else:
-        logname=appname
-    loginfo=setupLogging(logname,cfg)
-    log,cfg.logfilename=loginfo
-    cfg.log=log
+        logname = appname
+    loginfo = setupLogging(logname, cfg)
+    log, cfg.logfilename = loginfo
+    cfg.log = log
     if not cfg.quiet:
         logg('logfilename is "{}"'.format(cfg.logfilename))
-        logg('commandline: {} at {}'.format(' '.join(sys.argv),ut.now()),[log.warn])
+        logg('commandline: {} at {}'.format(' '.join(sys.argv), ut.now()), [log.warn])
 
     if dirName is not None:
         from Form import Form
         if rootForms:
-            cfg.formsRequested=[Form(rootForm,RecursionRootLevel) for rootForm in rootForms]
+            cfg.formsRequested = [Form(rootForm, RecursionRootLevel) for rootForm in rootForms]
         else:
             from os import listdir
             from os.path import isfile, join as joinpath
-            cfg.formsRequested=[Form(f,RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName,f)) and f.lower().endswith('.pdf')]
+            cfg.formsRequested = [Form(f, RecursionRootLevel) for f in listdir(dirName) if isfile(joinpath(dirName, f)) and f.lower().endswith('.pdf')]
         if not cfg.formsRequested and not cfg.relaxRqmts:
             raise Exception('must specify either a form via -f or a directory with form pdf files via -d')
-        cfg.indicateProgress=cfg.recurse or len(cfg.formsRequested)>1
+        cfg.indicateProgress = cfg.recurse or len(cfg.formsRequested) > 1
 
         # log entire config .before. getFileList makes it huge
-        logg('config:'+str(cfg),[log.warn])
+        logg('config:' + str(cfg), [log.warn])
 
         import os
         if not ut.exists(dirName):
             makedirs(dirName)
-        staticDir=ut.Resource(appname,'static').path()
-        staticLink=dirName+'/static'
+        staticDir = ut.Resource(appname, 'static').path()
+        staticLink = dirName + '/static'
         import os.path
         if not os.path.lexists(staticLink):
-            symlink(staticDir,staticLink)
+            symlink(staticDir, staticLink)
 
         if cfg.checkFileList:
             getFileList(dirName)
 
-    alreadySetup=True
-    return cfg,log
+    alreadySetup = True
+    return cfg, log
 
-if __name__=="__main__":
-    cfg,log=setup()
+if __name__ == "__main__":
+    cfg, log = setup()
     if cfg.doctests:
-        import doctest; doctest.testmod(verbose=cfg.verbose)
-
+        import doctest
+        doctest.testmod(verbose=cfg.verbose)
