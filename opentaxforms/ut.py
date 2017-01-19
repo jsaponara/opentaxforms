@@ -1,4 +1,6 @@
-from collections import (namedtuple as ntuple, defaultdict as ddict,
+from collections import (
+    namedtuple as ntuple,
+    defaultdict as ddict,
     OrderedDict as odict)
 from decimal import Decimal as dc
 from pprint import pprint as pp, pformat as pf
@@ -13,6 +15,8 @@ class Pass(object):
     def __getattr__(self, *args, **kw):
         print 'Pass', args, kw
         return lambda *args, **kw: None
+
+
 log = Pass()
 # NT eg X=ntuple('X','linenum unit name')
 
@@ -20,7 +24,10 @@ Bbox = ntuple('Bbox', 'x0 y0 x1 y1')
 
 
 def merge(bb1, bb2):
-    return Bbox(min(bb1.x0, bb2.x0), min(bb1.y0, bb2.y0), max(bb1.x1, bb2.x1),
+    return Bbox(
+        min(bb1.x0, bb2.x0),
+        min(bb1.y0, bb2.y0),
+        max(bb1.x1, bb2.x1),
         max(bb1.y1, bb2.y1))
 
 
@@ -33,6 +40,7 @@ def localsitepkgs():
 # python -c "import sys; sys.path = sys.path[1:]; import django;
 # print(django.__path__)"
 
+
 def numerify(s):
     try:
         return int(''.join(d for d in s if d.isdigit()))
@@ -44,9 +52,12 @@ def compactify(multilineRegex):
     # to avoid having to replace spaces in multilineRegex's with less readable
     # '\s' etc no re.VERBOSE flag needed
     r"""
-    line too long:
-        titlePttn1=re.compile(r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$')
-    re.VERBOSE with spaces removed (otherwise theyll be ignored in VERBOSE mode, right?):
+    line too long (folded):
+        titlePttn1=re.compile(r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)
+            (?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?
+            (?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)
+            .+?\))?\s*$')
+    re.VERBOSE with spaces removed (else theyll be ignored in VERBOSE mode):
         pttn=re.compile(
             r'''(?:(\d\d\d\d)\s)?       # 2016
                 Form\s([\w-]+           # Form 1040
@@ -55,14 +66,19 @@ def compactify(multilineRegex):
                 (?:\s\s?\(?(?:Schedule\s([\w-]+))\)?)?  # (Schedule B)
                 (?:\s\s?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$''',re.VERBOSE)
     using compactify:
+        >>> anyMonth = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec'
         >>> compactify(
         ... '''(?:(\d\d\d\d) )?       # 2016
         ...     Form ([\w-]+           # Form 1040
         ...     (?: \w\w?)?)           # AS
         ...     (?: or ([\w-]+))?      # or 1040A
         ...     (?:  ?\(?(?:Schedule ([\w-]+))\)?)?  # (Schedule B)
-        ...     (?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$''')
-        '(?:(\\d\\d\\d\\d) )?Form ([\\w-]+(?: \\w\\w?)?)(?: or ([\\w-]+))?(?:  ?\\(?(?:Schedule ([\\w-]+))\\)?)?(?:  ?\\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\\))?\\s*$'
+        ...     (?:  ?\((?:Rev|'''+anyMonth+''').+?\))?\s*$''')
+        '(?:(\\d\\d\\d\\d) )?Form ([\\w-]+(?: \\w\\w?)?)(?: or ([\\w-]+))?'
+          '(?:  ?\\(?(?:Schedule ([\\w-]+))\\)?)?'
+          '(?:  ?\\('
+          '(?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\\))?'
+          '\\s*$'
 
         todo how can i get this more readable expected string to work with doctest?
         r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
@@ -609,6 +625,13 @@ def serve():
         pass
     svr.server_close()
     return 0
+
+
+def unused():
+    num=dc(1,2)
+    d=ddict()
+    pp(0)
+    pf(0)
 
 
 def nestedFunctionTest():

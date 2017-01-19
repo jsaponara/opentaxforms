@@ -7,7 +7,8 @@ import sys
 excludedformsPttn = re.compile(r'109\d.*|w.*', re.I)
 
 # commands that are common in tax instructions
-verbs = [v.replace('_', ' ') for v in
+verbs = [
+    v.replace('_', ' ') for v in
     'add amount combine total howmany subtract multiply enter include check'.
     lower().split()]
 verbPtn = '|'.join(verbs)
@@ -76,7 +77,7 @@ def computeTitle(prefix):
 
 def sortableFieldname(fieldname):
     '''
-        to avoid lexicographic malordering: f1_19,f1_2,f1_20 
+        to avoid lexicographic malordering: f1_19,f1_2,f1_20
         >>> sortableFieldname('f1_43_L0T')
         ['f', 1, '_', 43, '_L', 0, 'T']
         '''
@@ -90,19 +91,22 @@ def sortableFieldname(fieldname):
         segs = re.findall('(\D+|\d+)', fieldname)
         segs = [intify(seg) for seg in segs]
         return segs
-    except Exception as e:
+    except Exception:
         excclass, exc, tb = sys.exc_info()
-        new_exc = Exception('sortableFieldname: new exception: fieldname= ' +
-            fieldname)
+        new_exc = Exception(
+            'sortableFieldname: new exception: fieldname= ' + fieldname)
         raise new_exc.__class__, new_exc, tb
 
 # todo eliminate guesswork in setup()/allpdfnames and possibleFilePrefixes by
 # reading document metadata as in pdfInfo() and mapping formName<->filename.
 
+
 def possibleFilePrefixes(formName):
     '''
-        the filename for form 1040 sched 8812 is f1040s8.pdf, whereas the typical pattern is f1040s8812.pdf.
-        todo eliminate this guesswork by reading document metadata in the setup()/allpdfnames step as done in pdfInfo()
+        the filename for form 1040 sched 8812 is f1040s8.pdf,
+          whereas the typical pattern is f1040s8812.pdf.
+        todo eliminate this guesswork by reading document metadata
+             in the setup()/allpdfnames step as done in pdfInfo()
         >>> possibleFilePrefixes(('1040','8812'))
         ['f1040s8812', 'f1040s881', 'f1040s88', 'f1040s8']
         '''
@@ -115,7 +119,7 @@ def possibleFilePrefixes(formName):
         ntrim = len(fsched)
         tmpl = {
             ('990', 'b'): '%sez%s',  # a glaring inconsistency--in 2015 only??
-            ('1120', 'utp'): '%s%s',  # no delimiter at all--how common is this?
+            ('1120', 'utp'): '%s%s',  # no delimiter at all--other forms too?
             }.get((fform, fsched), '%ss%s')  # the typical pattern
         formName = (tmpl % formName).lower()
         # formName may be eg ('f1040','A')
@@ -130,8 +134,12 @@ def possibleFilePrefixes(formName):
         # cuz 1120reit->f1120rei
         ntrim = max(0, len(trailingLetters(formName)) - 1)
     # remove '-' but protect '--'
-    formName = ('f' + formName.lower().replace('--', '<>').replace('-', '').
-        replace('<>', '--'))
+    formName = (
+        'f' +
+        formName.lower()
+        .replace('--', '<>')
+        .replace('-', '')
+        .replace('<>', '--'))
     prefixes.append(formName)
     if any(formName.endswith(suffix) for suffix in ('ez', 'eic')):
         prefixes.append(formName[:-1])  # remove last char

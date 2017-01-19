@@ -97,7 +97,8 @@ class Form(object):
                         url = irs.currurltmpl % (fname, )
                     if url in failurls:
                         continue
-                    log.warn('downloading: ' + url + ' for ' + formName +
+                    log.warn(
+                        'downloading: ' + url + ' for ' + formName +
                         ' from ' + url)
                     fin = urlopen(url, 'rb')
                     if fin.getcode() != 200:
@@ -138,14 +139,16 @@ class Form(object):
                 xmpdict = xmp_to_dict(metadata)
                 docinfo['titl'] = xmpdict['dc']['title']['x-default']
                 docinfo['desc'] = xmpdict['dc']['description']['x-default']
-                docinfo['isfillable'] = (xmpdict['pdf'].get('Keywords', '').
-                    lower() == 'fillable')
-                titlePttn1 = re.compile(ut.compactify(r'''(?:(\d\d\d\d) )?       # 2016
-                        Form ([\w-]+           # Form 1040
-                        (?: \w\w?)?)           # AS
-                        (?: or ([\w-]+))?      # or 1040A
-                        (?:  ?\(?(?:Schedule ([\w-]+))\)?)?  # (Schedule B)
-                        (?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'''
+                docinfo['isfillable'] = (
+                    xmpdict['pdf'].get('Keywords', '').lower() == 'fillable')
+                anyMonth = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec'
+                titlePttn1 = re.compile(ut.compactify(
+                    r'''(?:(\d\d\d\d) )?   # 2016
+                    Form ([\w-]+           # Form 1040
+                    (?: \w\w?)?)           # AS
+                    (?: or ([\w-]+))?      # or 1040A
+                    (?:  ?\(?(?:Schedule ([\w-]+))\)?)?  # (Schedule B)
+                    (?:  ?\((?:Rev|'''+anyMonth+''').+?\))?\s*$'''
                     ))
                 # eg 2016 Form W-2 AS
                 # eg 2015 Form 1120 S (Schedule D)
@@ -159,11 +162,12 @@ class Form(object):
                 if m:
                     taxyr, form1, form2, sched = m.groups()
                 else:
-                    titlePttn2 = re.compile(r'''(?:(\d\d\d\d) )?       # 2016
-                            Schedule ([-\w]+)[ ]   # Schedule B
-                            \(Form ([\w-]+)        # (Form 1040
-                            (?: or ([\w-]+))? ?\)  # or 1040A)
-                            (?: \((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$''',
+                    titlePttn2 = re.compile(
+                        r'''(?:(\d\d\d\d) )?   # 2016
+                        Schedule ([-\w]+)[ ]   # Schedule B
+                        \(Form ([\w-]+)        # (Form 1040
+                        (?: or ([\w-]+))? ?\)  # or 1040A)
+                        (?: \((?:Rev|'''+anyMonth+''').+?\))?\s*$''',
                         re.VERBOSE)
                     # eg 2015 Schedule M-3 (Form 1065)
                     # eg 2015 Schedule O (Form 990 or 990-EZ)
@@ -187,19 +191,20 @@ class Form(object):
                 raise Exception('PDFTextExtractionNotAllowed')
             pageinfo = {}
             rr = Renderer()
-            #for ipage,page in enumerate(doc.get_pages()):
+            # for ipage,page in enumerate(doc.get_pages()):
             for ipage, page in enumerate(PDFPage.create_pages(doc)):
                 pagenum = 1 + ipage
                 if page.cropbox != page.mediabox:
                     log.warn(
-                        'boxesDontMatch: cropbox!=mediabox on page %d: cropbox=%s; mediabox=%s'
-                        % (pagenum, page.cropbox, page.mediabox))
-                pagewidth = Qnty(page.cropbox[2] - page.cropbox[0],
-                    'printers_point')
-                pageheight = Qnty(page.cropbox[3] - page.cropbox[1],
-                    'printers_point')
-                pageinfo[pagenum] = PageInfo(pagenum, pagewidth, pageheight,
-                    rr.renderPage(page))
+                        'boxesDontMatch: cropbox!=mediabox on page %d:'
+                        ' cropbox=%s; mediabox=%s',
+                        pagenum, page.cropbox, page.mediabox)
+                pagewidth = Qnty(
+                    page.cropbox[2] - page.cropbox[0], 'printers_point')
+                pageheight = Qnty(
+                    page.cropbox[3] - page.cropbox[1], 'printers_point')
+                pageinfo[pagenum] = PageInfo(
+                    pagenum, pagewidth, pageheight, rr.renderPage(page))
         return docinfo, pageinfo
 
     def orderDependencies(self):
@@ -220,8 +225,8 @@ class Form(object):
     def computeMath(self):
         # determines which fields are computed from others
         # 'dep' means dependency
-        from cmds import (CommandParser, normalize, adjustNegativeField,
-            CannotParse)
+        from cmds import (
+            CommandParser, normalize, adjustNegativeField, CannotParse)
         fields, draws = (self.fields, self.draws) if 'm' in cfg.steps else ([
             ], [])
         for field in fields:
@@ -269,11 +274,10 @@ class Renderer(object):
                 textPoz.add(lt)
         return textPoz
 
-from pdfminer.layout import LTChar, LTTextLineHorizontal
-
 
 class TextPoz(object):
     # text positions
+    from pdfminer.layout import LTChar, LTTextLineHorizontal
     FormPos = ntuple('FormPos', 'itxt ichar chrz bbox')
 
     def __init__(self):
@@ -285,12 +289,13 @@ class TextPoz(object):
 
         def accum(ltobj, ltchars, chars):
             for lto in ltobj:
-                if isinstance(lto, LTChar):
+                if isinstance(lto, self.LTChar):
                     ltchartext = lto.get_text()
-                    ltchars.append((ltchartext, ut.Bbox(*quantify(lto.bbox,
-                        'printers_point'))))
+                    ltchars.append(
+                        (ltchartext,
+                         ut.Bbox(*quantify(lto.bbox, 'printers_point'))))
                     chars.append(ltchartext)
-                elif isinstance(lto, LTTextLineHorizontal):
+                elif isinstance(lto, self.LTTextLineHorizontal):
                     accum(lto, ltchars, chars)
         ltchars = []
         chars = []
@@ -318,18 +323,20 @@ class TextPoz(object):
                 # the actual form referenced [eg to avoid finding '1040' in
                 # '1040EZ']
                 slsafe = re.escape(sl)
-                for m in re.finditer(r'(?:^|[\s\W])(' + slsafe +
-                    r')(?:$|[\s\W])', chrz):
+                slsafeExact = r'(?:^|[\s\W])(' + slsafe + r')(?:$|[\s\W])'
+                for m in re.finditer(slsafeExact, chrz):
                     if m:
                         ichar = m.start()
                         bbox1 = charobjs[ichar][1]
                         bbox2 = charobjs[ichar + len(sl) - 1][1]
                         if not (bbox1.y0 == bbox2.y0 and bbox1.y1 == bbox2.y1):
-                            log.info('bbox.y coords dont match for [{}]'.
-                                format(sl))
+                            log.info(
+                                'bbox.y coords dont match for [{}]'.format(sl))
                         bbox = ut.merge(bbox1, bbox2)
-                        found.append(TextPoz.FormPos(itxt, ichar, chrz[ichar:
-                            ichar + len(sl)], bbox))
+                        found.append(
+                            TextPoz.FormPos(
+                                itxt, ichar,
+                                chrz[ichar: ichar + len(sl)], bbox))
                     else:
                         break
             return found
@@ -345,11 +352,12 @@ class TextPoz(object):
             log.warn('textNotFound: ' + s + ' in ' + self.alltext().replace(
                 NL, ' [newline] '))
         if len(found) > 1:
-            msgtmpl = 'textRepeats: found too many (returning all of them), seeking %s in %s ... [run in debug mode for fulltext]: %s'
-            log.warn(msgtmpl, s, self.alltext().replace(NL, '  ')[:60], str(
-                found))
-            log.debug(' fulltext: seeking ' + s + ' in ' + self.alltext().
-                replace(NL, '  '))
+            msgtmpl = 'textRepeats: found too many (returning all of them),' \
+                ' seeking %s in %s ... [run in debug mode for fulltext]: %s'
+            log.warn(
+                msgtmpl, s, self.alltext().replace(NL, '  ')[:60], str(found))
+            log.debug(' fulltext: seeking %s in %s',
+                      s, self.alltext().replace(NL, '  '))
         return found
 
     def alltext(self):

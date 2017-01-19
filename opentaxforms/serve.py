@@ -8,7 +8,7 @@ def createApi(**kw):
     import flask_restless
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import scoped_session, sessionmaker
-    from db import connect, engine, metadata
+    from db import connect
     from flask_sqlalchemy import SQLAlchemy
     db = SQLAlchemy(app)
     conn, engine, metadata, md = connect(appname, **kw)
@@ -22,7 +22,8 @@ def createApi(**kw):
         counts[tabl] = tablobj.count().execute().fetchone()[0]
         attrs = dict(
             __table__=tablobj,
-            __tablename__=str(tabl),  # todo should flask_restless need __tablename__?
+            # todo should flask_restless need __tablename__?
+            __tablename__=str(tabl),
             )
         attrs.update(dict(
             orgn=dict(
@@ -48,8 +49,9 @@ def createApi(**kw):
             )[tabl]
         colsToShow = [c.name for c in tablobj.columns]
         colsToShow.extend(colsToAdd)
-        #print tabl,colsToShow
-        apimanager.create_api(tablcls,
+        # print tabl,colsToShow
+        apimanager.create_api(
+            tablcls,
             url_prefix='/api/v%s' % (apiVersion, ),
             include_columns=colsToShow,
             )
@@ -60,9 +62,11 @@ def parseCmdline():
     '''Load command line arguments'''
     from argparse import ArgumentParser
     parser = ArgumentParser(
-        description='Automates tax forms and provides an API for new tax form interfaces'
+        description='Automates tax forms'
+                    ' and provides an API for new tax form interfaces'
         )
-    parser.add_argument('-P', '--postgres',
+    parser.add_argument(
+        '-P', '--postgres',
         help='use postgres database [default=sqlite]', action="store_true")
     return parser.parse_args()
 
@@ -89,6 +93,7 @@ def createApp(**kw):
 def main(**kw):
     app = createApp(dbpath='sqlite:///opentaxforms.sqlite3', **kw)
     app.run()
+
 
 if __name__ == "__main__":
     main(cmdline=True, verbose=True)

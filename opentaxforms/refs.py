@@ -6,13 +6,16 @@ import irs
 
 # nonforms are numbers that dont represent forms
 nonforms = [str(yr) for yr in range(2000, 2050)]
-''' nonformcontexts are text signals that the number to follow is not a form.  eg:
+''' nonformcontexts are text signals that the number to follow is not a form.
+    eg:
     line 40
     lines 40 through 49
     pub 15
     Form 1116, Part II
     use Schedule EIC to give the IRS informationabout
-    2439[instructions] ... and the tax shown in box 2 on the Form 2439 for each owner must agree with the amounts on Copy B that you received from the RIC or REIT.
+    2439[instructions] ... and the tax shown in box 2 on the Form 2439
+        for each owner must agree with the amounts on Copy B that you received
+        from the RIC or REIT.
     3903: This amount should be shown in box 12 of your Form W-2 with code P
     2015/f1040sd: Box A
     '''
@@ -73,10 +76,10 @@ def findRefs(form):
         def items(self):
             return iter(self.list)
 
+        # like 'wins n losses'
         def status(self):
             return (len(self.list), self.nErrs)
 
-  # like 'wins n losses'
         def __repr__(self):
             return ut.pf(sorted(self.set))
 
@@ -105,7 +108,8 @@ def findRefs(form):
                 context['fprefix'] = formFname
                 return (form, sched), context
         log.warn(
-            'unrecognizedRefs: not in allpdfnames: {} from {} originally {} eg {}'
+            'unrecognizedRefs: not in allpdfnames:'
+            ' {} from {} originally {} eg {}'
             .format(formFnames, formish, context, cfg.allpdfnames[:4]))
         return ['err']
 
@@ -134,13 +138,16 @@ def findRefs(form):
         # todo match should be assigned the biggest string that will occur on
         # the form. eg 'Schedule B' is better than just 'B' this way the user
         # has a bigger area to click on. 2015/8801: or 2014 Form 1041, Schedule
-        # I, line 55 todo order searches by decreasing length?  alg: min length
+        # I, line 55
+        # todo order searches by decreasing length?  alg: min length
         # of a regex eg len(regex)-nSpecialChars where
         # nSpecialChars=len(re.escape(regex))-len(regex) todo nonformcontexts
         # have not yet been removed, so eg could use 'line' here
         searches = [
-            ('form,sched',  # arbitrary string to summarize this search 1st field should be 'match', the
- # rest should be 'form' or 'sched' with trailing '?' if optional
+            ('form,sched',  # arbitrary string to summarize this search
+                            # 1st field should be 'match'; the
+                            #   rest should be 'form' or 'sched'
+                            #   with trailing '?' if optional
                 'match form sched'.split(),
                 # the actual pattern to seek
                 r'(Form (\S+), Schedule (\S+)\b)'),
@@ -174,11 +181,16 @@ def findRefs(form):
                             continue
                         # context highlights the match we found [for logging]
                         context = txt.replace(match, '[[' + match + ']]')
-                        if formrefs.add(*checkForm(form, sched, **dict(
-                            iFormInLine=iFormInLine, draw=el, match=match,
-                            form=formName, context=context))):
-                            formsinline.append(jj(idraw, summa, jj(form,
-                                sched, delim=','), match, txt, delim='|'))
+                        if formrefs.add(
+                           *checkForm(
+                               form, sched,
+                               **dict(
+                                 iFormInLine=iFormInLine, draw=el, match=match,
+                                 form=formName, context=context))):
+                            formsinline.append(
+                                jj(
+                                    idraw, summa, jj(form, sched, delim=','),
+                                    match, txt, delim='|'))
                         # remove the matching text to avoid matching a subset
                         # of it in subsequent searches
                         txt = txt.replace(match, '')
@@ -190,9 +202,8 @@ def findRefs(form):
         # instructions)  -> (8824,4797) wh is wrong, but may be tricky to get
         # right
         nicetext = re.sub(u'[\s\xa0|]+', ' ', txt)
-        matches = re.findall(
-            r'(((Form|Schedule)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)',
-            nicetext)
+        p = '(((Form|Schedule)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)'
+        matches = re.findall(p, nicetext)
         for match in matches:
             context, fulltype, typ, rest = match
             words = rest.split()
@@ -208,8 +219,12 @@ def findRefs(form):
                     >>> couldbeform('EIC')
                     True
                     '''
-                return (s and ((len(s) >= 4 and s[0].isdigit()) or (len(s) <= 3
-                    and s[0].isalpha()) or (len(s) > 1 and s[1] == '-')) and
+                return (
+                    s and (
+                        (len(s) >= 4 and s[0].isdigit())
+                        or (len(s) <= 3 and s[0].isalpha())
+                        or (len(s) > 1 and s[1] == '-'))
+                    and
                     all(c.isupper() or c.isdigit() for c in s if c not in '-')
                     and s not in nonforms and not s.startswith('1-800-'))
             for signal in nonformcontexts:  # eg 'line' or 'pub'
@@ -217,8 +232,11 @@ def findRefs(form):
                     # excise eg 'line','19' from list
                     i = wordslower.index(signal)
                     # 'line 43' vs 'lines 43a and 43b'
-                    gap = (4 if signal == 'lines' and len(wordslower) > i + 2
-                        and wordslower[i + 2] in 'and or' else 2)
+                    gap = (
+                        4
+                        if signal == 'lines' and len(wordslower) > i + 2
+                        and wordslower[i + 2] in 'and or'
+                        else 2)
                     words = words[:i] + words[i + gap:]
                     wordslower = wordslower[:i] + wordslower[i + gap:]
             for iword, txt in enumerate(words):
@@ -251,8 +269,9 @@ def findRefs(form):
                         iFormInLine=iFormInLine, draw=el, match=matchingtext,
                         form=formName, call='words'))
                     if formrefs.add(*checkedForm):
-                        formsinline.append(jj(idraw, 'couldbe', key,
-                            matchingtext, nicetext, delim='|'))
+                        formsinline.append(
+                            jj(idraw, 'couldbe', key,
+                               matchingtext, nicetext, delim='|'))
                         iFormInLine += 1
         # section for forms announced in previous layout object
         #   eg 1040/54 Other credits from Form: a 3800 b 8801 c ____
@@ -263,11 +282,12 @@ def findRefs(form):
                 txt = txt.strip(' .,;()|').upper()
                 if len(txt) > 1 and couldbeform(txt):
                     if formrefs.add(*checkForm(txt, **dict(
-                        iFormInLine=iFormInLine, draw=el, match=txt,
-                        form=formName, call='rawtext'))):
+                         iFormInLine=iFormInLine, draw=el, match=txt,
+                         form=formName, call='rawtext'))):
                         matchingtext = txt
-                        formsinline.append(jj(idraw, 'maybe', txt,
-                            matchingtext, rawtext, delim='|'))
+                        formsinline.append(
+                            jj(idraw, 'maybe', txt,
+                               matchingtext, rawtext, delim='|'))
                         iFormInLine += 1
         if lineHasForms:
             lines.extend(formsinline)
@@ -283,9 +303,9 @@ def findFormRefPoz(formrefs, pageinfo):
         npage = ref['draw']['npage']
         try:
             textpoz = pageinfo[npage].textpoz
-        except KeyError as e:
-            log.warn(jj('noSuchPage: no page', npage, 'in', form, '; ref:',
-                ref))
+        except KeyError:
+            log.warn(jj('noSuchPage: no page', npage,
+                        'in', form, '; ref:', ref))
             continue
         found = textpoz.find(matchingtext)
         if found:

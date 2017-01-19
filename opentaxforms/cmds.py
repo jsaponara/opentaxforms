@@ -3,9 +3,6 @@ import ut
 from ut import log, jj, numerify
 import irs
 
-Term = ut.ntuple('Term', 'linenum unit uniqname npage')
-linenumk, unitk, namek, pagek = Term._fields
-
 
 def normalize(s):
     # replace each whitespace string with a single space
@@ -32,7 +29,7 @@ def lineOrRange(s, pg, fieldsByLine, col=None):
     #>>> lineOrRange('46','1')
     #['line46']
     #>>> lineOrRange('56 through 62','1')
-    #['line57', 'line62', 'line60b', 'line59', 'line60a', 'line61', 'line56', 'line58']
+    #['line57', 'line62', 'line60b', ..., 'line61', 'line56', 'line58']
     '''
     log.debug('+lineOrRange s=%s col=%s', s, col)
     prefix = 'line'
@@ -43,13 +40,14 @@ def lineOrRange(s, pg, fieldsByLine, col=None):
         startnum, endnum = numerify(start), numerify(end)
         start, end = (prefix + start, prefix + end)
         # find horizontally aligned non-cent start and end fields
-        log.debug(' lineOrRange pg=%s start=%s end=%s fieldsByLine.pg,start=%s fieldsByLine.pg,end=%s',
-            pg, start, end, fieldsByLine[(pg, start)], fieldsByLine[(pg, end)]
-            )
+        log.debug(' lineOrRange pg=%s start=%s end=%s fieldsByLine.pg,start=%s'
+                  ' fieldsByLine.pg,end=%s',
+                  pg, start, end, fieldsByLine[(pg, start)],
+                  fieldsByLine[(pg, end)])
         startxpoz = [f['xpos'] for f in fieldsByLine[(pg, start)] if f['unit']
-            != 'cents']
+                     != 'cents']
         endxpoz = [f['xpos'] for f in fieldsByLine[(pg, end)] if f['unit'] !=
-            'cents']
+                   'cents']
         for pos in startxpoz:
             if pos in endxpoz:
                 startxpos = endxpos = pos
@@ -62,16 +60,17 @@ def lineOrRange(s, pg, fieldsByLine, col=None):
         # todo make this less sensitive to adjustments in xpos for now, moved
         # dx adjustment from top of computeMath [where it wrecked havoc] to
         # writeEmptyHtmlPages/adjustxpos
-        lines = ut.uniqify([(f['linenum'], f['unit'], f['xpos'])
-            for k, fs in fieldsByLine.iteritems()
-                for f in fs
-                    if f['linenum'] \
-                        and startnum <= numerify(f['linenum']) <= endnum \
-                        and f['unit'] != 'cents' \
+        lines = ut.uniqify(
+                    [(f['linenum'], f['unit'], f['xpos'])
+                     for k, fs in fieldsByLine.iteritems()
+                     for f in fs
+                     if f['linenum']
+                        and startnum <= numerify(f['linenum']) <= endnum
+                        and f['unit'] != 'cents'
                         and (startxpos != endxpos or startxpos == f['xpos'])])
         lines = [x[0] for x in lines]
     except ValueError:
-  # really only want to catch 'ValueError: need more than 1 value to unpack'
+        # tho only want to catch 'ValueError: need more than 1 value to unpack'
         if s.startswith(prefix):
             prefix = ''
         lines = [prefix + s]
@@ -106,7 +105,7 @@ class Parser(object):
             # eg 1040/line75  this is the amount you overpaid
             #    'amount' here is not a cmd [and thus op is not '+']
             raise NoCommand('sentence.startswith "this is the amount": [%s]' %
-                (self.sentence, ))
+                            (self.sentence, ))
         elif 'total number of exemptions claimed' in self.sentence:
             # eg 1040a/line6d Total number of exemptions claimed.  Boxes
             # checked on 6a and 6b todo
@@ -114,8 +113,8 @@ class Parser(object):
                 'sentence.contains "total number of exemptions claimed": [%s]'
                 % (self.sentence, ))
         # could be elim'd by allowing multi-word cmds
-        elif ('amount' in self.sentence and 'amount from line ' not in self.
-            sentence):
+        elif ('amount' in self.sentence
+              and 'amount from line ' not in self.sentence):
             # eg 2015/f5329/line3 Amount subject to additional tax. Subtract
             # line 2 from line 1
             raise NoCommand(
@@ -132,28 +131,31 @@ class Parser(object):
         # 'Combine lines 7 and 15 and enter the result'      f1040sd/16
         # 'Boxes checked on 6a and 6b'   f1040/line6d [we prepend 'howmany']
         self.sentence = self.sentence.replace(
-            'the amounts in the far right column for ', '') .replace(
-            'of all amounts reported on line ', 'lines ') .replace(
-            ' and enter the result', '') .replace('boxes checked on ',
-            'lines ') .replace('boxes checked', 'lines ' + (ll if ll else ''))
+            'the amounts in the far right column for ', '') \
+            .replace(
+            'of all amounts reported on line ', 'lines ') \
+            .replace(
+            ' and enter the result', '') \
+            .replace('boxes checked on ', 'lines ') \
+            .replace('boxes checked', 'lines ' + (ll if ll else ''))
         # remove "for all rental properties", "for all royalty properties",
         # "for all properties"  f1040se/23
-        self.sentence = re.sub(r' for all(?: \S+)? properties', '', self.
-            sentence, re.I)
+        self.sentence = re.sub(
+            r' for all(?: \S+)? properties', '', self.sentence, re.I)
 
     def extractCondition(self):
         # todo complete this function--forms,s2 are unused eg Form 1040 and
         # 1040A filers: complete section B  [just made that up]
-        formcondPtn = re.compile(r'form (\w+)(?: and (\w+))? filers: (\w+)',
-            re.I)
+        formcondPtn = re.compile(
+            r'form (\w+)(?: and (\w+))? filers: (\w+)', re.I)
         ifcondPtn = re.compile(r'if (.+?), (.+?)(?: otherwise,? (.+))?$')
         m = re.match(formcondPtn, self.sentence)
         if m:
             form1, form2, self.sentence = m.groups()
             assert form1, 'formcondPtn w/o form1!'
-            #forms=[form1,form2] if form2 else [form1]
+            # forms=[form1,form2] if form2 else [form1]
         else:
-            #forms=None
+            # forms=None
             pass
         m = re.match(ifcondPtn, self.sentence)
         if m:
@@ -181,6 +183,9 @@ class NoCommand(CannotParse):
 
 
 class CommandParser(object):
+    Term = ut.ntuple('Term', 'linenum unit uniqname npage')
+    linenumk, unitk, namek, pagek = Term._fields
+
     def __init__(self, field, form):
         self.op = None
         self.terms = None
@@ -204,8 +209,9 @@ class CommandParser(object):
             if m:
                 col = m.group(1)
                 s = s[:m.start()]
-            terms = sorted(ut.flattened([lineOrRange(entry, pg, fieldsByLine,
-                col) for entry in re.split(r' and |, (?:and )?', s)]),
+            terms = sorted(
+                ut.flattened([lineOrRange(entry, pg, fieldsByLine, col)
+                             for entry in re.split(r' and |, (?:and )?', s)]),
                 key=numerify)
         elif s.startswith('from line '):
             s = s.replace('from ', '')
@@ -220,12 +226,11 @@ class CommandParser(object):
             terms = [ll]
         else:
             msg = ('cannotParse: cannot parse [{}] cmd [{}] on {}/p{}/{}'.
-                format(cmd, s, math.form.prefix, pg, ll))
+                   format(cmd, s, math.form.prefix, pg, ll))
             log.warn(msg)
             if terms is None:
                 op = '?'
                 terms = []
-        #math.update(dict(op=op,terms=terms))
         math.op = op
         math.terms = terms
 
@@ -243,14 +248,15 @@ class CommandParser(object):
             )[cmd]
         terms = re.split(delim, s, re.I)
         if len(terms) != 2:
-            msg = ('oops, expected 2 terms for cmd [{}] using delim [{}] in [{}], found [{}]: [{}]'
-                .format(cmd, delim, s, len(terms), terms))
+            msg = ('oops, expected 2 terms for cmd [{}] using delim [{}]'
+                   ' in [{}], found [{}]: [{}]'
+                   .format(cmd, delim, s, len(terms), terms))
             log.error(msg)
             # or just return empty like parseAdd
             raise TooManyTerms(msg)
         if ' and ' in terms[1]:
-            m = re.search(r' and combine the result with (.*)$', terms[1], re.
-                I)
+            m = re.search(
+                r' and combine the result with (.*)$', terms[1], re.I)
             if m:
                 terms[1] = terms[1][:m.start()]
                 # NOTE this means op=='-' is really a-b+c+d+....
@@ -273,7 +279,6 @@ class CommandParser(object):
             # swap 1st two terms cuz 'subtract a from b' means 'b-a'
             terms[0], terms[1] = terms[1], terms[0]
         terms = [re.sub(r'[\s\$,]', '', term) for term in terms]
-        #math.update(dict(op=op,terms=terms))
         math.op = op
         math.terms = terms
 
@@ -291,8 +296,9 @@ class CommandParser(object):
         elif cond and s.startswith('the difference here'):
             op = '-'
             m1 = re.match(
-                r'(line \w+) is (less|more|larger|smaller|greater) than (line \w+)',
-                cond)
+              r'(line \w+) '
+              r'is (less|more|larger|smaller|greater) than '
+              r'(line \w+)', cond)
             if m1:
                 lineA, cmpOp, lineB = m1.groups()
                 if cmpOp in ('more', 'larger', 'greater'):
@@ -300,9 +306,10 @@ class CommandParser(object):
                 else:
                     terms = [lineB, lineA]
                 math.terms = terms
+                math.op = op       # todo suspect!  removeme
             else:
                 msg = jj('cannotParseMath: cannot parse math: cmd,s,cond:',
-                    cmd, cond, s, delim='|')
+                         cmd, cond, s, delim='|')
                 log.warn(msg)
                 raise CannotParse(msg)
         return s
@@ -316,10 +323,11 @@ class CommandParser(object):
             # 4684/line9: Subtract line 3 from line 8. If zero or less, enter
             # -0-
             cond = (terms[0].replace('line', 'line ') + ' is more than ' +
-                terms[1].replace('line', 'line '))
+                    terms[1].replace('line', 'line '))
         m1 = re.match(
-            r'(line \w+) is (less|more|larger|smaller|greater) than (line \w+)',
-            cond)
+            r'(line \w+) '
+            r'is (less|more|larger|smaller|greater) than '
+            r'(line \w+)', cond)
         m2 = re.match(r'(line \w+) is ([$\d,]+) or (less|more)', cond)
         condparse = None
         if m1:
@@ -354,7 +362,7 @@ class CommandParser(object):
                 math.zcond = condparse
             else:
                 log.debug(jj(
-                    '397 how interpret condition?  assuming zcond=flipcondition',
+                    'not sure but assuming zcond=flipcondition',
                     cond))
                 math.zcond = flipcondition(condparse)
 
@@ -363,15 +371,21 @@ class CommandParser(object):
         # returns the dollar and cent fields corresponding to a term such as
         # 'line7'
         if term.isdigit():
-            return [dict(typ='constant', uniqname=term, unit=None, val=term,
-                npage=pgnum, linenum=term, centfield='centfield_of_constant')]
+            return [dict(
+                typ='constant',
+                uniqname=term,
+                unit=None,
+                val=term,
+                npage=pgnum,
+                linenum=term,
+                centfield='centfield_of_constant')]
         if '.col.' in term:
             # field is in a table
             line, col = term.split('.col.')
             if not line:
                 line = parentline
             returnFields = [field for field in fieldsByLine[(pgnum, line)] if
-                field.get('coltitle') == col]
+                            field.get('coltitle') == col]
             if returnFields:
                 return returnFields
             else:
@@ -397,18 +411,19 @@ class CommandParser(object):
         op = math.op
         terms = math.terms
         math.text = ''
-        myFieldName = math.field[namek]
-        myFieldUnit = math.field[unitk]
+        myFieldName = math.field[math.namek]
+        myFieldUnit = math.field[math.unitk]
         fieldsByLine = math.form.fieldsByLine
         ll, pg = [math.field[key] for key in ('linenum', 'npage')]
         if op == '*' and math.constantUnit == 'dollars':
             # eg 1040/line42 our dep fields are unitless cuz our constant is in
             # dollars
             myFieldUnit = None
-        upfields = [math.getFieldFromTerm(term, ll, pg, fieldsByLine) for term
-            in terms]
-        upfields = [upf for upfs in upfields for upf in upfs if upf[namek] !=
-            myFieldName and upf[unitk] == myFieldUnit]
+        upfields = [math.getFieldFromTerm(term, ll, pg, fieldsByLine)
+                    for term in terms]
+        upfields = [upf for upfs in upfields for upf in upfs
+                    if upf[math.namek] != myFieldName
+                    and upf[math.unitk] == myFieldUnit]
         if op == '*':
             # todo revisit: here we assume that 1. we want to multiply only two
             # fields, and specifically 2. we want the first and the last [and
@@ -416,8 +431,9 @@ class CommandParser(object):
             # constant and the [computed] line6d
             if len(upfields) > 1:
                 upfields = [upfields[0], upfields[-1]]
-        math.form.upstreamFields.update([upf['uniqname'] for upf in upfields
-            if upf.get('typ') != 'constant'])
+        math.form.upstreamFields.update(
+            [upf['uniqname'] for upf in upfields
+             if upf.get('typ') != 'constant'])
         # math.form.upstreamFields.remove(myFieldName)  # do this later in case
         # fields are not in dependency order [see laterIsHere]
         math.form.computedFields[myFieldName] = math.field
@@ -425,7 +441,7 @@ class CommandParser(object):
         math.field['op'] = op
         mathstr = op.join(terms)
         if math.cond:
-            math.cond = ' if not %s else %s' % (condtopy(math.cond), self.pred)
+            math.cond = ' if not %s else %s' % (condtopy(math.cond), math.pred)
         mathstr = '=' + mathstr
         math.text = mathstr
 

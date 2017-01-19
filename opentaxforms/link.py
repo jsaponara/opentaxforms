@@ -1,35 +1,45 @@
 
+import re
 from ut import log, jj, ddict
 import irs
-import re
 
 
-def findLineAndUnit(s):
+def findLineAndUnit(speak):
     '''
-        >>> import logging
-        >>> log.addHandler(logging.NullHandler())
-        >>> findLineAndUnit('Payments, Credits, and Tax. Line 7. Federal income tax withheld. Dollars.')
-        ('line7', 'dollars')
-        >>> findLineAndUnit('Line 7. Cents.')
-        ('line7', 'cents')
-        >>> findLineAndUnit('Personal identification number (P I N). 5 digits. ')
-        (None, '')
-        >>> findLineAndUnit('Page 2. Worksheet for Line 5, ...')
-        (None, '')
-        >>> 
-        f2106ez/part1/line1: without the dots in units pttn, unit here would be cents
-        >>> findLineAndUnit('Part 1. Figure Your Expenses. Line 1. Complete Part 2. Multiply line 8a by 55.5 cents (.555). Enter the result here. Dollars.')
-        ('line1', 'dollars')
-        >>> findLineAndUnit("Part 1. Persons ... (If ..., see the instructions.) Line 1. Item 1. (a) Care provider's name. Caution. If the care was provided in your home, you may owe employment taxes. If you do, you cannot file Form 1040A. For details, see the instructions for Form 1040, line 60a, or Form 1040N R, line 59a. 2 lines available for entry.")  # f2441
-        ('line1', '')
-        '''
-    findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', s)
+    >>> import logging
+    >>> log.addHandler(logging.NullHandler())
+    >>> s='Payments, Credits, and Tax. Line 7. Federal income tax ... Dollars.'
+    >>> findLineAndUnit(s)
+    ('line7', 'dollars')
+    >>> findLineAndUnit('Line 7. Cents.')
+    ('line7', 'cents')
+    >>> findLineAndUnit('Personal identification number (P I N). 5 digits. ')
+    (None, '')
+    >>> findLineAndUnit('Page 2. Worksheet for Line 5, ...')
+    (None, '')
+    >>>
+    f2106ez/part1/line1: without the dots in units pttn,
+      unit here would be cents
+    >>> findLineAndUnit('Part 1. Figure Your Expenses. Line 1.'
+        ' Complete Part 2. Multiply line 8a by 55.5 cents (.555).'
+        ' Enter the result here. Dollars.')
+    ('line1', 'dollars')
+    >>> findLineAndUnit("Part 1. Persons ... (If ..., see the instructions.)"
+        " Line 1. Item 1. (a) Care provider's name. Caution. If the care was"
+        " provided in your home, you may owe employment taxes. If you do,"
+        " you cannot file Form 1040A. For details, see the instructions for"
+        " Form 1040, line 60a, or Form 1040N R, line 59a. 2 lines available"
+        " for entry.")  # f2441
+    ('line1', '')
+    '''
+    findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?',
+                             speak)
     # Line 62. a. etc
-    findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', s)
+    findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', speak)
     # Exemptions. 62. a. etc
-    findLineNum3 = re.search(r'^(\d+\w*)\.\s', s)
+    findLineNum3 = re.search(r'^(\d+\w*)\.\s', speak)
     # 16b. ... eg 990/page6/line16b
-    units = re.findall(r'\.?\s*(Dollars|Cents)\.?', s, re.I)
+    units = re.findall(r'\.?\s*(Dollars|Cents)\.?', speak, re.I)
     if findLineNum1:
         # linenum is eg 'line62a' for 'Line 62. a. etc' or even for
         # 'Exemptions. 62. a. etc'
@@ -40,8 +50,8 @@ def findLineAndUnit(s):
         linenum = 'line' + findLineNum3.groups()[0]
     else:
         linenum = None
-        if re.search(r'line\s+\d+', s, re.I):
-            log.warn(jj('linenumNotFound: cannot find the linenum in:', s))
+        if re.search(r'line\s+\d+', speak, re.I):
+            log.warn(jj('linenumNotFound: cannot find the linenum in:', speak))
     if linenum:
         linenum = linenum.lower().replace(' ', '').replace('.', '')
     unit = units[-1].lower().strip(' .') if units else ''
@@ -87,8 +97,10 @@ def unifyTableRows(fieldsByRow):
                 if f['linenum'] != ll0:
                     f['linenum-orig'] = f['linenum']
                     f['linenum'] = ll0
-                    msgtmpl = 'leftmostCellOverride: p%d: changed %s in field %s to %s from leftmost field %s'
-                    log.info(msgtmpl, page, f['linenum-orig'], f['uniqname'],
+                    msgtmpl = 'leftmostCellOverride: p%d: changed %s' \
+                              ' in field %s to %s from leftmost field %s'
+                    log.info(
+                        msgtmpl, page, f['linenum-orig'], f['uniqname'],
                         ll0, fs[0]['uniqname'])
 
 
@@ -99,8 +111,9 @@ def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
         # eg dollar-and-cent pair usu at same ypos
         # newcode but wks for 1040,1040sb
         pg, linenumm = lnum
-        noncentFields = [ff for ff in fieldsByLine[lnum] if ff['unit'] !=
-            'cents']
+        noncentFields = [
+            ff for ff in fieldsByLine[lnum]
+            if ff['unit'] != 'cents']
         dupLinenumz = len(noncentFields) > 1
         ypozz = [ff['ypos'] for ff in noncentFields]
         for iypos, ypos in enumerate(sorted(ypozz)):
@@ -151,7 +164,9 @@ def linkfields(form):
                 # 2015/f1040sse/line7 and 2015/f8814/line5 [hmm, both are pre-
                 # filled fields...; speak has the amt but not always with a
                 # "$"]
-                msgtmpl = 'expectedDollars: expected field [%s] to have unit==dollars, instead got [%s] from previous speak: [%s]'
+                msgtmpl = 'expectedDollars: expected field [%s]'      \
+                          ' to have unit==dollars, instead got [%s]'  \
+                          ' from previous speak: [%s]'
                 log.warn(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak']))
                 dd['unit'] = 'dollars'
             dd['centfield'] = cc

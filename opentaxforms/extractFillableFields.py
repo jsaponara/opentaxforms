@@ -1,12 +1,14 @@
 
-from config import cfg
-from ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
-from irs import commandPtn, possibleColTypes, CrypticXml
 from sys import exc_info
 import re
 from itertools import chain
+from argparse import ArgumentParser
+from config import cfg
+from ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
+from irs import commandPtn, possibleColTypes, CrypticXml
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
+UNESC_PAT = re.compile(r'&#(\d+);')
 
 
 def escape(s):
@@ -15,7 +17,6 @@ def escape(s):
         '&#60;field name=&#34;blah&#34;&#62;'
         '''
     return ESC_PAT.sub(lambda m: '&#%d;' % ord(m.group(0)), s)
-UNESC_PAT = re.compile(r'&#(\d+);')
 
 
 def unescape(s):
@@ -53,8 +54,8 @@ def getRawXml(prefix, path='.'):
                         len(line), len(fieldFrags[0]))
                 else:
                     fieldFrags.append(unescapeline(line))
-        xmlAsStr = '\n'.join(f for f in fieldFrags if f and 'form checksum'
-            not in f)
+        xmlAsStr = '\n'.join(f for f in fieldFrags
+                             if f and 'form checksum' not in f)
         if not xmlAsStr:
             xmlAsStr = '\n'.join(f for f in fieldFrags if f)
         if not xmlAsStr.strip():
@@ -65,50 +66,52 @@ def getRawXml(prefix, path='.'):
     return xmlAsStr
 
 
-def collectTables(tree, namespaces):
-    tableEls = tree.xpath('//*[@layout="table"]', namespaces=namespaces)
+def collectTables(tree, nsz):
+    tableEls = tree.xpath('//*[@layout="table"]', namespaces=nsz)
     tables = {}
     for el in tableEls:
-        #tablename=el.attrib.get('name','nameless')
-        key = computePath(el, namespaces)
+        # tablename=el.attrib.get('name','nameless')
+        key = computePath(el, nsz)
         maxhs = []
-        for iele, ele in enumerate(el.xpath('.//*[@layout="row"]',
-            namespaces=namespaces)):
+        for iele, ele in enumerate(
+           el.xpath('.//*[@layout="row"]', namespaces=nsz)):
             # rowname=ele.attrib.get('name','nameless') todo for maxheight in
             # each row, assuming just need 'h' attrib, but f1040/line6ctable
             # also has node w/ lineHeight attrib
-            cells = ele.xpath('./*[@h or @minH]', namespaces=namespaces)
+            cells = ele.xpath('./*[@h or @minH]', namespaces=nsz)
             if iele == 0:
-
                 # get titles from 1st row
-                def getcoltext(elem, namespaces):
+                def getcoltext(elem, nsz):
                     txts = list(elem.xpath('.//*[@style]/text()',
-                        namespaces=namespaces))
+                                namespaces=nsz))
                     alltxt = ' '.join(txts).replace(u'\xa0', '')
                     m = re.match(commandPtn, alltxt)
                     if m:
                         colinstruction = alltxt[m.start():]
                     else:
                         colinstruction = ''
-                    ctitles = [txt[:3].strip('()') for txt in txts if len(txt)
-                        >= 3 and txt[0] == '(' and txt[2] == ')' and txt[1].
-                        islower()]
+                    ctitles = [txt[:3].strip('()') for txt in txts
+                               if len(txt) >= 3 and txt[0] == '('
+                               and txt[2] == ')' and txt[1].islower()]
                     coltext = (' '.join(txts)).lower()
-                    coltype = ' '.join(coltype for coltype in possibleColTypes
+                    coltype = ' '.join(
+                        coltype for coltype in possibleColTypes
                         if coltype in coltext)
-                    return (ctitles[0] if ctitles else '', coltype,
-                        colinstruction)
-                coltitles, coltypes, colinstructions = zip(*[getcoltext(elem,
-                    namespaces) for elem in cells])
+                    return (ctitles[0] if ctitles else '',
+                            coltype,
+                            colinstruction)
+                coltitles, coltypes, colinstructions = zip(
+                    *[getcoltext(elem, nsz) for elem in cells])
             try:
                 maxh = max([Qnty.fromstring(c.attrib.get('h', c.attrib.get(
                     'minH'))) for c in cells])
                 log.debug('row name:' + ele.attrib.get('name', 'nameless') +
-                    ' maxh:' + str(maxh))
+                          ' maxh:' + str(maxh))
             except:
-                log.debug('oops row,cell names: ' + ','.join([el.attrib.get(
-                    'name', 'nameless'), ele.attrib.get('name', str(ele.attrib
-                    ))]))
+                log.debug(
+                    'oops row,cell names: ' + ','.join(
+                        [el.attrib.get('name', 'nameless'),
+                         ele.attrib.get('name', str(ele.attrib))]))
                 raise
             maxhs.append(maxh)
         if maxhs:
@@ -126,9 +129,14 @@ def collectTables(tree, namespaces):
 
 
 def computePath(el, namespaces):
-    return '.'.join(reversed(list(ele.attrib.get('name', '%s#%d' % (ele.tag,
-        indexAmongSibs(ele, ele.tag, namespaces))) for ele in chain([el], el.
-        iterancestors()))))
+    def ancestry(ele, nsz):
+        return reversed(list(
+            ele.attrib.get(
+                'name', '%s#%d' % (
+                    ele.tag,
+                    indexAmongSibs(ele, ele.tag, nsz)))
+            for ele in chain([el], el.iterancestors())))
+    return '.'.join(ancestry(el, namespaces))
 
 
 def indexAmongSibs(el, tag=None, namespaces=None):
@@ -191,9 +199,9 @@ def extractFields(form):
     xmlFromPdf(pathprefix)
     xmlAsStr = getRawXml(prefix, dirName)
     tree = parseXml(xmlAsStr, pathprefix)
-    namespaces = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
-    tables = collectTables(tree, namespaces)
-    fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=namespaces)
+    namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+    tables = collectTables(tree, nsz)
+    fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
     prevTable = None
     for iel, el in enumerate(fieldEls):
         def getvar(el, varname):
@@ -206,54 +214,53 @@ def extractFields(form):
                 except Exception:
                     q = Qnty.fromstring('0mm')
             return q
-        xpos, ypos, hdim, wdim = [getvar(el, varname) for varname in ('x',
-            'y', 'h minH', 'w')]
+        xpos, ypos, hdim, wdim = [
+            getvar(el, varname) for varname in ('x', 'y', 'h minH', 'w')]
         isfield = el.tag.endswith('field')
-        #isdraw=not isfield
+        # isdraw=not isfield
         if isfield:
             # caption node isnt v.informative (or even common), at least for
             # f1040schedB
-            istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=namespaces
-                ))
-            ischeckbox = bool(el.xpath('t:ui/t:checkButton',
-                namespaces=namespaces))
+            istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=nsz))
+            ischeckbox = bool(el.xpath('t:ui/t:checkButton', namespaces=nsz))
             isReadonly = el.attrib.get('access') == 'readOnly'
-            speakNodes = el.xpath('t:assist/t:speak', namespaces=namespaces)
+            speakNodes = el.xpath('t:assist/t:speak', namespaces=nsz)
             if speakNodes:
                 speak = unicode(speakNodes[0].text).encode('utf-8')
             else:
                 speak = ''
-            code = el.xpath('t:items/t:text', namespaces=namespaces)
+            code = el.xpath('t:items/t:text', namespaces=nsz)
             if code:
                 code = unicode(code[0].text).encode('utf-8')
             else:
                 code = None
-            captionText = el.xpath('t:caption/descendant-or-self::text()',
-                namespaces=namespaces)
+            captionText = el.xpath(
+                't:caption/descendant-or-self::text()',
+                namespaces=nsz)
             if captionText:
                 captionText = u'|'.join(unicode(t) for t in captionText)
             else:
                 captionText = ''
             # captionReserve info allows our textbox to avoid encompassing the
             # caption
-            captionReserveNodes = el.xpath('t:caption[@reserve]',
-                namespaces=namespaces)
+            captionReserveNodes = el.xpath(
+                't:caption[@reserve]',
+                namespaces=nsz)
             if captionReserveNodes:
                 xCaptionReserve = yCaptionReserve = wCaptionReserve = \
                     hCaptionReserve = Qnty(0, 'inch')
-                captionReserveNode = captionReserveNodes[0]
-                captionReserve = Qnty.fromstring(captionReserveNode.attrib.get
-                    ('reserve'))
-                if (captionReserveNode.attrib.get('placement', 'left') in
-                    'right left'):
-                    if captionReserveNode.attrib.get('placement') == 'right':
+                crn = captionReserveNodes[0]
+                captionReserve = Qnty.fromstring(
+                    crn.attrib.get('reserve'))
+                if crn.attrib.get('placement', 'left') in 'right left':
+                    if crn.attrib.get('placement') == 'right':
                         wCaptionReserve = captionReserve
                     else:
                         xCaptionReserve = wCaptionReserve = captionReserve
                     xpos += xCaptionReserve
                     wdim -= wCaptionReserve
                 else:  # placement is top or bottom
-                    if captionReserveNode.attrib.get('placement') == 'top':
+                    if crn.attrib.get('placement') == 'top':
                         yCaptionReserve = captionReserve
                         hCaptionReserve = captionReserve
                     else:
@@ -264,13 +271,15 @@ def extractFields(form):
             maxchars = None
             if istextbox:
                 # hscrolllist=el.xpath('t:ui/t:textEdit/@hScrollPolicy',namespa
-                # ces=namespaces) hscroll=not hscrolllist or
+                # ces=nsz) hscroll=not hscrolllist or
                 # hscrolllist[0]!='off'
-                multilinelist = el.xpath('t:ui/t:textEdit/@multiLine',
-                    namespaces=namespaces)
+                multilinelist = el.xpath(
+                    't:ui/t:textEdit/@multiLine',
+                    namespaces=nsz)
                 multiline = multilinelist and multilinelist[0] == '1'
-                maxcharslist = el.xpath('t:value/t:text/@maxChars',
-                    namespaces=namespaces)
+                maxcharslist = el.xpath(
+                    't:value/t:text/@maxChars',
+                    namespaces=nsz)
                 maxchars = maxcharslist[0] if maxcharslist else None
             if istextbox and not ischeckbox:
                 typ = 'text'
@@ -279,7 +288,7 @@ def extractFields(form):
             else:
                 # default to textbox but warn
                 typ = 'text'
-                uinodes = el.xpath('t:ui', namespaces=namespaces)
+                uinodes = el.xpath('t:ui', namespaces=nsz)
                 if uinodes:
                     uikids = uinodes[0].getchildren()
                     info = str(uikids)
@@ -288,14 +297,16 @@ def extractFields(form):
                 log.warn(
                     'not sure of element type: textbox, checkbox, other?  ' +
                     info)
-        else:  # el is a draw 
+        else:  # el is a draw
             assert el.tag.endswith('draw'), \
                 'expected tag.endswith "draw" instead got tag==' + el.tag
-            texts = el.xpath('*/t:exData/*/*/descendant-or-self::text()',
-                namespaces=namespaces)
+            texts = el.xpath(
+                '*/t:exData/*/*/descendant-or-self::text()',
+                namespaces=nsz)
             if not texts:
-                texts = el.xpath('t:value/t:text/descendant-or-self::text()',
-                    namespaces=namespaces)
+                texts = el.xpath(
+                    't:value/t:text/descendant-or-self::text()',
+                    namespaces=nsz)
             if texts:
                 text = '|'.join(texts)
             else:
@@ -316,8 +327,11 @@ def extractFields(form):
                 break
             xpos += Qnty.fromstring(p.attrib.get('x', '0mm'))
             ypos += Qnty.fromstring(p.attrib.get('y', '0mm'))
-            if p.attrib.get('name', '').startswith('Page') and p.attrib.get(
-                'name')[4].isdigit():
+
+            def at(elem, attrib, default=None):
+                return elem.attrib.get(attrib, default)
+            if at(p, 'name', '').startswith('Page') and \
+               at(p, 'name')[4].isdigit():
                 # or could assume that subforms just below the topmost are the
                 # pages/copies
                 npage = int(p.attrib.get('name')[len('Page')])
@@ -327,8 +341,8 @@ def extractFields(form):
             idxfornamelessnode = '[%d]' % (p.index(a) - 1)
             if 'name' in a.attrib:
                 ancname = a.get('name')
-                sibsOfSameName = [c for c in p.getchildren() if c.get('name')
-                    == ancname]
+                sibsOfSameName = [
+                    c for c in p.getchildren() if c.get('name') == ancname]
                 idxOfNamedNode = '[%d]' % (sibsOfSameName.index(a))
                 idx = idxOfNamedNode
             else:
@@ -342,13 +356,14 @@ def extractFields(form):
                 layout = p.attrib.get('layout')
                 if layout == 'table':
                     # record name of table
-                    currTable = computePath(p, namespaces)
+                    currTable = computePath(p, nsz)
                 elif layout == 'row':
                     # record index of current row
-                    irow = (list(p.getparent().xpath('*[@layout="row"]')).index
-                        (p))
-                    icol = list(p.xpath('t:draw|t:field|t:subform',
-                        namespaces=namespaces)).index(a)
+                    gp = p.getparent()
+                    irow = (list(gp.xpath('*[@layout="row"]')).index(p))
+                    icol = list(p.xpath(
+                        't:draw|t:field|t:subform',
+                        namespaces=nsz)).index(a)
         path = '.'.join(p for p in reversed(path) if p)
         elname = el.attrib.get('name', path)
         coltitle = ''
@@ -360,11 +375,13 @@ def extractFields(form):
                 # columnWidths and set icol to 1st column
                 columnWidths = [Qnty.fromstring(width) for width in tables[
                     currTable]['colwidths'].split()]
-                cumColWidths = [sum(columnWidths[0:i], Qnty(0, columnWidths[0]
-                    .units)) for i in range(len(columnWidths))]
+                cumColWidths = [
+                    sum(columnWidths[0:i], Qnty(0, columnWidths[0].units))
+                    for i in range(len(columnWidths))]
                 maxheights = tables[currTable]['maxheights']
-                rowheights = [sum(maxheights[0:i], Qnty(0, maxheights[0].units
-                    )) for i in range(len(maxheights))]
+                rowheights = [
+                    sum(maxheights[0:i], Qnty(0, maxheights[0].units))
+                    for i in range(len(maxheights))]
                 coltitles = tables[currTable]['coltitles']
                 coltypes = tables[currTable]['coltypes']
                 colinstructions = tables[currTable]['colinstructions']
@@ -393,7 +410,8 @@ def extractFields(form):
                 coltype = coltypes[icol]
                 colinstruction = colinstructions[icol]
             except Exception as e:
-                msg = (e.message +
+                msg = (
+                    e.message +
                     '; icol,coltitles,coltypes,colinstructions=%s,%s,%s,%s' %
                     (icol, coltitles, coltypes, colinstructions))
                 log.error(msg)
@@ -407,7 +425,8 @@ def extractFields(form):
         d = dict(el.attrib.iteritems())  # todo is el.attrib needed here?
         d.update(dict(
             i=iel,
-            name=elname,  # this way there's a name key even if the element has no name attrib
+            # this way there's a name key even if element has no name attrib
+            name=elname,
             tag=el.tag,
             path=path,
             xpos=xpos,
@@ -468,8 +487,9 @@ def extractFields(form):
                     return "{name=%s,text=%s}" % (shortname(), self.get(
                         'text', '--'))
                 else:
-                    return "{name=%s,speak=%s%s,unit=%s...}" % (shortname(),
-                        speaklinecol[:13], col, self.get('unit', '--'))
+                    return "{name=%s,speak=%s%s,unit=%s...}" % (
+                        shortname(), speaklinecol[:13], col,
+                        self.get('unit', '--'))
         d = El(d)
         if isfield:
             fields.append(d)
@@ -477,8 +497,8 @@ def extractFields(form):
         else:
             visiblz.append(d)
     ensurePathsAreUniq(fields)
-    log.info('found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz
-        )))
+    log.info(
+        'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
     with open(dirName + '/' + prefix + '-visiblz.txt', 'w') as f:
         f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
     # fields refers to fillable fields only; draws are all (fillable and read-
@@ -494,21 +514,19 @@ def saveFields(fields, prefix):
     dump(fields, pickl)
     pickl.close()
 
-from argparse import ArgumentParser
-
 
 def parse_cli():
     '''Load command line arguments'''
     parser = ArgumentParser(description='extract field info of a PDF.')
-    parser.add_argument('-p', '--prefix', metavar='PREFIX',
-                    nargs='?', help='prefix for names of files generated')
-    parser.add_argument('infile', metavar='pdf_file',
-                    nargs='?', default='stdin',
-                    help='PDF file to extract from')
-    parser.add_argument('-l', '--loglevel', help='Set loglevel',
-                      default='WARN', metavar='LOG_LEVEL')
-    parser.add_argument('-t', '--doctests', help='Run doctests',
-                       action="store_true")
+    addarg = parser.add_argument
+    addarg('-p', '--prefix', metavar='PREFIX',
+           nargs='?', help='prefix for names of files generated')
+    addarg('infile', metavar='pdf_file',
+           nargs='?', default='stdin',
+           help='PDF file to extract from')
+    addarg('-l', '--loglevel', help='Set loglevel',
+           default='WARN', metavar='LOG_LEVEL')
+    addarg('-t', '--doctests', help='Run doctests', action="store_true")
     return parser.parse_args()
 
 
@@ -545,6 +563,7 @@ def main():
         f.close()
     saveFields(form.fields, prefix)
     log.info(pf(form.fields))
+
 
 if __name__ == '__main__':
     main()
