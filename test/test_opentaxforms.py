@@ -10,12 +10,6 @@ from opentaxforms import ut
 
 class TestBase(object):
     '''setup/teardown'''
-    def __init__(self):
-        self.dir_name = None
-        self.testdir = None
-        self.default_args = None
-        self.outdir = None
-
     def setup_method(self, _):
         '''setup'''
         self.testdir = ut.Resource('test', '').path()
@@ -57,7 +51,7 @@ class TestBase(object):
         root_forms = kw.get('rootForms') or ['1040']
         shallow = False
         targetdir = pathjoin(self.testdir, 'forms-targetOutput', '')
-        files_to_check = kw.get('files_to_check') or \
+        files_to_check = kw.get('filesToCheck') or \
             ['f%s-p1.html' % (form, ) for form in root_forms]
 
         def fmtmsg(result, verb, file_to_check, outdir, targetdir):
@@ -121,17 +115,14 @@ class TestSteps(TestBase):
 
 class TestApiBase(object):
     '''setup/teardown'''
-    def __init__(self):
-        self.app = None
-        self.client = None
-
     def setup_method(self, _):
         '''pre-test setup'''
         from opentaxforms.serve import createApp
+        # we just read from this db
         dbpath = 'sqlite:///' + ut.Resource(
-            'test', 'opentaxforms.sqlite3').path()
-        # dir_name=None means dont look for a forms/ directory
-        self.app = createApp(dbpath=dbpath, dir_name=None)
+            'test', 'forms-common/f1040.sqlite3').path()
+        # dirName=None means dont look for a forms/ directory
+        self.app = createApp(dbpath=dbpath, dirName=None)
         self.client = self.app.test_client()
 
     def teardown_method(self, _):
@@ -143,23 +134,29 @@ class TestApi(TestApiBase):
     '''test the api'''
     def test_api_orgn(self):
         '''get list of organizations (currently just IRS)'''
-        response = self.client.get('/api/v1/orgn')
+        request = '/api/v1/orgn'
+        response = self.client.get(request)
+        print request, '->', response.data
         assert '"code": "us_irs"' in response.data
         assert response.status_code == 200
 
     def test_api_f1040(self):
         '''get form 1040'''
-        response = self.client.get(
+        request = (
             '/api/v1/form?q='
             '{"filters":[{"name":"code","op":"eq","val":"1040"}]}')
+        response = self.client.get(request)
+        print request, '->', response.data
         assert '"title": "Form 1040"' in response.data
         assert response.status_code == 200
 
     def test_api_noresults(self):
         '''request a nonexistent form'''
-        response = self.client.get(
+        request = (
             '/api/v1/form?q='
             '{"filters":[{"name":"code","op":"eq","val":"0000"}]}')
+        response = self.client.get(request)
+        print request, '->', response.data
         assert '"num_results": 0' in response.data
         assert response.status_code == 200
 
@@ -176,7 +173,9 @@ class TestApi(TestApiBase):
                  val=dict(name='code', op='eq', val='1040')),  # of form 1040
             ]
         paramstring = json.dumps(dict(filters=filters))
-        response = self.client.get(url % (paramstring, ))
+        request = url % (paramstring, )
+        response = self.client.get(request)
+        print request, '->', response.data
         assert response.status_code == 200
         assert '"num_results": 15' in response.data
 

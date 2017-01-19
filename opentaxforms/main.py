@@ -25,10 +25,6 @@ import opentaxforms.refs as references
 # from opentaxforms.extractFillableFields import extractFields
 from extractFillableFields import extractFields
 
-# import sys
-# reload(sys)
-# sys.setdefaultencoding('utf-8')
-
 
 def cleanup_files(form):
     '''remove intermediate files'''
