@@ -7,7 +7,7 @@
 
     By Matt Swain. Released under the MIT license.
 
-    from http://blog.matt-swain.com/post/25650072381/a-lightweight-xmp-parser-for-extracting-pdf
+    from http://blog.matt-swain.com/post/25650072381/
 """
 
 from collections import defaultdict

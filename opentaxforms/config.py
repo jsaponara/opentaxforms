@@ -8,8 +8,13 @@ from version import appname, appversion
 
 RecurseInfinitely = -1
 RecursionRootLevel = 0
-SkippableSteps = (ut.ChainablyUpdatableOrderedDict()(x='xfaParsing')(
-    m='mathParsing')(r='referenceParsing')(d='databaseOutput')(h='htmlOutput')
+SkippableSteps = (
+    ut.ChainablyUpdatableOrderedDict()
+    (x='xfaParsing')
+    (m='mathParsing')
+    (r='referenceParsing')
+    (d='databaseOutput')
+    (h='htmlOutput')
     (c='cleanupFiles'))
 # remove intermediate files
 

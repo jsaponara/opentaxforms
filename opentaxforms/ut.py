@@ -1,3 +1,7 @@
+import os
+import logging
+# from http.server import SimpleHTTPRequestHandler  #py3?
+import BaseHTTPServer  # py2
 from collections import (
     namedtuple as ntuple,
     defaultdict as ddict,
@@ -5,6 +9,7 @@ from collections import (
 from decimal import Decimal as dc
 from pprint import pprint as pp, pformat as pf
 from sys import stdout, exc_info
+from pint import UnitRegistry
 NL = '\n'
 TAB = '\t'
 
@@ -80,15 +85,14 @@ def compactify(multilineRegex):
           '(?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\\))?'
           '\\s*$'
 
-        todo how can i get this more readable expected string to work with doctest?
-        r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$'
-
-        # todo what should compactify return for these? [but note this entire docstring is raw]
+        # todo what should compactify return for these?
+        #      [but note this entire docstring is raw]
         #>>> compactify(r'\   # comment')
         #>>> compactify(r'\\  # comment')
         #>>> compactify( '\   # comment')
         #>>> compactify( '\\  # comment')
-        #print len(multilineRegex),'[%s%s]'%(multilineRegex[0],multilineRegex[1])
+        #print len(multilineRegex),
+            '[%s%s]'%(multilineRegex[0],multilineRegex[1])
     """
     import re
 
@@ -138,7 +142,8 @@ def flattened(l):
 
 def hasdups(l, key=None):
     if key is None:
-        key = lambda x: x
+        # key = lambda x: x
+        def key(x): return x
     ll = [key(it) for it in l]
     return any(it in ll[1 + i:] for i, it in enumerate(ll))
 
@@ -164,7 +169,7 @@ def uniqify2(l):
             l.pop(i)
     return l
 
-import logging
+
 log = logging.getLogger()
 defaultLoglevel = 'WARN'
 alreadySetupLogging = False
@@ -189,6 +194,7 @@ def setupLogging(loggerId, args=None):
     alreadySetupLogging = True
     log.name = loggerId
     return log, fname
+
 
 defaultOutput = stdout
 
@@ -283,13 +289,14 @@ class CharEnum(object):
 
     @classmethod
     def vals(cls):
-        return [v for k, v in cls.__dict__.iteritems() if not k.startswith('_'
-            )]
+        return [
+            v for k, v in cls.__dict__.iteritems() if not k.startswith('_')]
 
     @classmethod
     def items(cls):
-        return [(k, v) for k, v in cls.__dict__.iteritems() if not k.
-            startswith('_')]
+        return [
+            (k, v) for k, v in cls.__dict__.iteritems()
+            if not k.startswith('_')]
 
 
 class ChainablyUpdatableOrderedDict(odict):
@@ -320,9 +327,11 @@ class Bag(object):
         for mapp in maps:
             getdict = None
             if type(mapp) == dict:
-                getdict = lambda x: x
+                # getdict = lambda x: x
+                def getdict(x): return x
             elif type(mapp) == Bag:
-                getdict = lambda x: x.__dict__
+                # getdict = lambda x: x.__dict__
+                def getdict(x): return x.__dict__
             elif type(mapp) == tuple:
                 mapp, getdict = mapp
             if getdict is not None:
@@ -337,7 +346,8 @@ class Bag(object):
         if type(mapp) == tuple:
             mapp, getitems = mapp
         else:
-            getitems = lambda m: m.items()
+            # getitems = lambda m: m.items()
+            def getitems(m): return m.items()
         return mapp, getitems
 
     def __getitem__(self, key):
@@ -418,7 +428,7 @@ class Bag(object):
     def __repr__(self):
         return self.__str__()
 
-from pint import UnitRegistry
+
 ureg = UnitRegistry()
 # interactive use: from pint import UnitRegistry as ureg; ur=ureg();
 # qq=ur.Quantity
@@ -427,6 +437,8 @@ qq = ureg.Quantity
 
 def notequalpatch(self, o):
     return not self.__eq__(o)
+
+
 setattr(qq, '__ne__', notequalpatch)
 assert qq(1, 'mm') == qq(1, 'mm')
 assert not qq(1, 'mm') != qq(1, 'mm')
@@ -505,25 +517,9 @@ def nth(n):
     n = str(n)
     if n[-2:] in ('11', '12', '13'):
         return n + 'th'
-    return (n + dict([(nth[0], nth[1:3]) for nth in '1st 2nd 3rd'.split()]).get
-        (n[-1], 'th'))
-
-
-# todo school stuff doesnt belong here--abstract this
-def worddiffs(a, b):
-    # todo add doctest to demo that order matters, ie 'east amwell' != 'amwell
-    # east'
-    '''
-        >>> sorted(worddiffs('east amwell township e.s.','east amwell twp'))
-        ['E.S.', 'TOWNSHIP', 'TWP']
-        '''
-    from re import split as sp
-    az = sp(r'[ -]', a.upper())
-    bz = sp(r'[ -]', b.upper())
-    #from difflib import context_diff as cdf; cdf(az,bz)
-    from difflib import ndiff
-    diffs = [dif[2:] for dif in ndiff(az, bz) if dif[0] != ' ']
-    return diffs
+    return (n + dict(
+        [(nth[0], nth[1:3])
+            for nth in '1st 2nd 3rd'.split()]).get(n[-1], 'th'))
 
 
 def htmlTableFromDict(rows, cols):
@@ -575,8 +571,6 @@ def exists(fname):
     fname = fname.rstrip('/')
     return access(fname, F_OK)
 
-import os
-
 
 def ensure_dir(folder):
     '''ensure that directory exists'''
@@ -600,9 +594,8 @@ def readImgSize(fname, dirName):
     f.close()
     return imgw, imgh
 
+
 # simple server that allows injection of http response headers
-#from http.server import SimpleHTTPRequestHandler  #py3?
-import BaseHTTPServer  # py2
 HOST_NAME = 'localhost'
 PORT_NUMBER = 8000
 
@@ -628,15 +621,16 @@ def serve():
 
 
 def unused():
-    num=dc(1,2)
-    d=ddict()
+    print dc(1, 2)
+    print ddict()
     pp(0)
     pf(0)
 
 
 def nestedFunctionTest():
     '''
-        just to see if doctest still doesnt run nested functions (as in py27,py34)
+        just to see if doctest still doesnt run nested functions
+          (as in py27,py34)
           cuz theyre not created until the outer function is run
           https://bugs.python.org/issue1650090
         >>> 'a'
@@ -649,15 +643,20 @@ def nestedFunctionTest():
             'b'
         '''
         pass
+
+
 '''
 
 def parse_cli():
-    from argparse import ArgumentParser   # https://docs.python.org/2/library/argparse.html
+    # https://docs.python.org/2/library/argparse.html
+    from argparse import ArgumentParser
     parser = ArgumentParser(description='compute form connection graph')
+    addarg=parser.add_argument
     # required arg:
-    parser.add_argument('directory', help='directory of "*-refs.txt" files to parse')
+    addarg('directory', help='directory of "*-refs.txt" files to parse')
     # optional arg:
-    parser.add_argument('-f', '--form', metavar='formName', nargs='?', help='form file name, eg f1040')
+    addarg('-f', '--form', metavar='formName', nargs='?',
+           help='form file name, eg f1040')
     return parser.parse_args()
 if __name__=='__main__':
     # this code is not used here in ut.py cuz ut.py must stand alone.
