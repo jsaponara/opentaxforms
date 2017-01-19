@@ -84,5 +84,6 @@ class XmpParser(object):
 
 
 def xmp_to_dict(xmp):
-    """ Shorthand function for parsing an XMP string into a python dictionary. """
+    """ Shorthand function for parsing an XMP string into a python dictionary.
+        """
     return XmpParser(xmp).meta

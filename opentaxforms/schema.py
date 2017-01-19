@@ -68,9 +68,11 @@ def schema():
 
     global tableInfo
     tableInfo = {}
-    # no sense in creating the database itself cuz cannot connect to a db that doesnt exist
-    # try: conn.execute('CREATE DATABASE %s'%(dbname)) except ProgrammingError,exc: if 'already exists' not in str(exc): print exc exit()
-    # todo try connecting to db postgres and creating new db from there; grant privs too
+    # no sense in creating the database itself cuz cannot connect to a db that
+    # doesnt exist try: conn.execute('CREATE DATABASE %s'%(dbname)) except
+    # ProgrammingError,exc: if 'already exists' not in str(exc): print exc
+    # exit() todo try connecting to db postgres and creating new db from there;
+    # grant privs too
 
     from db import engine, metadata
     from config import cfg
@@ -82,54 +84,41 @@ def schema():
             if 'already exists' not in str(e):
                 raise
 
-    cols = dict(
-        orgn=(  # organization eg US/IRS
-            Column('id', Integer, primary_key=True),
-            Column('code', String, nullable=False, unique=True),
-            Column('title', String, nullable=False),
-            ),
-        form=(  # eg form 1040
-            Column('id', Integer, primary_key=True),
-            Column('code', String, nullable=False),  # eg 1040-e
-            Column('year', String, nullable=False),
-            Column('title', String, nullable=False),  # eg Form 1040 Schedule E
-            Column('fname', String, nullable=False),  # filename eg f1040se
-            Column('orgnId', Integer, ForeignKey('orgn.id')),
-            Column('pageht', String, nullable=False),
-            Column('pagewd', String, nullable=False),
-            UniqueConstraint('code', 'year'),
-            ),
-        slot=(  # fillable field in a form
-            # todo consider categorizing these to allow:
-            #      slot=Table('slot',metadata,*chain(slot.columns,slot.constraints,slot.indexes))
-            Column('id', Integer, primary_key=True),
-            Column('formId', Integer, ForeignKey('form.id')),
-            Column('page', SmallInteger, nullable=False),
-            Column('uniqname', String, nullable=False),
-            Column('uniqlinenum', String),  # some fields are not numbered, eg 1040 name and address fields
-            Column('path', String, nullable=False),
-            Column('inptyp', CHAR, CheckConstraint('inptyp in (%s)' % (','.join("'%s'" % (i) for i in InputType.vals())))),
-            Column('xmltyp', CHAR, CheckConstraint('xmltyp in (%s)' % (','.join("'%s'" % (i) for i in XmlType.vals())))),
-            Column('unit', CHAR, CheckConstraint('unit in (%s)' % (','.join("'%s'" % (i) for i in Unit.vals())))),
-            Column('maxlen', SmallInteger),  # nullable cuz senseless for checkboxes
-            Column('math', String),
-            #Column('op', CHAR, CheckConstraint('op in (%s)'%(','.join("'%s'"%(i) for i in Op.vals())))),
-            Column('xpos', String),  # x position
-            Column('ypos', String),  # y position
-            Column('wdim', String),  # width dimension
-            Column('hdim', String),  # height dimension
-            Column('vistxt', String),  # visible text eg draw/text and field/captionText
-            Column('hidtxt', String),  # hidden text eg field/speak
-            Column('code', String),  # for checkboxes eg MJ for married filing jointly
-            Column('currtabl', String),  # table if any
-            Column('coltitle', String),  # column title if in table
-            Column('coltype', String),  # column type if in table
-            Column('colinstrc', String),  # column instructions if any if in table
-            Column('isreadonly', Boolean),
-            Column('ismultiline', Boolean),  # for textboxes--computable from hdim?
-            UniqueConstraint('formId', 'path'),
-            ),
-        )
+    cols = dict(orgn=(Column('id', Integer, primary_key=True), Column('code',
+        String, nullable=False, unique=True), Column('title', String,
+        nullable=False),), form=(Column('id', Integer, primary_key=True),
+        Column('code', String, nullable=False), Column('year', String,
+        nullable=False), Column('title', String, nullable=False), Column(
+        'fname', String, nullable=False), Column('orgnId', Integer, ForeignKey
+        ('orgn.id')), Column('pageht', String, nullable=False), Column(
+        'pagewd', String, nullable=False), UniqueConstraint('code', 'year'),),
+        slot=(Column('id', Integer, primary_key=True), Column('formId',
+        Integer, ForeignKey('form.id')), Column('page', SmallInteger,
+        nullable=False), Column('uniqname', String, nullable=False), Column(
+        'uniqlinenum', String), Column('path', String, nullable=False), Column
+        ('inptyp', CHAR, CheckConstraint('inptyp in (%s)' % (','.join("'%s'" %
+        (i) for i in InputType.vals())))), Column('xmltyp', CHAR,
+        CheckConstraint('xmltyp in (%s)' % (','.join("'%s'" % (i) for i in
+        XmlType.vals())))), Column('unit', CHAR, CheckConstraint(
+        'unit in (%s)' % (','.join("'%s'" % (i) for i in Unit.vals())))),
+        Column('maxlen', SmallInteger), Column('math', String), Column('xpos',
+        String), Column('ypos', String), Column('wdim', String), Column(
+        'hdim', String), Column('vistxt', String), Column('hidtxt', String),
+        Column('code', String), Column('currtabl', String), Column('coltitle',
+        String), Column('coltype', String), Column('colinstrc', String),
+        Column('isreadonly', Boolean), Column('ismultiline', Boolean),
+        UniqueConstraint('formId', 'path'),),)
+        # organization eg US/IRS eg form 1040 eg 1040-e eg Form 1040 Schedule E
+        # filename eg f1040se
+        # e('slot',metadata,*chain(slot.columns,slot.constraints,slot.indexes))
+        # some fields are not numbered, eg 1040 name and address fields
+        # nullable cuz senseless for checkboxes (%s)'%(','.join("'%s'"%(i) for
+        # i in Op.vals())))), x position y position width dimension height
+        # dimension visible text eg draw/text and field/captionText hidden text
+        # eg field/speak for checkboxes eg MJ for married filing jointly table
+        # if any column title if in table column type if in table column
+        # instructions if any if in table for textboxes--computable from hdim?
+
     for tabl in ('orgn', 'form', 'slot'):
         if tabl in metadata.tables:
             tablobj = metadata.tables[tabl]
@@ -163,7 +152,8 @@ def ensureCodes():
 def setup(cfg):
     global conn, engine, metadata, md
     if conn is None:
-        conn, engine, metadata, md = db.connect(appname, dbpath=cfg.get('dbpath'))
+        conn, engine, metadata, md = db.connect(appname, dbpath=cfg.get(
+            'dbpath'))
     md = schema()
     dbc = ensureCodes()
     return conn, engine, metadata, md, dbc
@@ -251,7 +241,8 @@ if __name__ == "__main__":
         import doctest
         doctest.testmod(verbose=cfg.verbose)
     elif cfg.dropall:
-        response = raw_input('are you sure you want to drop all tables?  if so enter "yes": ')
+        response = raw_input(
+            'are you sure you want to drop all tables?  if so enter "yes": ')
         if response == 'yes':
             conn, engine, metadata, md = db.connect(appname)
             dropAll(metadata, conn)

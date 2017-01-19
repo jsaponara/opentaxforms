@@ -7,17 +7,18 @@ import sys
 excludedformsPttn = re.compile(r'109\d.*|w.*', re.I)
 
 # commands that are common in tax instructions
-verbs = [v.replace('_', ' ') for v in 'add amount combine total howmany subtract multiply enter include check'.lower().split()]
+verbs = [v.replace('_', ' ') for v in
+    'add amount combine total howmany subtract multiply enter include check'.
+    lower().split()]
 verbPtn = '|'.join(verbs)
 commandPtn = re.compile('.*?(' + verbPtn + r') (.+)', re.I)
 
 possibleColTypes = 'proceeds cost adjustment gain loss'.lower().split()
 
-# irs Prior Year Products  https://apps.irs.gov/app/picklist/list/priorFormPublication.html
-# 2014
-#   prevurltmpl='http://www.irs.gov/pub/irs-pdf/%s'%(fname,)
-#   currurltmpl='http://www.irs.gov/file_source/pub/irs-pdf/%s'%(fname,)
-# 2015
+# irs Prior Year Products
+# https://apps.irs.gov/app/picklist/list/priorFormPublication.html 2014
+# prevurltmpl='http://www.irs.gov/pub/irs-pdf/%s'%(fname,)
+# currurltmpl='http://www.irs.gov/file_source/pub/irs-pdf/%s'%(fname,) 2015
 prevurltmpl = 'http://www.irs.gov/pub/irs-prior/%s'
 currurltmpl = 'http://www.irs.gov/pub/irs-pdf/%s'
 
@@ -91,11 +92,12 @@ def sortableFieldname(fieldname):
         return segs
     except Exception as e:
         excclass, exc, tb = sys.exc_info()
-        new_exc = Exception('sortableFieldname: new exception: fieldname= ' + fieldname)
+        new_exc = Exception('sortableFieldname: new exception: fieldname= ' +
+            fieldname)
         raise new_exc.__class__, new_exc, tb
 
 # todo eliminate guesswork in setup()/allpdfnames and possibleFilePrefixes by
-#      reading document metadata as in pdfInfo() and mapping formName<->filename.
+# reading document metadata as in pdfInfo() and mapping formName<->filename.
 
 def possibleFilePrefixes(formName):
     '''
@@ -115,7 +117,8 @@ def possibleFilePrefixes(formName):
             ('990', 'b'): '%sez%s',  # a glaring inconsistency--in 2015 only??
             ('1120', 'utp'): '%s%s',  # no delimiter at all--how common is this?
             }.get((fform, fsched), '%ss%s')  # the typical pattern
-        formName = (tmpl % formName).lower()  # formName may be eg ('f1040','A')
+        formName = (tmpl % formName).lower()
+        # formName may be eg ('f1040','A')
     except:
         def trailingLetters(s):
             i = -1
@@ -127,7 +130,8 @@ def possibleFilePrefixes(formName):
         # cuz 1120reit->f1120rei
         ntrim = max(0, len(trailingLetters(formName)) - 1)
     # remove '-' but protect '--'
-    formName = 'f' + formName.lower().replace('--', '<>').replace('-', '').replace('<>', '--')
+    formName = ('f' + formName.lower().replace('--', '<>').replace('-', '').
+        replace('<>', '--'))
     prefixes.append(formName)
     if any(formName.endswith(suffix) for suffix in ('ez', 'eic')):
         prefixes.append(formName[:-1])  # remove last char

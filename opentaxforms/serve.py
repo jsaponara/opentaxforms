@@ -59,8 +59,11 @@ def createApi(**kw):
 def parseCmdline():
     '''Load command line arguments'''
     from argparse import ArgumentParser
-    parser = ArgumentParser(description='Automates tax forms and provides an API for new tax form interfaces')
-    parser.add_argument('-P', '--postgres', help='use postgres database [default=sqlite]', action="store_true")
+    parser = ArgumentParser(
+        description='Automates tax forms and provides an API for new tax form interfaces'
+        )
+    parser.add_argument('-P', '--postgres',
+        help='use postgres database [default=sqlite]', action="store_true")
     return parser.parse_args()
 
 
@@ -78,7 +81,8 @@ def createApp(**kw):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # to suppress warning
     counts = createApi(postgres=args.postgres, **kw)
     if verbose:
-        print 'serving {slot} slots in {form} forms from {orgn} orgns'.format(**counts)
+        print 'serving {slot} slots in {form} forms from {orgn} orgns'.format(
+            **counts)
     return app
 
 

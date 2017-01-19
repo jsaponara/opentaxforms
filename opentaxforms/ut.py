@@ -1,4 +1,5 @@
-from collections import namedtuple as ntuple, defaultdict as ddict, OrderedDict as odict
+from collections import (namedtuple as ntuple, defaultdict as ddict,
+    OrderedDict as odict)
 from decimal import Decimal as dc
 from pprint import pprint as pp, pformat as pf
 from sys import stdout, exc_info
@@ -19,7 +20,8 @@ Bbox = ntuple('Bbox', 'x0 y0 x1 y1')
 
 
 def merge(bb1, bb2):
-    return Bbox(min(bb1.x0, bb2.x0), min(bb1.y0, bb2.y0), max(bb1.x1, bb2.x1), max(bb1.y1, bb2.y1))
+    return Bbox(min(bb1.x0, bb2.x0), min(bb1.y0, bb2.y0), max(bb1.x1, bb2.x1),
+        max(bb1.y1, bb2.y1))
 
 
 def localsitepkgs():
@@ -28,7 +30,8 @@ def localsitepkgs():
     import django
     print(django.__path__)
 
-#python -c "import sys; sys.path = sys.path[1:]; import django; print(django.__path__)"
+# python -c "import sys; sys.path = sys.path[1:]; import django;
+# print(django.__path__)"
 
 def numerify(s):
     try:
@@ -38,8 +41,8 @@ def numerify(s):
 
 
 def compactify(multilineRegex):
-    # to avoid having to replace spaces in multilineRegex's with less readable '\s' etc
-    # no re.VERBOSE flag needed
+    # to avoid having to replace spaces in multilineRegex's with less readable
+    # '\s' etc no re.VERBOSE flag needed
     r"""
     line too long:
         titlePttn1=re.compile(r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)(?: or ([\w-]+))?(?:  ?\(?(?:Schedule ([\w-]+))\)?)?(?:  ?\((?:Rev|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?\))?\s*$')
@@ -163,7 +166,8 @@ def setupLogging(loggerId, args=None):
     loglevel = getattr(logging, loglevel)
     if not isinstance(loglevel, int):
         allowedLogLevels = 'debug info warn warning error critical exception'
-        raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (args.loglevel, allowedLogLevels))
+        raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (
+            args.loglevel, allowedLogLevels))
     fname = loggerId + '.log'
     logging.basicConfig(filename=fname, filemode='w', level=loglevel)
     alreadySetupLogging = True
@@ -221,10 +225,12 @@ def run0(cmd):
 
 def run(cmd, **kw):
     logprefix = 'run' if 'logprefix' not in kw else kw['logprefix']
-    loglevel = logging.INFO if 'loglevel' not in kw else getattr(logging, kw['loglevel'].upper(), None)
+    loglevel = logging.INFO if 'loglevel' not in kw else getattr(logging, kw[
+        'loglevel'].upper(), None)
     out, err = run0(cmd)
     out, err = err.strip(), out.strip()
-    msg = logprefix + ': command [%s] returned error [%s] and output [%s]' % (cmd, err, out)
+    msg = logprefix + ': command [%s] returned error [%s] and output [%s]' % (
+        cmd, err, out)
     if err:
         log.error(msg)
         raise Exception(msg)
@@ -253,19 +259,21 @@ class Resource(object):
 
 class CharEnum(object):
 
-    # unlike a real enum, no order guarantee
-    # the simplest one from this url:  http://stackoverflow.com/questions/2676133/
+    # unlike a real enum, no order guarantee the simplest one from this url:
+    # http://stackoverflow.com/questions/2676133/
     @classmethod
     def keys(cls):
         return [k for k in cls.__dict__.iterkeys() if not k.startswith('_')]
 
     @classmethod
     def vals(cls):
-        return [v for k, v in cls.__dict__.iteritems() if not k.startswith('_')]
+        return [v for k, v in cls.__dict__.iteritems() if not k.startswith('_'
+            )]
 
     @classmethod
     def items(cls):
-        return [(k, v) for k, v in cls.__dict__.iteritems() if not k.startswith('_')]
+        return [(k, v) for k, v in cls.__dict__.iteritems() if not k.
+            startswith('_')]
 
 
 class ChainablyUpdatableOrderedDict(odict):
@@ -396,7 +404,8 @@ class Bag(object):
 
 from pint import UnitRegistry
 ureg = UnitRegistry()
-# interactive use: from pint import UnitRegistry as ureg; ur=ureg(); qq=ur.Quantity
+# interactive use: from pint import UnitRegistry as ureg; ur=ureg();
+# qq=ur.Quantity
 qq = ureg.Quantity
 
 
@@ -440,9 +449,11 @@ def playQnty():
     b = Qnty.fromstring('1in')
     print Qnty(a - b, 'printers_point')
     print Qnty.fromstring('72pt')
-    # cumColWidths=[sum(columnWidths[0:i],Qnty(0,columnWidths[0].units)) for i in range(len(columnWidths))]
+    # cumColWidths=[sum(columnWidths[0:i],Qnty(0,columnWidths[0].units)) for i
+    # in range(len(columnWidths))]
     print Qnty(0, a.units)
-    # maxh=max([Qnty.fromstring(c.attrib.get('h',c.attrib.get('minH'))) for c in cells])
+    # maxh=max([Qnty.fromstring(c.attrib.get('h',c.attrib.get('minH'))) for c
+    # in cells])
     print max(a, b)
     s = set()
     s.update([a, b])
@@ -478,12 +489,14 @@ def nth(n):
     n = str(n)
     if n[-2:] in ('11', '12', '13'):
         return n + 'th'
-    return n + dict([(nth[0], nth[1:3]) for nth in '1st 2nd 3rd'.split()]).get(n[-1], 'th')
+    return (n + dict([(nth[0], nth[1:3]) for nth in '1st 2nd 3rd'.split()]).get
+        (n[-1], 'th'))
 
 
 # todo school stuff doesnt belong here--abstract this
 def worddiffs(a, b):
-    # todo add doctest to demo that order matters, ie 'east amwell' != 'amwell east'
+    # todo add doctest to demo that order matters, ie 'east amwell' != 'amwell
+    # east'
     '''
         >>> sorted(worddiffs('east amwell township e.s.','east amwell twp'))
         ['E.S.', 'TOWNSHIP', 'TWP']
@@ -545,6 +558,14 @@ def exists(fname):
     from os import access, F_OK
     fname = fname.rstrip('/')
     return access(fname, F_OK)
+
+import os
+
+
+def ensure_dir(folder):
+    '''ensure that directory exists'''
+    if not exists(folder):
+        os.makedirs(folder)
 
 
 def now(**kw):

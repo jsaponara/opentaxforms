@@ -23,12 +23,16 @@ def findLineAndUnit(s):
         >>> findLineAndUnit("Part 1. Persons ... (If ..., see the instructions.) Line 1. Item 1. (a) Care provider's name. Caution. If the care was provided in your home, you may owe employment taxes. If you do, you cannot file Form 1040A. For details, see the instructions for Form 1040, line 60a, or Form 1040N R, line 59a. 2 lines available for entry.")  # f2441
         ('line1', '')
         '''
-    findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', s)  # Line 62. a. etc
-    findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', s)  # Exemptions. 62. a. etc
-    findLineNum3 = re.search(r'^(\d+\w*)\.\s', s)  # 16b. ... eg 990/page6/line16b
+    findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', s)
+    # Line 62. a. etc
+    findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', s)
+    # Exemptions. 62. a. etc
+    findLineNum3 = re.search(r'^(\d+\w*)\.\s', s)
+    # 16b. ... eg 990/page6/line16b
     units = re.findall(r'\.?\s*(Dollars|Cents)\.?', s, re.I)
     if findLineNum1:
-        # linenum is eg 'line62a' for 'Line 62. a. etc' or even for 'Exemptions. 62. a. etc'
+        # linenum is eg 'line62a' for 'Line 62. a. etc' or even for
+        # 'Exemptions. 62. a. etc'
         linenum = findLineNum1.groups()[0]
     elif findLineNum2:
         linenum = 'line' + findLineNum2.groups()[0]
@@ -54,7 +58,9 @@ def computeUniqname(f, fieldsSofarByName):
         uniqname = '_'. join(seg for seg in pathsegs[i:])
         i -= 1
         if i < -len(pathsegs):
-            msg = 'cannot generate unique key from path segments %s in keys %s' % (pathsegs, fieldsSofarByName.keys())
+            msg = (
+                'cannot generate unique key from path segments %s in keys %s'
+                % (pathsegs, fieldsSofarByName.keys()))
             log.error(msg)
             raise Exception(msg)
     return uniqname
@@ -62,9 +68,10 @@ def computeUniqname(f, fieldsSofarByName):
 
 def unifyTableRows(fieldsByRow):
 
-    # force cells in each row to have same linenum as leftmost cell
-    # todo give example [form/line] of where this is needed
-    # todo consider adding tolerance, eg if y,y+ht overlap >=90% for two cells then theyre in the same row
+    # force cells in each row to have same linenum as leftmost cell todo give
+    # example [form/line] of where this is needed todo consider adding
+    # tolerance, eg if y,y+ht overlap >=90% for two cells then theyre in the
+    # same row
     def byPageAndYpos(((pg, ypos), val)):
         '''
             >>> byPageAndYpos((1,'67.346 mm'),['et','cetera'])
@@ -81,7 +88,8 @@ def unifyTableRows(fieldsByRow):
                     f['linenum-orig'] = f['linenum']
                     f['linenum'] = ll0
                     msgtmpl = 'leftmostCellOverride: p%d: changed %s in field %s to %s from leftmost field %s'
-                    log.info(msgtmpl, page, f['linenum-orig'], f['uniqname'], ll0, fs[0]['uniqname'])
+                    log.info(msgtmpl, page, f['linenum-orig'], f['uniqname'],
+                        ll0, fs[0]['uniqname'])
 
 
 def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
@@ -91,7 +99,8 @@ def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
         # eg dollar-and-cent pair usu at same ypos
         # newcode but wks for 1040,1040sb
         pg, linenumm = lnum
-        noncentFields = [ff for ff in fieldsByLine[lnum] if ff['unit'] != 'cents']
+        noncentFields = [ff for ff in fieldsByLine[lnum] if ff['unit'] !=
+            'cents']
         dupLinenumz = len(noncentFields) > 1
         ypozz = [ff['ypos'] for ff in noncentFields]
         for iypos, ypos in enumerate(sorted(ypozz)):
@@ -99,7 +108,8 @@ def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
                 if linenumm is None:
                     uniqlinenum = None
                 elif dupLinenumz:
-                    # todo ensure the delimiter char ['_'] doesnt occur in any linenum
+                    # todo ensure the delimiter char ['_'] doesnt occur in any
+                    # linenum
                     uniqlinenum = ff['linenum'] + '_' + str(1 + iypos)
                 else:
                     uniqlinenum = ff['linenum']
@@ -121,9 +131,9 @@ def linkfields(form):
         f['uniqname'] = uniqname
         pg = f['npage']
         l, u = findLineAndUnit(f['speak'])
-        # use page,linenum as key
-        #   eg f3800 has line3 on both page1 and page3.  so p1/line6 deps on which line3?
-        #   todo can fields w/ same linenum occur on same page?  eg f990/p12/line1?  track section numbers?
+        # use page,linenum as key eg f3800 has line3 on both page1 and page3.
+        # so p1/line6 deps on which line3? todo can fields w/ same linenum
+        # occur on same page?  eg f990/p12/line1?  track section numbers?
         fieldsByLine[(pg, l)].append(f)
         ypozByLinenum[(pg, l)].add(f['ypos'])
         fieldsByLinenumYpos[(pg, l, f['ypos'])].append(f)
@@ -133,11 +143,14 @@ def linkfields(form):
             if any(typ in f['coltype'] for typ in irs.possibleColTypes):
                 f['unit'] = None  # 'dollars'
         if u == 'cents':
-            # todo should check abit more, eg approx dollars.ypos==cents.ypos and dollars.xpos+dollars.wdim==cents.xpos
+            # todo should check abit more, eg approx dollars.ypos==cents.ypos
+            # and dollars.xpos+dollars.wdim==cents.xpos
             cc, dd = f, fprev
             if dd['unit'] != 'dollars':
-                # occasionally dollars fields are not so labeled, eg 2015/f1040sse/line7 and 2015/f8814/line5
-                #   [hmm, both are pre-filled fields...; speak has the amt but not always with a "$"]
+                # occasionally dollars fields are not so labeled, eg
+                # 2015/f1040sse/line7 and 2015/f8814/line5 [hmm, both are pre-
+                # filled fields...; speak has the amt but not always with a
+                # "$"]
                 msgtmpl = 'expectedDollars: expected field [%s] to have unit==dollars, instead got [%s] from previous speak: [%s]'
                 log.warn(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak']))
                 dd['unit'] = 'dollars'

@@ -1,10 +1,10 @@
 
-import ut
-import config
+from itertools import chain
+import opentaxforms.ut as ut
+import opentaxforms.config as config
 from sqlalchemy import MetaData, create_engine, select
 from sqlalchemy import UniqueConstraint
-#from sqlalchemy.exc import ProgrammingError
-from itertools import chain
+# from sqlalchemy.exc import ProgrammingError
 
 engine, metadata, conn = None, None, None
 
@@ -12,7 +12,7 @@ engine, metadata, conn = None, None, None
 def unicodify(dic):
     for k, v in dic.iteritems():
         if type(v) == str:
-            dic[k] = unicode(v)
+            dic[k] = unicode(v.decode('utf-8'))
     return dic
 
 
@@ -66,10 +66,9 @@ def connect_(**kw):
 
 
 def queryIdx(table):
-    # nicer indexing for non-dict rows
-    # eg row[idx['colname']] becomes row[idx.colname]
-    # todo could be replaced by Bag?
-    # todo return something like this for every query, not just straight table queries
+    # nicer indexing for non-dict rows eg row[idx['colname']] becomes
+    # row[idx.colname] todo could be replaced by Bag? todo return something
+    # like this for every query, not just straight table queries
     '''
         >>> from sqlalchemy import MetaData, Table, Column, Integer, String
         >>> metadata=MetaData()
@@ -82,7 +81,9 @@ def queryIdx(table):
         >>> tq.id,tq.name,tq.addr
         (0, 1, 2)
         '''
-    return ut.ntuple('I' + table.name, [c.name for c in table.columns])(*range(len(table.columns)))
+    return ut.ntuple('I' + table.name,
+                     [c.name for c in table.columns])(
+                        *range(len(table.columns)))
 
 
 def deleteall():
@@ -97,17 +98,19 @@ def deleteall():
         metadata.clear()
         metadata.reflect()
     # should be empty by now, else there's a problem
-    nonemptytables = [t for t in metadata.tables if conn.execute(t.count()).first() != (0, )]
+    nonemptytables = [t for t in metadata.tables
+                      if conn.execute(t.count()).first() != (0, )]
     if nonemptytables:
         raise Exception('failed to delete tables [%s]' % (nonemptytables, ))
 
 
 def dropall():
     # ideally would compute graph of ForeignKey deps via table.foreign_keys
-    # needed because metadata.drop_all() doesnt wk for tables w/ foreign keys but fails silently!
-    # todo this doesnt wk cuz didnt declare the cascade?
-    #   ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in http://docs.sqlalchemy.org/en/latest/core/constraints.html
-    #   [tho cascading delete isn't supported by sqlite until version 3.6.19]
+    # needed because metadata.drop_all() doesnt wk for tables w/ foreign keys
+    # but fails silently! todo this doesnt wk cuz didnt declare the cascade?
+    # ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in
+    # http://docs.sqlalchemy.org/en/latest/core/constraints.html [tho cascading
+    # delete isn't supported by sqlite until version 3.6.19]
     for i in range(len(metadata.tables)):
         for tname, t in metadata.tables.iteritems():
             try:
@@ -130,12 +133,14 @@ def getUniqueConstraints(table):
 
 
 def firstCompleteConstraint(table, kw):
-    # return first constraint all of whose fields are in kw, otherwise return kw
+    # return first constraint all of whose fields are in kw, otherwise return
+    # kw
     uniqconstraints = getUniqueConstraints(table)
     for ucon in uniqconstraints:
         uniqfields = [c.key for c in ucon.columns]
         if all([field in kw for field in uniqfields]):
-            seekfields = [(getattr(table.c, field), kw[field]) for field in uniqfields]
+            seekfields = [(getattr(table.c, field), kw[field])
+                          for field in uniqfields]
             break
     else:
         # found no such constraint, so use all kw entries
@@ -214,7 +219,8 @@ def selsert(table, **kw):
     matches = conn.execute(select([table.c.id], where))
     allmatches = matches.fetchall()
     if len(allmatches) == 0:
-        insertedpk, = conn.execute(table.insert(), **unicodify(kw)).inserted_primary_key
+        insertedpk, = (conn.execute(table.insert(), **unicodify(kw)).
+                       inserted_primary_key)
     elif len(allmatches) == 1:
         insertedpk, = allmatches[0]
     else:
@@ -223,6 +229,7 @@ def selsert(table, **kw):
             % (len(allmatches), table, seekfields)
         raise Exception(msg)
     return insertedpk
+
 
 # todo switch to a memoize decorator
 mem = ut.ddict(dict)
