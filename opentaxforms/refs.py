@@ -101,7 +101,7 @@ def findRefs(form):
         # included in allpdfnames
         m = re.match(irs.excludedformsPttn, form)
         if m:
-            log.debug('ignoring excludedform: {}'.format(m.group()))
+            log.debug('ignoring excludedform: %s',m.group())
             return ['excludedform']
         for formFname in formFnames:
             if formFname in cfg.allpdfnames:
