@@ -1,3 +1,15 @@
+0.4.18 (2017-01-19)
+
+- test: separate read-only database file from the overwritten one in test/.
+- test: add script to run just the api tests.
+- test: make api tests print feedback.
+- fixed all linting errors [according to vim/syntastic] [just errors, not warnings].
+- ran pep8ify.
+- mv opentaxforms.py -> main.py.
+- main.py: remove sys.setdefaultencoding [and reload].
+- remove pointless path from tox env.
+- README.md fixes/updates. landscape.io suggestions.
+
 0.4.17 (2017-01-17)
 
 - move cmds.computeMath to Form.computeMath.
