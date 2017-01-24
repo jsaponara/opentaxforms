@@ -5,15 +5,15 @@ form=blank forms
 orgn=organization that publishes the form
 slot=fillable slot in a form
 '''
-from ut import Bag, CharEnum
-from config import cfg
-import db
-from irs import computeTitle as computeFormTitle
-from version import appname
 from sqlalchemy import (
     Table, Column, Integer, SmallInteger, String,
     ForeignKey, Boolean, UniqueConstraint, CheckConstraint, CHAR)
 from sqlalchemy.exc import ProgrammingError
+from opentaxforms.ut import Bag, CharEnum
+from opentaxforms.config import cfg
+import opentaxforms.db as db
+from opentaxforms.irs import computeTitle as computeFormTitle
+from opentaxforms.version import appname
 
 conn = None
 tableInfo = None
@@ -67,7 +67,7 @@ def schema():
     global tableInfo
     tableInfo = {}
 
-    from db import engine, metadata
+    from opentaxforms.db import engine, metadata
     if cfg.postgres:
         try:
             from sqlalchemy.schema import CreateSchema
@@ -151,7 +151,7 @@ def schema():
 
 
 def createAll():
-    from db import engine, metadata
+    from opentaxforms.db import engine, metadata
     metadata.create_all(engine)   # checks for existence before creating
 
 
@@ -259,7 +259,7 @@ def writeFormToDb(form, year=None):
 
 
 if __name__ == "__main__":
-    from config import setup as appsetup
+    from opentaxforms.config import setup as appsetup
     appsetup(relaxRqmts=True, checkFileList=False)
     if cfg.doctests:
         import doctest

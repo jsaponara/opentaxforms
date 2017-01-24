@@ -1,10 +1,9 @@
 
 import sys
 from argparse import ArgumentParser
-import ut
-from ut import log, Bag, setupLogging, logg, NL
-
-from version import appname, appversion
+import opentaxforms.ut as ut
+from opentaxforms.ut import log, Bag, setupLogging, logg, NL
+from opentaxforms.version import appname, appversion
 
 RecurseInfinitely = -1
 RecursionRootLevel = 0
@@ -202,7 +201,7 @@ def setup(**overrideArgs):
             log.warn])
 
     if dirName is not None:
-        from Form import Form
+        from opentaxforms.Form import Form
         if rootForms:
             cfg.formsRequested = [
                 Form(rootForm, RecursionRootLevel) for rootForm in rootForms]

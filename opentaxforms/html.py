@@ -1,13 +1,11 @@
 
-from config import cfg
-from ut import log, jdb
-import ut
-from ut import Qnty, NL
 from os import remove as removeFile
 import re
 from itertools import chain
-import config
-from irs import computeTitle, computeFormId, sortableFieldname
+from opentaxforms.config import cfg,setup
+from opentaxforms.irs import computeTitle, computeFormId, sortableFieldname
+import opentaxforms.ut as ut
+from opentaxforms.ut import log, jdb, Qnty, NL
 
 
 def computeFormFilename(form):
@@ -53,8 +51,8 @@ def createSvgFile(dirName, prefix, npage):
     out, err = ut.run(cmd)
     if err:
         msg = (
-            'dotaxes.py/writeEmptyHtmlPages: command [%s] returned error [%s]'
-            % (cmd, err))
+            'dotaxes.py/writeEmptyHtmlPages: command [%s] returned error [%s] and output [%s]'
+            % (cmd, err, out))
         log.error(msg)
         raise Exception(msg)
     with open(outfpath) as f:
@@ -82,8 +80,8 @@ def createGifFile(dirName, prefix, npage):
     out, err = ut.run(cmd)
     if err:
         msg = (
-            'dotaxes.py/writeEmptyHtmlPages: command [%s] returned error [%s]'
-            % (cmd, err))
+            'dotaxes.py/writeEmptyHtmlPages: command [%s] returned error [%s] and output [%s]'
+            % (cmd, err, out))
         log.error(msg)
         raise Exception(msg)
     try:
@@ -607,7 +605,7 @@ def writeEmptyHtmlPages(form):
 
 
 if __name__ == "__main__":
-    config.setup()
+    setup()
     if cfg.doctests:
         import doctest
         doctest.testmod(verbose=cfg.verbose)

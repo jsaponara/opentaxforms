@@ -21,9 +21,7 @@ import opentaxforms.link as link
 import opentaxforms.schema as schema
 import opentaxforms.html as html
 import opentaxforms.refs as references
-# linter: [import-error] Unable to import opentaxforms.extractFillableFields
-# from opentaxforms.extractFillableFields import extractFields
-from extractFillableFields import extractFields
+from opentaxforms.extractFillableFields import extractFields
 
 
 def cleanup_files(form):
@@ -39,7 +37,7 @@ def cleanup_files(form):
 
 
 def addFormsTodo(form, formsdone, formstodo, formsfail):
-    from Form import Form
+    from opentaxforms.Form import Form
     recurselevel = form.recurselevel
     refs = form.refs
     if cfg.recurse and (cfg.maxrecurselevel == RecurseInfinitely or
@@ -115,8 +113,8 @@ def logFormStatus(form):
     z.rgood, z.rerrs = form.refs.status() if form.refs else (0, 0)
     z.mgood, z.merrs = mathStatus(form.computedFields)
 
-    def neg2unkn(list):
-        return [l if l > 0 else '?' for l in list]
+    def neg2unkn(lst):
+        return [l if l > 0 else '?' for l in lst]
     statusmsg = 'form {} status: '.format(form.name) + statusmsgtmpl.format(
         *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')))
         )

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-from version import appname, apiVersion
+from opentaxforms.version import appname, apiVersion
 from flask import Flask
 
 
-def createApi(**kw):
+def createApi(app,**kw):
     import flask_restless
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import scoped_session, sessionmaker
-    from db import connect
+    from opentaxforms.db import connect
     from flask_sqlalchemy import SQLAlchemy
     db = SQLAlchemy(app)
     conn, engine, metadata, md = connect(appname, **kw)
@@ -72,8 +72,7 @@ def parseCmdline():
 
 
 def createApp(**kw):
-    global app
-    from ut import Bag
+    from opentaxforms.ut import Bag
     cmdline = kw.get('cmdline')
     verbose = kw.get('verbose')
     if 'cmdline' in kw:
@@ -83,7 +82,7 @@ def createApp(**kw):
     args = parseCmdline() if cmdline else Bag(dict(postgres=False))
     app = Flask(appname)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # to suppress warning
-    counts = createApi(postgres=args.postgres, **kw)
+    counts = createApi(app,postgres=args.postgres, **kw)
     if verbose:
         print 'serving {slot} slots in {form} forms from {orgn} orgns'.format(
             **counts)
