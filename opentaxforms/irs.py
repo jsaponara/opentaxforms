@@ -115,7 +115,6 @@ def possibleFilePrefixes(formName):
         fform, fsched = formName
         if fsched is None:
             formName = fform
-            raise
         ntrim = len(fsched)
         tmpl = {
             ('990', 'b'): '%sez%s',  # a glaring inconsistency--in 2015 only??

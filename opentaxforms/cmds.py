@@ -196,10 +196,10 @@ class CommandParser(object):
         self.field = field
         self.form = form
 
-    def parseAdd(math, cmd, s):
-        fieldsByLine = math.form.fieldsByLine
-        ll, pg = [math.field[key] for key in ('linenum', 'npage')]
-        terms = math.terms
+    def parseAdd(self, cmd, s):
+        fieldsByLine = self.form.fieldsByLine
+        ll, pg = [self.field[key] for key in ('linenum', 'npage')]
+        terms = self.terms
         op = '+'
         if s.startswith('lines '):
             # eg f1040sd: Combine lines 1a through 6 in column (h).
@@ -226,15 +226,15 @@ class CommandParser(object):
             terms = [ll]
         else:
             msg = ('cannotParse: cannot parse [{}] cmd [{}] on {}/p{}/{}'.
-                   format(cmd, s, math.form.prefix, pg, ll))
+                   format(cmd, s, self.form.prefix, pg, ll))
             log.warn(msg)
             if terms is None:
                 op = '?'
                 terms = []
-        math.op = op
-        math.terms = terms
+        self.op = op
+        self.terms = terms
 
-    def parseSubOrMult(math, cmd, s):
+    def parseSubOrMult(self, cmd, s):
         # eg 1040/line43 Subtract line 42 from line 41 eg 1040/line42 Multiply
         # $3,800 by the number on line 6d todo eg Subtract column (e) from
         # column (d) and combine the result with column (g). * recognize this
@@ -279,17 +279,17 @@ class CommandParser(object):
             # swap 1st two terms cuz 'subtract a from b' means 'b-a'
             terms[0], terms[1] = terms[1], terms[0]
         terms = [re.sub(r'[\s\$,]', '', term) for term in terms]
-        math.op = op
-        math.terms = terms
+        self.op = op
+        self.terms = terms
 
-    def parseEnter(math, s, cond):
+    def parseEnter(self, s, cond):
         # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line
         # 41. If line 42 is more than line 41, enter zero. Dollars.
         # [[topmostSubform[0].Page2[0].p2-t10[0]]] eg 4684/line4 : If line 3 is
         # more than line 2, enter the difference here and skip lines 5 through
         # 9 for that column. eg 1040ez/line43: Line 6. ... If line 5 is larger
         # than line 4, enter -0-.
-        op, terms = math.op, math.terms
+        op, terms = self.op, self.terms
         cmd = 'enter'
         if s == 'zero':
             s = '-0-'
@@ -305,8 +305,8 @@ class CommandParser(object):
                     terms = [lineA, lineB]
                 else:
                     terms = [lineB, lineA]
-                math.terms = terms
-                math.op = op       # todo suspect!  removeme
+                self.terms = terms
+                self.op = op       # todo suspect!  removeme
             else:
                 msg = jj('cannotParseMath: cannot parse math: cmd,s,cond:',
                          cmd, cond, s, delim='|')
@@ -314,11 +314,11 @@ class CommandParser(object):
                 raise CannotParse(msg)
         return s
 
-    def parseCondition(math, cmd, s, cond):
+    def parseCondition(self, cmd, s, cond):
         # 1040/line43 line 42 is more than line 41
         # 1040/line42 line 38 is $154,950 or less
         # 1040/line4  the qualifying person is a child but not your dependent
-        terms = math.terms
+        terms = self.terms
         if cond.startswith('zero or') and terms and len(terms) == 2:
             # 4684/line9: Subtract line 3 from line 8. If zero or less, enter
             # -0-
@@ -340,7 +340,7 @@ class CommandParser(object):
         elif m2:
             line, amt, cmpOp = m2.groups()
             if '$' in amt:
-                math.constantUnit = 'dollars'
+                self.constantUnit = 'dollars'
             condparse = (
                 '<=' if cmpOp == 'less' else '>=',
                 line.replace(' ', ''),
@@ -359,14 +359,14 @@ class CommandParser(object):
                     }[cmpOp]
                 return (cmpOp, x, y)
             if cmd == 'enter' and s == '-0-':
-                math.zcond = condparse
+                self.zcond = condparse
             else:
                 log.debug(jj(
                     'not sure but assuming zcond=flipcondition',
                     cond))
-                math.zcond = flipcondition(condparse)
+                self.zcond = flipcondition(condparse)
 
-    def getFieldFromTerm(math, term, parentline, pgnum, fieldsByLine):
+    def getFieldFromTerm(self, term, parentline, pgnum, fieldsByLine):
         # find fields that correspond to the term; parentline is lhs typically
         # returns the dollar and cent fields corresponding to a term such as
         # 'line7'
@@ -407,23 +407,23 @@ class CommandParser(object):
                 found = []
         return found
 
-    def assembleFields(math):
-        op = math.op
-        terms = math.terms
-        math.text = ''
-        myFieldName = math.field[math.namek]
-        myFieldUnit = math.field[math.unitk]
-        fieldsByLine = math.form.fieldsByLine
-        ll, pg = [math.field[key] for key in ('linenum', 'npage')]
-        if op == '*' and math.constantUnit == 'dollars':
+    def assembleFields(self):
+        op = self.op
+        terms = self.terms
+        self.text = ''
+        myFieldName = self.field[self.namek]
+        myFieldUnit = self.field[self.unitk]
+        fieldsByLine = self.form.fieldsByLine
+        ll, pg = [self.field[key] for key in ('linenum', 'npage')]
+        if op == '*' and self.constantUnit == 'dollars':
             # eg 1040/line42 our dep fields are unitless cuz our constant is in
             # dollars
             myFieldUnit = None
-        upfields = [math.getFieldFromTerm(term, ll, pg, fieldsByLine)
+        upfields = [self.getFieldFromTerm(term, ll, pg, fieldsByLine)
                     for term in terms]
         upfields = [upf for upfs in upfields for upf in upfs
-                    if upf[math.namek] != myFieldName
-                    and upf[math.unitk] == myFieldUnit]
+                    if upf[self.namek] != myFieldName
+                    and upf[self.unitk] == myFieldUnit]
         if op == '*':
             # todo revisit: here we assume that 1. we want to multiply only two
             # fields, and specifically 2. we want the first and the last [and
@@ -431,19 +431,19 @@ class CommandParser(object):
             # constant and the [computed] line6d
             if len(upfields) > 1:
                 upfields = [upfields[0], upfields[-1]]
-        math.form.upstreamFields.update(
+        self.form.upstreamFields.update(
             [upf['uniqname'] for upf in upfields
              if upf.get('typ') != 'constant'])
-        # math.form.upstreamFields.remove(myFieldName)  # do this later in case
+        # self.form.upstreamFields.remove(myFieldName)  # do this later in case
         # fields are not in dependency order [see laterIsHere]
-        math.form.computedFields[myFieldName] = math.field
-        math.field['deps'] = upfields
-        math.field['op'] = op
+        self.form.computedFields[myFieldName] = self.field
+        self.field['deps'] = upfields
+        self.field['op'] = op
         mathstr = op.join(terms)
-        if math.cond:
-            math.cond = ' if not %s else %s' % (condtopy(math.cond), math.pred)
+        if self.cond:
+            self.cond = ' if not %s else %s' % (condtopy(self.cond), self.pred)
         mathstr = '=' + mathstr
-        math.text = mathstr
+        self.text = mathstr
 
     def parseSentence(self, sentence, field):
         parser = Parser(sentence)

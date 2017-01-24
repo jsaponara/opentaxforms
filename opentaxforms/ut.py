@@ -1,7 +1,5 @@
 import os
 import logging
-# from http.server import SimpleHTTPRequestHandler  #py3?
-import BaseHTTPServer  # py2
 from collections import (
     namedtuple as ntuple,
     defaultdict as ddict,
@@ -23,7 +21,6 @@ class Pass(object):
 
 
 log = Pass()
-# NT eg X=ntuple('X','linenum unit name')
 
 Bbox = ntuple('Bbox', 'x0 y0 x1 y1')
 
@@ -34,16 +31,6 @@ def merge(bb1, bb2):
         min(bb1.y0, bb2.y0),
         max(bb1.x1, bb2.x1),
         max(bb1.y1, bb2.y1))
-
-
-def localsitepkgs():
-    import sys
-    sys.path = sys.path[1:]
-    import django
-    print(django.__path__)
-
-# python -c "import sys; sys.path = sys.path[1:]; import django;
-# print(django.__path__)"
 
 
 def numerify(s):
@@ -142,8 +129,8 @@ def flattened(l):
 
 def hasdups(l, key=None):
     if key is None:
-        # key = lambda x: x
-        def key(x): return x
+        key = lambda x: x
+        # def key(x): return x
     ll = [key(it) for it in l]
     return any(it in ll[1 + i:] for i, it in enumerate(ll))
 
@@ -261,10 +248,6 @@ def run(cmd, **kw):
     return out, err
 
 
-def enc(s):
-    return ''.join([chr(158 - ord(c)) for c in s])
-
-
 class Resource(object):
     def __init__(self, pkgname, fpath=None):
         self.pkgname = pkgname
@@ -327,11 +310,11 @@ class Bag(object):
         for mapp in maps:
             getdict = None
             if type(mapp) == dict:
-                # getdict = lambda x: x
-                def getdict(x): return x
+                getdict = lambda x: x
+                # def getdict(x): return x
             elif type(mapp) == Bag:
-                # getdict = lambda x: x.__dict__
-                def getdict(x): return x.__dict__
+                getdict = lambda x: x.__dict__
+                # def getdict(x): return x.__dict__
             elif type(mapp) == tuple:
                 mapp, getdict = mapp
             if getdict is not None:
@@ -346,8 +329,8 @@ class Bag(object):
         if type(mapp) == tuple:
             mapp, getitems = mapp
         else:
-            # getitems = lambda m: m.items()
-            def getitems(m): return m.items()
+            getitems = lambda m: m.items()
+            # def getitems(m): return m.items()
         return mapp, getitems
 
     def __getitem__(self, key):
@@ -488,17 +471,6 @@ def playQnty():
     assert len(s) == 1
 
 
-def classifyRange(amt, classes):
-    '''
-        >>> classifyRange(3,[(0,4),(2,3),(4,2),(6,0)])
-        2
-        '''
-    for limit, classs in classes:
-        if amt < limit:
-            return classs
-    return classes[-1][1]
-
-
 def nth(n):
     '''
         >>> nth(2)
@@ -520,23 +492,6 @@ def nth(n):
     return (n + dict(
         [(nth[0], nth[1:3])
             for nth in '1st 2nd 3rd'.split()]).get(n[-1], 'th'))
-
-
-def htmlTableFromDict(rows, cols):
-    if type(cols) == str:
-        cols = cols.split()
-    table = [
-        '<table>',
-        '<tr>' + '\n'.join('<th>%s</th>' % (col, ) for col in cols) + '</tr>',
-        '\n'.join([
-            '<tr>' +
-            '\n\t'.join(
-                '<td>%s</td>' % (row[col], )
-                for col in cols)
-            + '</tr>' for row in rows]),
-        '</table>'
-        ]
-    return '\n'.join(table)
 
 
 def skip(s, substr):
@@ -595,80 +550,14 @@ def readImgSize(fname, dirName):
     return imgw, imgh
 
 
-# simple server that allows injection of http response headers
-HOST_NAME = 'localhost'
-PORT_NUMBER = 8000
-
-
-class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    def do_GET(s):
-        content = open('f1040ez-fmt-1.xml').read()
-        s.send_response(200)
-        s.send_header("Content-type", "text/xml")
-        s.end_headers()
-        s.wfile.write(content)
-
-
-def serve():
-    Svr = BaseHTTPServer.HTTPServer
-    svr = Svr((HOST_NAME, PORT_NUMBER), MyHandler)
-    try:
-        svr.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    svr.server_close()
-    return 0
-
-
 def unused():
+    # just to keep linters quiet about unused imports
     print dc(1, 2)
     print ddict()
     pp(0)
     pf(0)
 
 
-def nestedFunctionTest():
-    '''
-        just to see if doctest still doesnt run nested functions
-          (as in py27,py34)
-          cuz theyre not created until the outer function is run
-          https://bugs.python.org/issue1650090
-        >>> 'a'
-        'a'
-    '''
-
-    def theNestedFunction():
-        '''
-            >>> 'a'
-            'b'
-        '''
-        pass
-
-
-'''
-
-def parse_cli():
-    # https://docs.python.org/2/library/argparse.html
-    from argparse import ArgumentParser
-    parser = ArgumentParser(description='compute form connection graph')
-    addarg=parser.add_argument
-    # required arg:
-    addarg('directory', help='directory of "*-refs.txt" files to parse')
-    # optional arg:
-    addarg('-f', '--form', metavar='formName', nargs='?',
-           help='form file name, eg f1040')
-    return parser.parse_args()
-if __name__=='__main__':
-    # this code is not used here in ut.py cuz ut.py must stand alone.
-    # for all modules:
-    from config import cfg,setup
-    setup()
-    if cfg.doctests:
-        import doctest; doctest.testmod(verbose=cfg.verbose)
-    # for main module, add:
-    else:
-        sys.exit(main())
-'''
 if __name__ == "__main__":
     import sys
     args = sys.argv[1:]
