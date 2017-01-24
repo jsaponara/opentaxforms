@@ -3,9 +3,9 @@ from sys import exc_info
 import re
 from itertools import chain
 from argparse import ArgumentParser
-from config import cfg
-from ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
-from irs import commandPtn, possibleColTypes, CrypticXml
+from opentaxforms.config import cfg
+from opentaxforms.ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
+from opentaxforms.irs import commandPtn, possibleColTypes, CrypticXml
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 UNESC_PAT = re.compile(r'&#(\d+);')
@@ -131,11 +131,11 @@ def collectTables(tree, nsz):
 def computePath(el, namespaces):
     def ancestry(ele, nsz):
         return reversed(list(
-            ele.attrib.get(
+            elem.attrib.get(
                 'name', '%s#%d' % (
-                    ele.tag,
-                    indexAmongSibs(ele, ele.tag, nsz)))
-            for ele in chain([el], el.iterancestors())))
+                    elem.tag,
+                    indexAmongSibs(elem, elem.tag, nsz)))
+            for elem in chain([ele], ele.iterancestors())))
     return '.'.join(ancestry(el, namespaces))
 
 

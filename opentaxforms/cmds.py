@@ -1,7 +1,7 @@
 import re
-import ut
-from ut import log, jj, numerify
-import irs
+import opentaxforms.ut as ut
+from opentaxforms.ut import log, jj, numerify
+import opentaxforms.irs as irs
 
 
 def normalize(s):

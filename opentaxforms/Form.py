@@ -1,8 +1,8 @@
 import re
-import ut
-from ut import log, ntuple, logg, stdout, Qnty, NL
-import irs
-from config import cfg
+import opentaxforms.ut as ut
+from opentaxforms.ut import log, ntuple, logg, stdout, Qnty, NL
+import opentaxforms.irs as irs
+from opentaxforms.config import cfg
 
 # global so that theyre pickle-able
 PageInfo = ntuple('PageInfo', 'pagenum pagewidth pageheight textpoz')
@@ -134,7 +134,7 @@ class Form(object):
             docinfo = {}
             if 'Metadata' in doc.catalog:
                 from pdfminer.pdftypes import resolve1
-                from xmp import xmp_to_dict
+                from opentaxforms.xmp import xmp_to_dict
                 metadata = resolve1(doc.catalog['Metadata']).get_data()
                 xmpdict = xmp_to_dict(metadata)
                 docinfo['titl'] = xmpdict['dc']['title']['x-default']
@@ -225,7 +225,7 @@ class Form(object):
     def computeMath(self):
         # determines which fields are computed from others
         # 'dep' means dependency
-        from cmds import (
+        from opentaxforms.cmds import (
             CommandParser, normalize, adjustNegativeField, CannotParse)
         fields, draws = (self.fields, self.draws) if 'm' in cfg.steps else ([
             ], [])

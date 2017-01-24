@@ -48,15 +48,14 @@ optimize-ast=no
 
 # Only show warnings with the listed confidence levels. Leave empty to show
 # all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
-confidence=
+confidence=HIGH
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time. See also the "--disable" option for examples.
 disable=all
 
-enable=import-error,
-       import-self,
+enable=import-self,
        reimported,
        wildcard-import,
        misplaced-future,
@@ -274,6 +273,9 @@ enable=import-error,
        # unsubscriptable-object,
 	   		# understandable but wrong:
 	   		# opentaxforms/link.py:162: [E1136(unsubscriptable-object), linkfields] Value 'dd' is unsubscriptable
+
+	# rejected for ut.py
+			# import-error,
 
 # ...
 [REPORTS]

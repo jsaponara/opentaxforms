@@ -1,8 +1,8 @@
 import re
-import ut
-from ut import log, jj
-from config import cfg
-import irs
+import opentaxforms.ut as ut
+from opentaxforms.ut import log, jj
+from opentaxforms.config import cfg
+import opentaxforms.irs as irs
 
 # nonforms are numbers that dont represent forms
 nonforms = [str(yr) for yr in range(2000, 2050)]

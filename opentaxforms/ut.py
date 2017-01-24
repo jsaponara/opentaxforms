@@ -550,14 +550,6 @@ def readImgSize(fname, dirName):
     return imgw, imgh
 
 
-def unused():
-    # just to keep linters quiet about unused imports
-    print dc(1, 2)
-    print ddict()
-    pp(0)
-    pf(0)
-
-
 if __name__ == "__main__":
     import sys
     args = sys.argv[1:]

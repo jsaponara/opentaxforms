@@ -1,7 +1,7 @@
 
 import re
-from ut import log, jj, ddict
-import irs
+from opentaxforms.ut import log, jj, ddict
+import opentaxforms.irs as irs
 
 
 def findLineAndUnit(speak):
