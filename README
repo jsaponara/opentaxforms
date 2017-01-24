@@ -39,7 +39,8 @@ to test (and ultimately use) at
    they're easy to find. Each bugfix will likely reduce errors across
    many forms.
 
-   [form status listing forthcoming]
+   `1040 form status
+   listing <https://opentaxforms.org/pages/status-form-1040-family-and-immediate-references.html>`__
 
 -  **API**
 
@@ -69,7 +70,7 @@ to test (and ultimately use) at
 
    All this information is stored in a database (optionally
    `PostgreSQL <https://www.postgresql.org/>`__ or the default
-   (sqlite)[https://sqlite.org/]) and served according to a
+   `sqlite <https://sqlite.org/>`__) and served according to a
    `ReSTful <https://en.wikipedia.org/wiki/Representational_state_transfer>`__
    API. For each tax form page, an html form (with javascript to express
    the formulas) is generated and overlaid on an svg rendering of the
@@ -118,6 +119,20 @@ to test (and ultimately use) at
       with the invocation interpreter rather than setting up many
       virtualenvs and installing packages. [toxSansSetup]
    -  separate dirName into pdfInputDir,htmlOutputDir [splitIoDirs]
+
+0.4.18 (2017-01-19)
+
+-  test: separate read-only database file from the overwritten one in
+   test/.
+-  test: add script to run just the api tests.
+-  test: make api tests print feedback.
+-  fixed all linting errors [according to vim/syntastic] [just errors,
+   not warnings].
+-  ran pep8ify.
+-  mv opentaxforms.py -> main.py.
+-  main.py: remove sys.setdefaultencoding [and reload].
+-  remove pointless path from tox env.
+-  README.md fixes/updates. landscape.io suggestions.
 
 0.4.17 (2017-01-17)
 
