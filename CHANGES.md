@@ -1,3 +1,13 @@
+0.4.19 (2017-01-24)
+
+- add pylint config file.
+- fix or silence all pylint errors.
+- remove unused code from ut.py.
+- use another project's pylintrc [pylint config file] as a starting point to reduce false positives.
+- make linting more fine-grained [pylintrc-ut for ut.py, pylintrc for the rest of the code].
+- integrate linting with tox.
+- fail the build only for linting errors, not warnings.
+
 0.4.18 (2017-01-19)
 
 - test: separate read-only database file from the overwritten one in test/.
