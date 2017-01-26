@@ -186,6 +186,7 @@ def extractFields(form):
     prefix = form.prefix
     fields = form.fields
     visiblz = form.draws
+    assert len(fields)==0
     if 'x' not in cfg.steps:
         return
     pathprefix = '%s/%s' % (dirName, prefix)

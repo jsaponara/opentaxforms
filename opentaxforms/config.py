@@ -14,12 +14,11 @@ SkippableSteps = (
     (r='referenceParsing')
     (d='databaseOutput')
     (h='htmlOutput')
-    (c='cleanupFiles'))
-# remove intermediate files
+    (c='cleanupFiles')) # remove intermediate files
 
 defaults = Bag(dict(
-    # todo separate dirName into pdfInputDir,htmlOutputDir: #pdfInputDir='pdf',
-    # htmlOutputDir='html',
+    # todo separate dirName into pdfInputDir,htmlOutputDir
+    #      pdfInputDir='pdf', htmlOutputDir='html',
     dirName='forms',
     checkFileList=True,
     computeOverlap=True,
@@ -32,6 +31,7 @@ defaults = Bag(dict(
     # forms are ready but not schedule D and 200ish others
     latestTaxYear=2016,
     loglevel='warn',
+    logPrefix=None,
     maxrecurselevel=RecurseInfinitely,
     okToDownload=True,
     # todo replace postgres option with dbpath/dburl
@@ -155,9 +155,9 @@ alreadySetup = False
 def setup(**overrideArgs):
     from os import makedirs, symlink
     # note formyear will default to latestTaxYear even if dirName=='2014'
-    global alreadySetup, log, cfg
+    global alreadySetup
     if alreadySetup:
-        return cfg, log
+        return
     args = None
     if overrideArgs.get('readCmdlineArgs'):
         args = parseCmdline()
@@ -184,7 +184,9 @@ def setup(**overrideArgs):
         cfg.formyear = cfg.latestTaxYear
     dirName = cfg.dirName
     rootForms = cfg.rootForms
-    if rootForms:
+    if cfg.logPrefix:
+        logname=cfg.logPrefix
+    elif rootForms:
         logname = rootForms[0]
         if len(rootForms) > 1:
             logname += 'etc'
@@ -193,12 +195,11 @@ def setup(**overrideArgs):
     else:
         logname = appname
     loginfo = setupLogging(logname, cfg)
-    log, cfg.logfilename = loginfo
+    cfg.logfilename = loginfo
     cfg.log = log
     if not cfg.quiet:
         logg('logfilename is "{}"'.format(cfg.logfilename))
-        logg('commandline: {} at {}'.format(' '.join(sys.argv), ut.now()), [
-            log.warn])
+        log.warn('commandline: %s at %s', ' '.join(sys.argv), ut.now())
 
     if dirName is not None:
         from opentaxforms.Form import Form
@@ -235,7 +236,17 @@ def setup(**overrideArgs):
             getFileList(dirName)
 
     alreadySetup = True
-    return cfg, log
+
+
+def unsetup():
+    global alreadySetup
+    alreadySetup = False
+    # clear cfg but preserve logfilename
+    logfilename=cfg.logfilename
+    cfg.clear()
+    cfg.update(defaults)
+    cfg.logfilename=logfilename
+    #ut.unsetupLogging()  # continue using same log setup
 
 
 if __name__ == "__main__":

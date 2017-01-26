@@ -3,9 +3,10 @@
     The tests.
 '''
 
-from os.path import join as pathjoin
+from os.path import join as pathjoin,basename
 from shutil import copy
 from opentaxforms import ut
+from opentaxforms import config
 
 
 class TestBase(object):
@@ -23,7 +24,7 @@ class TestBase(object):
 
     def teardown_method(self, _):
         '''post-tests teardown'''
-        pass
+        config.unsetup()
 
     def run(self, **kw):
         '''
@@ -38,9 +39,11 @@ class TestBase(object):
         self.outdir = pathjoin(self.testdir, self.dir_name, '')
         ut.ensure_dir(self.outdir)
         copy(inputpdf, self.outdir)
+        logPrefix=basename(self.dir_name)
         from opentaxforms import main as otfmain
         returnval = otfmain.opentaxforms(
             okToDownload=False,
+            logPrefix=logPrefix,
             **kw)
         if returnval != 0:
             raise Exception('run failed, no output to compare against target')
@@ -83,12 +86,14 @@ class TestSteps(TestBase):
         '''
 
     # todo use a less complex form than 1040 to speed testing
-    def run_1040_full(self, **kw):
+    #      yet maintain 75% coverage
+    def test_run_1040_full(self, **kw):
         '''full run of form 1040'''
+        dir_name = pathjoin(self.testdir, 'forms_1040_full')
         self.run(
             rootForms=['1040'],
             filesToCheck=['f1040-p1.html'],
-            dirName='forms_1040_full',
+            dirName=dir_name,
             ignoreCaches=True,
             **kw
             )
@@ -191,10 +196,15 @@ def main(args):
               '-x=xfa-only 1040\n' \
               '-a=api tests' % (args[0], )
     if len(args) >= 2:
-        if any(arg in args for arg in ('-q', '-s', '-f', '-x')):
+        if any(arg in args for arg in ('-q', '-s', '-f', '-x', '-sf')):
             step_test_runner = TestSteps()
             step_test_runner.setup_method(0)
             if '-q' in args:
+                step_test_runner.test_run_1040_xfa()
+            elif '-sf' in args:
+                step_test_runner.test_run_1040_full()
+                step_test_runner.teardown_method(0)
+                step_test_runner.setup_method(0)
                 step_test_runner.test_run_1040_xfa()
             elif '-s' in args:
                 step_test_runner.run_1040_full()
