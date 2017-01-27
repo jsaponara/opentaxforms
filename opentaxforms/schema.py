@@ -52,15 +52,6 @@ def createdb(dbname):
             exit()
 
 
-def dropTableCascade(table, connection):
-    connection.execute('drop table "%s" cascade' % (table.name))
-
-
-def dropAll(metadata, connection):
-    for tablename, table in metadata.tables.iteritems():
-        dropTableCascade(table, connection)
-
-
 def schema():
     # construct schema and create tables if they dont exist
 
@@ -264,14 +255,5 @@ if __name__ == "__main__":
     if cfg.doctests:
         import doctest
         doctest.testmod(verbose=cfg.verbose)
-    elif cfg.dropall:
-        response = raw_input(
-            'are you sure you want to drop all tables?  if so enter "yes": ')
-        if response == 'yes':
-            conn, engine, metadata, md = db.connect(appname)
-            dropAll(metadata, conn)
-            print "dropall done"
-        else:
-            print 'dropall NOT done, quitting'
     else:
         setup(cfg)

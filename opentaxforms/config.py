@@ -100,8 +100,6 @@ def parseCmdline():
            help='use postgres database [default=sqlite]', action="store_true")
     addarg('-V', '--version', help='report version and exit',
            default=False, action="store_true")
-    addarg('-Z', '--dropall', help='drop all database tables',
-           action="store_true")
     addarg('--calledFromCmdline',
            help='signals that script is run from commandline', default=True)
     return parser.parse_args()

@@ -2,6 +2,8 @@
 from itertools import chain
 import opentaxforms.ut as ut
 import opentaxforms.config as config
+from ut import log
+from config import cfg
 from sqlalchemy import MetaData, create_engine, select
 from sqlalchemy import UniqueConstraint
 # from sqlalchemy.exc import ProgrammingError
@@ -33,8 +35,7 @@ def connect(appname, **kw):
 def connect_(**kw):
     # consumes keys from kw: user pw db
     global conn, engine, metadata
-    global cfg, log
-    cfg, log = config.setup(**kw)
+    config.setup(**kw)
     if 'dirName' in kw:
         del kw['dirName']
     usepostgres = kw.get('postgres', False) if cfg is None else cfg.postgres
@@ -84,44 +85,6 @@ def queryIdx(table):
     return ut.ntuple('I' + table.name,
                      [c.name for c in table.columns])(
                         *range(len(table.columns)))
-
-
-def deleteall():
-    # ideally would compute graph of ForeignKey deps via table.foreign_keys
-    # todo doesnt wk cuz didnt declare the cascade?  see dropall
-    for i in range(len(metadata.tables)):
-        for tname, t in metadata.tables.iteritems():
-            try:
-                conn.execute(t.delete())
-            except Exception:
-                pass
-        metadata.clear()
-        metadata.reflect()
-    # should be empty by now, else there's a problem
-    nonemptytables = [t for t in metadata.tables
-                      if conn.execute(t.count()).first() != (0, )]
-    if nonemptytables:
-        raise Exception('failed to delete tables [%s]' % (nonemptytables, ))
-
-
-def dropall():
-    # ideally would compute graph of ForeignKey deps via table.foreign_keys
-    # needed because metadata.drop_all() doesnt wk for tables w/ foreign keys
-    # but fails silently! todo this doesnt wk cuz didnt declare the cascade?
-    # ForeignKey('parent.id',onupdate="CASCADE",ondelete="CASCADE" in
-    # http://docs.sqlalchemy.org/en/latest/core/constraints.html [tho cascading
-    # delete isn't supported by sqlite until version 3.6.19]
-    for i in range(len(metadata.tables)):
-        for tname, t in metadata.tables.iteritems():
-            try:
-                t.drop()
-            except Exception:
-                pass
-        metadata.clear()
-        metadata.reflect()
-    # should be empty by now, else there's a problem
-    if metadata.tables:
-        raise Exception('cannot drop tables [%s]' % (metadata.tables.keys()))
 
 
 def getUniqueConstraints(table):
