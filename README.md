@@ -5,6 +5,10 @@ and offers a database and API for developers to create their own tax application
 The converted forms will be available to test (and ultimately use)
 at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
+  - **PyPI**
+
+    [![PyPI version](https://badge.fury.io/py/opentaxforms.svg)](https://badge.fury.io/py/opentaxforms)
+
   - **License**
 
     [GNU AGPLv3](http://choosealicense.com/licenses/agpl-3.0/)
