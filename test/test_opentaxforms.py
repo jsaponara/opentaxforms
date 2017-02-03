@@ -11,7 +11,7 @@ from opentaxforms import config
 
 class TestBase(object):
     '''setup/teardown'''
-    def setup_method(self, _):
+    def setup_method(self):
         '''setup'''
         self.testdir = ut.Resource('test', '').path()
         dbpath = 'sqlite:///' + self.testdir + '/opentaxforms.sqlite3'
@@ -22,7 +22,7 @@ class TestBase(object):
             dbpath=dbpath,
             )
 
-    def teardown_method(self, _):
+    def teardown_method(self):
         '''post-tests teardown'''
         config.unsetup()
 
@@ -120,7 +120,7 @@ class TestSteps(TestBase):
 
 class TestApiBase(object):
     '''setup/teardown'''
-    def setup_method(self, _):
+    def setup_method(self):
         '''pre-test setup'''
         from opentaxforms.serve import createApp
         # we just read from this db
@@ -130,7 +130,7 @@ class TestApiBase(object):
         self.app = createApp(dbpath=dbpath, dirName=None)
         self.client = self.app.test_client()
 
-    def teardown_method(self, _):
+    def teardown_method(self):
         '''post-test teardown'''
         pass
 
@@ -198,13 +198,13 @@ def main(args):
     if len(args) >= 2:
         if any(arg in args for arg in ('-q', '-s', '-f', '-x', '-sf')):
             step_test_runner = TestSteps()
-            step_test_runner.setup_method(0)
+            step_test_runner.setup_method()
             if '-q' in args:
                 step_test_runner.test_run_1040_xfa()
             elif '-sf' in args:
                 step_test_runner.test_run_1040_full()
-                step_test_runner.teardown_method(0)
-                step_test_runner.setup_method(0)
+                step_test_runner.teardown_method()
+                step_test_runner.setup_method()
                 step_test_runner.test_run_1040_xfa()
             elif '-s' in args:
                 step_test_runner.run_1040_full()
@@ -214,7 +214,7 @@ def main(args):
                 step_test_runner.run_1040_full()
         elif '-a' in args:  # run api tests
             api_test_runner = TestApi()
-            api_test_runner.setup_method(0)
+            api_test_runner.setup_method()
 
             api_test_runner.test_api_orgn()
             api_test_runner.test_api_f1040()

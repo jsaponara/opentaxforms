@@ -21,6 +21,7 @@ setup(
     license="Affero GNU General Public License v3",
     author='John Saponara',
     tests_require=['pytest'],
+    setup_requires=['pytest-runner', ],
     install_requires=['Pint==0.7.2',
         'argparse==1.2.1',
         'lxml==3.6.4',
