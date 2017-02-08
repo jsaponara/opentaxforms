@@ -44,7 +44,7 @@ def getRawXml(prefix, path='.'):
         for line in f:
             if datanamespace in line:
                 # just in case there are multiple data elements with the target
-                # datanamespace must not give multiple toplevel elements to
+                # datanamespace--must not give multiple toplevel elements to
                 # lxml to avoid 'lxml.etree.XMLSyntaxError: Extra content at
                 # the end of the document'
                 log.debug('found datanamespace')
