@@ -25,7 +25,7 @@ defaults = Bag(dict(
     debug=False,
     rootForms=None,
     formyear=None,
-    ignoreCaches=False,
+    useCaches=False,
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho
     # could be incomplete eg during dec2016 the 2016 1040 and 400ish other
     # forms are ready but not schedule D and 200ish others
@@ -94,7 +94,7 @@ def parseCmdline():
     addarg('-k', '--skip', nargs='?', default=[],
            help='steps to skip, can be any combination of: ' + ' '.join(
            '='.join((k, v)) for k, v in SkippableSteps.items()), dest='skip')
-    addarg('-C', '--ignoreCaches',
+    addarg('-C', '--useCaches',
            help='recompute cached intermediate results', action="store_true")
     addarg('-P', '--postgres',
            help='use postgres database [default=sqlite]', action="store_true")
