@@ -55,8 +55,8 @@ def parseCmdline():
                     ' must specify either form or directory option'
         )
     addarg = parser.add_argument
-    addarg('-f', '--form', dest='rootForms', nargs='*',
-           help='form file name, eg f1040')
+    addarg('-f', '--form', dest='rootForms', nargs='?',
+           help='forms to parse, eg f1040 or f1040sa,f1040sab')
     # disallowing --year option for now the code currently assumes all forms
     # are available at irs-prior/ [the collection of all past forms] for each
     # year, eg f1040--2015.pdf; but some forms arent revised every year, so eg
@@ -181,7 +181,7 @@ def setup(**overrideArgs):
     if cfg.formyear is None:
         cfg.formyear = cfg.latestTaxYear
     dirName = cfg.dirName
-    rootForms = cfg.rootForms
+    rootForms = [f.strip() for f in cfg.rootForms.split(',')]
     if cfg.logPrefix:
         logname=cfg.logPrefix
     elif rootForms:
