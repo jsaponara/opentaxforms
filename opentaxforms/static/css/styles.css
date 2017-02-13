@@ -1,33 +1,33 @@
-body {
+/*body {
 	background-repeat: no-repeat;
 	background-size: 1224px 1584px;
-}
-img {
+}*/
+.tff img {
 	position:absolute;
 	top:0;
 	left:0;
 }
-a,input,textarea {
+.tff a, .tff input, .tff textarea {
 	position: absolute;
 	background-color: transparent;
 }
-input,textarea {
+.tff input, .tff textarea {
 	border-color: orange;
 	font-color:orange; 
 	font-size: 1.2em;
 }
-a {
+.tff a {
 	border-bottom:3px solid blue;
 }
-input[type="checkbox"]{
+.tff input[type="checkbox"]{
 	display:none;
 }
-input[type="checkbox"] + label {
+.tff input[type="checkbox"] + label {
 	display: inline-block;
 	/*border: 1px solid #000;*/
 	position: absolute;
 }
-input[type="checkbox"]:checked + label:after {
+.tff input[type="checkbox"]:checked + label:after {
 	content: '✔';
 	display: inline-block;
 	font-size: 1.6em;

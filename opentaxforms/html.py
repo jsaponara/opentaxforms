@@ -367,11 +367,8 @@ def computeSteps(cfield):
     return result
 
 
-def pagelinkhtml(prefix, npage, npages, imgw):
+def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
     # generate the next and prev page links
-    linkwidthprop = float(24) / imgw
-    # todo dont hardcode width of 24x24.png icon
-
     # marginw=.05
     def pagelinktmpl(nnpage, npages, whichway):
         jdb('>pagelinktmpl', nnpage, npages, whichway)
@@ -380,9 +377,9 @@ def pagelinkhtml(prefix, npage, npages, imgw):
                 "<a id='{whichway}pagelink' href='{prefix}-p{npage}.html'" \
                 " title='page {npage}' style='top:{top:.0f}px;" \
                 " left:{left:.0f}px;'>" \
-                "<img src='static/img/arrow_%s_32px.png'></a>" % (whichway)
+                "<img class='tff' src='/static/img/arrow_%s_32px.png'></a>" % (whichway)
         else:
-            result = ("<img src='static/img/arrow_%s_gray_32px.png'"
+            result = ("<img class='tff' src='/static/img/arrow_%s_gray_32px.png'"
                       " style='top:{top:.0f}px; left:{left:.0f}px;'>"
                       % (whichway))
         jdb('<pagelinktmpl', result)
@@ -393,6 +390,12 @@ def pagelinkhtml(prefix, npage, npages, imgw):
             left=imgw * (1 - nicon * linkwidthprop),)
         for nicon, nnpage, whichway
         in ((2, npage - 1, 'prev'), (1, npage + 1, 'next')))
+
+
+def pdflinkhtml(prefix,imgw,linkwidthprop):
+    return '<a href="/static/pdf/%s.pdf" style="top:6px;left:%dpx">PDF</a>'%(
+        # using 4 linkwidths because 3 looks too tight
+        prefix,imgw*(1-4*linkwidthprop))
 
 
 def getSigns(field, unit=None):
@@ -565,7 +568,10 @@ def writeEmptyHtmlPages(form):
             if cfield['unit'] == 'dollars'   # $4000] but not cents
             and cfield['npage'] == npage]
         inputdeps = '\n'.join(chain(inputdepsSingle, inputdepsPair))
-        pagelinks = pagelinkhtml(prefix, npage, npages, imgw)
+        # todo dont hardcode width of 24x24.png icon
+        linkwidthprop = float(24) / imgw
+        pagelinks = pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop)
+        pdflink = pdflinkhtml(prefix, imgw, linkwidthprop)
         formlinks = '\n'.encode('utf8').join(
             "<a id='{name}' href='{fname}-p1.html' title='{tip}' "
             "style='font-color:orange; top:{top:.0f}px; left:{left:.0f}px;"
@@ -596,6 +602,7 @@ def writeEmptyHtmlPages(form):
                     dbid=dbid,
                     formid=formid,
                     pagelinks=pagelinks,
+                    pdflink=pdflink,
                     inputboxes=inputboxes,
                     formlinks=formlinks,
                     readonlyz=readonlyz,
