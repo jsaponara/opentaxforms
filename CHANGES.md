@@ -1,3 +1,7 @@
+0.5.1 (2017-02-13)
+
+- bugfix: tracking: rootForms must be same type in test_opentaxforms and main.
+
 0.5.0 (2017-02-13)
 
 - css,template: add minimal tester interface.
