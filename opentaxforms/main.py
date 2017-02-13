@@ -143,6 +143,15 @@ def logRunStatus(formsdone, formsfail, status):
 
 
 def indicateProgress(form):
+    def guessFormPrefix(form):
+        try:
+            f,sched=form.name
+            sched='' if sched is None else 's'+sched.lower()
+        except ValueError:
+            f=form.name
+            sched=''
+        return 'f'+f+sched
+    log.name=guessFormPrefix(form)
     if cfg.indicateProgress:
         msg = '--------' + jj(
               form.name,
