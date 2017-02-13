@@ -24,7 +24,7 @@ setup(
     setup_requires=['pytest-runner', ],
     install_requires=['Pint==0.7.2',
         'argparse==1.2.1',
-        'lxml==3.6.4',
+        'lxml>=3.6.4',
         'SQLAlchemy==1.0.15',
         'pdfminer==20140328',
         'Flask==0.11.1',
