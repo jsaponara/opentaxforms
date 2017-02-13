@@ -168,6 +168,7 @@ def linkfields(form):
                           ' to have unit==dollars, instead got [%s]'  \
                           ' from previous speak: [%s]'
                 log.warn(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak']))
+                #log.warn('UnicodeError:'+(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak'])).encode('utf-8'))
                 dd['unit'] = 'dollars'
             dd['centfield'] = cc
             cc['dollarfieldname'] = dd['uniqname']
