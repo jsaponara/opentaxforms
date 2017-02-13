@@ -51,7 +51,7 @@ class TestBase(object):
 
     def check_output(self, **kw):
         '''compare run output to target output'''
-        root_forms = kw.get('rootForms') or ['1040']
+        root_forms = kw.get('rootForms') or '1040'
         shallow = False
         targetdir = pathjoin(self.testdir, 'forms-targetOutput', '')
         files_to_check = kw.get('filesToCheck') or \
@@ -91,7 +91,7 @@ class TestSteps(TestBase):
         '''full run of form 1040'''
         dir_name = pathjoin(self.testdir, 'forms_1040_full')
         self.run(
-            rootForms=['1040'],
+            rootForms='1040',
             filesToCheck=['f1040-p1.html'],
             dirName=dir_name,
             ignoreCaches=True,
@@ -106,7 +106,7 @@ class TestSteps(TestBase):
         pdfinfo = pathjoin(self.testdir, 'forms-common', 'f1040-pdfinfo.pickl')
         copy(pdfinfo, dir_name)
         self.run(
-            rootForms=['1040'],
+            rootForms='1040',
             filesToCheck=['f1040-fmt.xml'],
             dirName=dir_name,
             steps=['x'],
