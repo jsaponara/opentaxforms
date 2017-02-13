@@ -19,6 +19,7 @@ class Form(object):
         self.refs = []
         self.computedFields = ut.odict()
         self.upstreamFields = set()
+        self.isCryptic = False
 
     def __str__(self):
         return self.__repr__()

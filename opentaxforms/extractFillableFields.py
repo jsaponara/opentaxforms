@@ -59,8 +59,9 @@ def getRawXml(prefix, path='.'):
         if not xmlAsStr:
             xmlAsStr = '\n'.join(f for f in fieldFrags if f)
         if not xmlAsStr.strip():
-            raise CrypticXml('cannot textify xml file for form {}'.format(
-                prefix))
+            msg='CrypticXml: cannot textify xml file for form %s'%(prefix,)
+            log.warn(msg)
+            raise CrypticXml(msg)
         open(xmltextfname, 'w').write(xmlAsStr)
         f.close()
     return xmlAsStr
@@ -198,314 +199,313 @@ def extractFields(form):
             run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathprefix,
                 pathprefix))
     xmlFromPdf(pathprefix)
-    xmlAsStr = getRawXml(prefix, dirName)
-    tree = parseXml(xmlAsStr, pathprefix)
-    namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
-    tables = collectTables(tree, nsz)
-    fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
-    prevTable = None
-    for iel, el in enumerate(fieldEls):
-        def getvar(el, varname):
-            varnames = varname.split()
-            for varname in varnames:
-                try:
-                    # in some draws, eg in 1040a, "h='=0mm'"
-                    q = Qnty.fromstring(el.attrib[varname])
-                    break  # to avoid trying 2nd varname, if any
-                except Exception:
-                    q = Qnty.fromstring('0mm')
-            return q
-        xpos, ypos, hdim, wdim = [
-            getvar(el, varname) for varname in ('x', 'y', 'h minH', 'w')]
-        isfield = el.tag.endswith('field')
-        # isdraw=not isfield
-        if isfield:
-            # caption node isnt v.informative (or even common), at least for
-            # f1040schedB
-            istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=nsz))
-            ischeckbox = bool(el.xpath('t:ui/t:checkButton', namespaces=nsz))
-            isReadonly = el.attrib.get('access') == 'readOnly'
-            speakNodes = el.xpath('t:assist/t:speak', namespaces=nsz)
-            if speakNodes:
-                speak = unicode(speakNodes[0].text).encode('utf-8')
-            else:
-                speak = ''
-            code = el.xpath('t:items/t:text', namespaces=nsz)
-            if code:
-                code = unicode(code[0].text).encode('utf-8')
-            else:
-                code = None
-            captionText = el.xpath(
-                't:caption/descendant-or-self::text()',
-                namespaces=nsz)
-            if captionText:
-                captionText = u'|'.join(unicode(t) for t in captionText)
-            else:
-                captionText = ''
-            # captionReserve info allows our textbox to avoid encompassing the
-            # caption
-            captionReserveNodes = el.xpath(
-                't:caption[@reserve]',
-                namespaces=nsz)
-            if captionReserveNodes:
-                xCaptionReserve = yCaptionReserve = wCaptionReserve = \
-                    hCaptionReserve = Qnty(0, 'inch')
-                crn = captionReserveNodes[0]
-                captionReserve = Qnty.fromstring(
-                    crn.attrib.get('reserve'))
-                if crn.attrib.get('placement', 'left') in 'right left':
-                    if crn.attrib.get('placement') == 'right':
-                        wCaptionReserve = captionReserve
-                    else:
-                        xCaptionReserve = wCaptionReserve = captionReserve
-                    xpos += xCaptionReserve
-                    wdim -= wCaptionReserve
-                else:  # placement is top or bottom
-                    if crn.attrib.get('placement') == 'top':
-                        yCaptionReserve = captionReserve
-                        hCaptionReserve = captionReserve
-                    else:
-                        hCaptionReserve = captionReserve
-                    ypos += yCaptionReserve
-                    hdim -= hCaptionReserve
-            multiline = False
-            maxchars = None
-            if istextbox:
-                # hscrolllist=el.xpath('t:ui/t:textEdit/@hScrollPolicy',namespa
-                # ces=nsz) hscroll=not hscrolllist or
-                # hscrolllist[0]!='off'
-                multilinelist = el.xpath(
-                    't:ui/t:textEdit/@multiLine',
-                    namespaces=nsz)
-                multiline = multilinelist and multilinelist[0] == '1'
-                maxcharslist = el.xpath(
-                    't:value/t:text/@maxChars',
-                    namespaces=nsz)
-                maxchars = maxcharslist[0] if maxcharslist else None
-            if istextbox and not ischeckbox:
-                typ = 'text'
-            elif not istextbox and ischeckbox:
-                typ = 'checkbox'
-            else:
-                # default to textbox but warn
-                typ = 'text'
-                uinodes = el.xpath('t:ui', namespaces=nsz)
-                if uinodes:
-                    uikids = uinodes[0].getchildren()
-                    info = str(uikids)
-                else:
-                    info = str(el.attrib)
-                log.warn(
-                    'not sure of element type: textbox, checkbox, other?  ' +
-                    info)
-        else:  # el is a draw
-            assert el.tag.endswith('draw'), \
-                'expected tag.endswith "draw" instead got tag==' + el.tag
-            texts = el.xpath(
-                '*/t:exData/*/*/descendant-or-self::text()',
-                namespaces=nsz)
-            if not texts:
-                texts = el.xpath(
-                    't:value/t:text/descendant-or-self::text()',
-                    namespaces=nsz)
-            if texts:
-                text = '|'.join(texts)
-            else:
-                continue
-        # climb node ancestry for relative position info to see entire subtree
-        # of field nodes, xmllint --format --recover form.xml [where form.xml
-        # is written above]
-        path = []
-        # for fields in tables [if any]--typically in the table ancestor
-        # element
-        currTable = None
-        npage = None
-        for a in chain([el], el.iterancestors()):
-            p = a.getparent()
-            # todo are these two conditions the same?  if so, not-p is likely
-            # more general
-            if a.tag.endswith('template') or p is None:
-                break
-            xpos += Qnty.fromstring(p.attrib.get('x', '0mm'))
-            ypos += Qnty.fromstring(p.attrib.get('y', '0mm'))
-
-            def at(elem, attrib, default=None):
-                return elem.attrib.get(attrib, default)
-            if at(p, 'name', '').startswith('Page') and \
-               at(p, 'name')[4].isdigit():
-                # or could assume that subforms just below the topmost are the
-                # pages/copies
-                npage = int(p.attrib.get('name')[len('Page')])
-            elif p.attrib.get('name', '').startswith('Copy'):
-                npage = ord(p.attrib.get('name')[len('Copy')].lower()) - ord(
-                    'a') + 1
-            idxfornamelessnode = '[%d]' % (p.index(a) - 1)
-            if 'name' in a.attrib:
-                ancname = a.get('name')
-                sibsOfSameName = [
-                    c for c in p.getchildren() if c.get('name') == ancname]
-                idxOfNamedNode = '[%d]' % (sibsOfSameName.index(a))
-                idx = idxOfNamedNode
-            else:
-                tag = re.sub(r'{.*}', '', a.tag)
-                ancname = '#%s' % (tag)
-                idx = idxfornamelessnode
-            path.append(ancname + idx)
+    try:
+        xmlAsStr = getRawXml(prefix, dirName)
+        tree = parseXml(xmlAsStr, pathprefix)
+        namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+        tables = collectTables(tree, nsz)
+        fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
+        prevTable = None
+        for iel, el in enumerate(fieldEls):
+            def getvar(el, varname):
+                varnames = varname.split()
+                for varname in varnames:
+                    try:
+                        # in some draws, eg in 1040a, "h='=0mm'"
+                        q = Qnty.fromstring(el.attrib[varname])
+                        break  # to avoid trying 2nd varname, if any
+                    except Exception:
+                        q = Qnty.fromstring('0mm')
+                return q
+            xpos, ypos, hdim, wdim = [
+                getvar(el, varname) for varname in ('x', 'y', 'h minH', 'w')]
+            isfield = el.tag.endswith('field')
+            # isdraw=not isfield
             if isfield:
-                # todo maybe attrib layout="table" [as in collectTables] is
-                # better to use than existence of attrib columnWidths
-                layout = p.attrib.get('layout')
-                if layout == 'table':
-                    # record name of table
-                    currTable = computePath(p, nsz)
-                elif layout == 'row':
-                    # record index of current row
-                    gp = p.getparent()
-                    irow = (list(gp.xpath('*[@layout="row"]')).index(p))
-                    icol = list(p.xpath(
-                        't:draw|t:field|t:subform',
-                        namespaces=nsz)).index(a)
-        path = '.'.join(p for p in reversed(path) if p)
-        elname = el.attrib.get('name', path)
-        coltitle = ''
-        coltype = ''
-        colinstruction = ''
-        if currTable:
-            if currTable != prevTable:
-                # this is the first element in the table, so read the
-                # columnWidths and set icol to 1st column
-                columnWidths = [Qnty.fromstring(width) for width in tables[
-                    currTable]['colwidths'].split()]
-                cumColWidths = [
-                    sum(columnWidths[0:i], Qnty(0, columnWidths[0].units))
-                    for i in range(len(columnWidths))]
-                maxheights = tables[currTable]['maxheights']
-                rowheights = [
-                    sum(maxheights[0:i], Qnty(0, maxheights[0].units))
-                    for i in range(len(maxheights))]
-                coltitles = tables[currTable]['coltitles']
-                coltypes = tables[currTable]['coltypes']
-                colinstructions = tables[currTable]['colinstructions']
-                prevTable = currTable
-                # todo chkboxes [and textboxes in tables] have more specific
-                # dims--reduce wdim,hdim,xpos,ypos by <field><margin> [see
-                # notes/27sep2013]
-            try:
-                wdim = columnWidths[icol]
-            except Exception as e:
-                msg = '; icol,columnWidths=%s,%s' % (icol, columnWidths)
-                raise type(e), type(e)(e.message + msg), exc_info()[2]
-            try:
-                ypos += rowheights[irow]
-            except Exception as e:
-                msg = '; irow,rowheights=%s,%s\n%s' % (irow, rowheights, pf(
-                    locals()))
-                raise type(e), type(e)(e.message + msg), exc_info()[2]
-            try:
-                xpos += cumColWidths[icol]
-            except Exception as e:
-                msg = '; icol,cumColWidths=%s,%s' % (icol, cumColWidths)
-                raise type(e), type(e)(e.message + msg), exc_info()[2]
-            try:
-                coltitle = coltitles[icol]
-                coltype = coltypes[icol]
-                colinstruction = colinstructions[icol]
-            except Exception as e:
-                msg = (
-                    e.message +
-                    '; icol,coltitles,coltypes,colinstructions=%s,%s,%s,%s' %
-                    (icol, coltitles, coltypes, colinstructions))
-                log.error(msg)
-        if not npage:
-            continue
-            # skip draw elements not assoc'd w/ a page; they are in some header
-        if npage < 1:
-            log.warn('rejecting visibl [{}] on invalid page [{}]'.format(
-                elname, npage))
-            continue
-        d = dict(el.attrib.iteritems())  # todo is el.attrib needed here?
-        d.update(dict(
-            i=iel,
-            # this way there's a name key even if element has no name attrib
-            name=elname,
-            tag=el.tag,
-            path=path,
-            xpos=xpos,
-            ypos=ypos,
-            hdim=hdim,
-            wdim=wdim,
-            npage=npage,
-            ))
-        if isfield:
-            d.update(dict(
-                typ=typ,
-                speak=speak,
-                code=code,  # for checkboxes eg MJ for married filing jointly
-                multiline=multiline,
-                maxchars=maxchars,
-                text=captionText,
-                isReadonly=isReadonly,
-                currTable=currTable,
-                coltitle=coltitle,
-                coltype=coltype,
-                colinstruction=colinstruction,
-                ))
-        else:
-            d.update(dict(
-                text=text,
-                parentForm=prefix,
-                ))
-
-        class El(dict):
-            '''
-                delegate to dict but override __str__
-                # todo generalize at least the keys selected
-                '''
-
-            def __str__(self):
-                speaklinecol = self.get('speak', '<<speakless>>')
-                try:
-                    lineidx = speaklinecol.lower().index('line ')
-                    speaklinecol = speaklinecol[lineidx:]
-                except Exception:
-                    pass
-                col = ''
-                try:
-                    # seek cols a-r since 's' occurs often as "Form(s)" and 18
-                    # cols is plenty!
-                    parenchars = re.findall(r'\([a-r]\)', speaklinecol)
-                    if parenchars and parenchars[0] not in speaklinecol[:13]:
-                        col = parenchars[0]
-                except Exception:
-                    pass
-
-                def shortname():
-                    name = self.get('name', '<<nameless>>')
-                    if '.' in name:
-                        name = '....' + [n for n in name.split('.') if n][-1]
-                    return name
-                if self.get('tag', '').endswith('draw'):
-                    return "{name=%s,text=%s}" % (shortname(), self.get(
-                        'text', '--'))
+                # caption node isnt v.informative (or even common), at least for
+                # f1040schedB
+                istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=nsz))
+                ischeckbox = bool(el.xpath('t:ui/t:checkButton', namespaces=nsz))
+                isReadonly = el.attrib.get('access') == 'readOnly'
+                speakNodes = el.xpath('t:assist/t:speak', namespaces=nsz)
+                if speakNodes:
+                    speak = unicode(speakNodes[0].text).encode('utf-8')
                 else:
-                    return "{name=%s,speak=%s%s,unit=%s...}" % (
-                        shortname(), speaklinecol[:13], col,
-                        self.get('unit', '--'))
-        d = El(d)
-        if isfield:
-            fields.append(d)
-            visiblz.append(d)  # because captionText is visible
-        else:
-            visiblz.append(d)
-    ensurePathsAreUniq(fields)
-    log.info(
-        'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
-    with open(dirName + '/' + prefix + '-visiblz.txt', 'w') as f:
-        f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
-    # fields refers to fillable fields only; draws are all (fillable and read-
-    # only/non-fillable) fields
-    form.fields = fields
-    form.draws = visiblz
+                    speak = ''
+                code = el.xpath('t:items/t:text', namespaces=nsz)
+                if code:
+                    code = unicode(code[0].text).encode('utf-8')
+                else:
+                    code = None
+                captionText = el.xpath(
+                    't:caption/descendant-or-self::text()',
+                    namespaces=nsz)
+                if captionText:
+                    captionText = u'|'.join(unicode(t) for t in captionText)
+                else:
+                    captionText = ''
+                # captionReserve info allows our textbox to avoid encompassing the
+                # caption
+                captionReserveNodes = el.xpath(
+                    't:caption[@reserve]',
+                    namespaces=nsz)
+                if captionReserveNodes:
+                    xCaptionReserve = yCaptionReserve = wCaptionReserve = \
+                        hCaptionReserve = Qnty(0, 'inch')
+                    crn = captionReserveNodes[0]
+                    captionReserve = Qnty.fromstring(
+                        crn.attrib.get('reserve'))
+                    if crn.attrib.get('placement', 'left') in 'right left':
+                        if crn.attrib.get('placement') == 'right':
+                            wCaptionReserve = captionReserve
+                        else:
+                            xCaptionReserve = wCaptionReserve = captionReserve
+                        xpos += xCaptionReserve
+                        wdim -= wCaptionReserve
+                    else:  # placement is top or bottom
+                        if crn.attrib.get('placement') == 'top':
+                            yCaptionReserve = captionReserve
+                            hCaptionReserve = captionReserve
+                        else:
+                            hCaptionReserve = captionReserve
+                        ypos += yCaptionReserve
+                        hdim -= hCaptionReserve
+                multiline = False
+                maxchars = None
+                if istextbox:
+                    # hscrolllist=el.xpath('t:ui/t:textEdit/@hScrollPolicy',namespa
+                    # ces=nsz) hscroll=not hscrolllist or
+                    # hscrolllist[0]!='off'
+                    multilinelist = el.xpath(
+                        't:ui/t:textEdit/@multiLine',
+                        namespaces=nsz)
+                    multiline = multilinelist and multilinelist[0] == '1'
+                    maxcharslist = el.xpath(
+                        't:value/t:text/@maxChars',
+                        namespaces=nsz)
+                    maxchars = maxcharslist[0] if maxcharslist else None
+                if istextbox and not ischeckbox:
+                    typ = 'text'
+                elif not istextbox and ischeckbox:
+                    typ = 'checkbox'
+                else:
+                    # default to textbox but warn
+                    typ = 'text'
+                    uinodes = el.xpath('t:ui', namespaces=nsz)
+                    if uinodes:
+                        uikids = uinodes[0].getchildren()
+                        info = str(uikids)
+                    else:
+                        info = str(el.attrib)
+                    log.warn(
+                        'not sure of element type: textbox, checkbox, other?  ' +
+                        info)
+            else:  # el is a draw
+                assert el.tag.endswith('draw'), \
+                    'expected tag.endswith "draw" instead got tag==' + el.tag
+                texts = el.xpath(
+                    '*/t:exData/*/*/descendant-or-self::text()',
+                    namespaces=nsz)
+                if not texts:
+                    texts = el.xpath(
+                        't:value/t:text/descendant-or-self::text()',
+                        namespaces=nsz)
+                if texts:
+                    text = '|'.join(texts)
+                else:
+                    continue
+            # climb node ancestry for relative position info to see entire subtree
+            # of field nodes, xmllint --format --recover form.xml [where form.xml
+            # is written above]
+            path = []
+            # for fields in tables [if any]--typically in the table ancestor
+            # element
+            currTable = None
+            npage = None
+            for a in chain([el], el.iterancestors()):
+                p = a.getparent()
+                # todo are these two conditions the same?  if so, not-p is likely
+                # more general
+                if a.tag.endswith('template') or p is None:
+                    break
+                xpos += Qnty.fromstring(p.attrib.get('x', '0mm'))
+                ypos += Qnty.fromstring(p.attrib.get('y', '0mm'))
+                def at(elem, attrib, default=None):
+                    return elem.attrib.get(attrib, default)
+                if at(p, 'name', '').startswith('Page') and \
+                   at(p, 'name')[4].isdigit():
+                    # or could assume that subforms just below the topmost are the
+                    # pages/copies
+                    npage = int(p.attrib.get('name')[len('Page')])
+                elif p.attrib.get('name', '').startswith('Copy'):
+                    npage = ord(p.attrib.get('name')[len('Copy')].lower()) - ord(
+                        'a') + 1
+                idxfornamelessnode = '[%d]' % (p.index(a) - 1)
+                if 'name' in a.attrib:
+                    ancname = a.get('name')
+                    sibsOfSameName = [
+                        c for c in p.getchildren() if c.get('name') == ancname]
+                    idxOfNamedNode = '[%d]' % (sibsOfSameName.index(a))
+                    idx = idxOfNamedNode
+                else:
+                    tag = re.sub(r'{.*}', '', a.tag)
+                    ancname = '#%s' % (tag)
+                    idx = idxfornamelessnode
+                path.append(ancname + idx)
+                if isfield:
+                    # todo maybe attrib layout="table" [as in collectTables] is
+                    # better to use than existence of attrib columnWidths
+                    layout = p.attrib.get('layout')
+                    if layout == 'table':
+                        # record name of table
+                        currTable = computePath(p, nsz)
+                    elif layout == 'row':
+                        # record index of current row
+                        gp = p.getparent()
+                        irow = (list(gp.xpath('*[@layout="row"]')).index(p))
+                        icol = list(p.xpath(
+                            't:draw|t:field|t:subform',
+                            namespaces=nsz)).index(a)
+            path = '.'.join(p for p in reversed(path) if p)
+            elname = el.attrib.get('name', path)
+            coltitle = ''
+            coltype = ''
+            colinstruction = ''
+            if currTable:
+                if currTable != prevTable:
+                    # this is the first element in the table, so read the
+                    # columnWidths and set icol to 1st column
+                    columnWidths = [Qnty.fromstring(width) for width in tables[
+                        currTable]['colwidths'].split()]
+                    cumColWidths = [
+                        sum(columnWidths[0:i], Qnty(0, columnWidths[0].units))
+                        for i in range(len(columnWidths))]
+                    maxheights = tables[currTable]['maxheights']
+                    rowheights = [
+                        sum(maxheights[0:i], Qnty(0, maxheights[0].units))
+                        for i in range(len(maxheights))]
+                    coltitles = tables[currTable]['coltitles']
+                    coltypes = tables[currTable]['coltypes']
+                    colinstructions = tables[currTable]['colinstructions']
+                    prevTable = currTable
+                    # todo chkboxes [and textboxes in tables] have more specific
+                    # dims--reduce wdim,hdim,xpos,ypos by <field><margin> [see
+                    # notes/27sep2013]
+                try:
+                    wdim = columnWidths[icol]
+                except Exception as e:
+                    msg = '; icol,columnWidths=%s,%s' % (icol, columnWidths)
+                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                try:
+                    ypos += rowheights[irow]
+                except Exception as e:
+                    msg = '; irow,rowheights=%s,%s\n%s' % (irow, rowheights, pf(
+                        locals()))
+                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                try:
+                    xpos += cumColWidths[icol]
+                except Exception as e:
+                    msg = '; icol,cumColWidths=%s,%s' % (icol, cumColWidths)
+                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                try:
+                    coltitle = coltitles[icol]
+                    coltype = coltypes[icol]
+                    colinstruction = colinstructions[icol]
+                except Exception as e:
+                    msg = (
+                        e.message +
+                        '; icol,coltitles,coltypes,colinstructions=%s,%s,%s,%s' %
+                        (icol, coltitles, coltypes, colinstructions))
+                    log.error(msg)
+            if not npage:
+                continue
+                # skip draw elements not assoc'd w/ a page; they are in some header
+            if npage < 1:
+                log.warn('rejecting visibl [{}] on invalid page [{}]'.format(
+                    elname, npage))
+                continue
+            d = dict(el.attrib.iteritems())  # todo is el.attrib needed here?
+            d.update(dict(
+                i=iel,
+                # this way there's a name key even if element has no name attrib
+                name=elname,
+                tag=el.tag,
+                path=path,
+                xpos=xpos,
+                ypos=ypos,
+                hdim=hdim,
+                wdim=wdim,
+                npage=npage,
+                ))
+            if isfield:
+                d.update(dict(
+                    typ=typ,
+                    speak=speak,
+                    code=code,  # for checkboxes eg MJ for married filing jointly
+                    multiline=multiline,
+                    maxchars=maxchars,
+                    text=captionText,
+                    isReadonly=isReadonly,
+                    currTable=currTable,
+                    coltitle=coltitle,
+                    coltype=coltype,
+                    colinstruction=colinstruction,
+                    ))
+            else:
+                d.update(dict(
+                    text=text,
+                    parentForm=prefix,
+                    ))
+            class El(dict):
+                '''
+                    delegate to dict but override __str__
+                    # todo generalize at least the keys selected
+                    '''
+                def __str__(self):
+                    speaklinecol = self.get('speak', '<<speakless>>')
+                    try:
+                        lineidx = speaklinecol.lower().index('line ')
+                        speaklinecol = speaklinecol[lineidx:]
+                    except Exception:
+                        pass
+                    col = ''
+                    try:
+                        # seek cols a-r since 's' occurs often as "Form(s)" and 18
+                        # cols is plenty!
+                        parenchars = re.findall(r'\([a-r]\)', speaklinecol)
+                        if parenchars and parenchars[0] not in speaklinecol[:13]:
+                            col = parenchars[0]
+                    except Exception:
+                        pass
+                    def shortname():
+                        name = self.get('name', '<<nameless>>')
+                        if '.' in name:
+                            name = '....' + [n for n in name.split('.') if n][-1]
+                        return name
+                    if self.get('tag', '').endswith('draw'):
+                        return "{name=%s,text=%s}" % (shortname(), self.get(
+                            'text', '--'))
+                    else:
+                        return "{name=%s,speak=%s%s,unit=%s...}" % (
+                            shortname(), speaklinecol[:13], col,
+                            self.get('unit', '--'))
+            d = El(d)
+            if isfield:
+                fields.append(d)
+                visiblz.append(d)  # because captionText is visible
+            else:
+                visiblz.append(d)
+        ensurePathsAreUniq(fields)
+        log.info(
+            'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
+        with open(dirName + '/' + prefix + '-visiblz.txt', 'w') as f:
+            f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
+        # fields refers to fillable fields only;
+        # draws are all (fillable and read-only/non-fillable) visible fields
+        form.fields = fields
+        form.draws = visiblz
+    except CrypticXml:
+        form.isCryptic=True
 
 
 def saveFields(fields, prefix):
