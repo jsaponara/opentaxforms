@@ -181,7 +181,10 @@ def setup(**overrideArgs):
     if cfg.formyear is None:
         cfg.formyear = cfg.latestTaxYear
     dirName = cfg.dirName
-    rootForms = [f.strip() for f in cfg.rootForms.split(',')]
+    if cfg.rootForms:
+        rootForms = [f.strip() for f in cfg.rootForms[0].split(',')]
+    else:
+        rootForms=['']
     if cfg.logPrefix:
         logname=cfg.logPrefix
     elif rootForms:
