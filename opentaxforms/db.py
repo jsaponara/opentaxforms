@@ -2,8 +2,8 @@
 from itertools import chain
 import opentaxforms.ut as ut
 import opentaxforms.config as config
-from ut import log
-from config import cfg
+from opentaxforms.ut import log
+from opentaxforms.config import cfg
 from sqlalchemy import MetaData, create_engine, select
 from sqlalchemy import UniqueConstraint
 # from sqlalchemy.exc import ProgrammingError
