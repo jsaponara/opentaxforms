@@ -5,6 +5,10 @@ and offers a database and API for developers to create their own tax application
 The converted forms will be available to test (and ultimately use)
 at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
+  - **PyPI**
+
+    [![PyPI version](https://badge.fury.io/py/opentaxforms.svg)](https://badge.fury.io/py/opentaxforms)
+
   - **License**
 
     [GNU AGPLv3](http://choosealicense.com/licenses/agpl-3.0/)
@@ -71,23 +75,22 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
     Eventually those forms may be updated to contain XFA, but until then, the
     best automated approach is probably
     [OCR](link:https://en.wikipedia.org/wiki/Optical_character_recognition)
-    (optical character recognition).  OCR maybe a less fool-proof approach in general,
+    (optical character recognition).  OCR may be a less fool-proof approach in general,
     especially for state (NJ, NY, etc) forms, which generally are not XFA-based.
 
   - **To do**
 
-	- Replace ToDo with a link to github/issues.
+	- Move lower-level ToDo items to github/issues.
     - Refactor toward a less script-ish architecture that will scale to more developers. [architecturePlease]
 	- Switch to a pdf-to-svg converter that preserves text (rather than converting text to paths), perhaps pdfjs,
 	  so that testers can easily copy and paste text from forms. [copyableText]
-    - Should extractFillableFields.py be a separate project called xfadump? [xfadump]
-	  This might provide a cleaner target output interface for an OCR effort.
+    - Should extractFillableFields.py be a separate project called xfadump?
+	  This might provide a cleaner target output interface for an OCR effort. [xfadump]
 	- Replace allpdfnames.txt with a more detailed form dictionary via a preprocess step. [formDictionary]
 	- Offer entire-form html interface (currently presenting each page separately). [formAsSingleHtmlPage]
 	- Incorporate instructions and publications, especially extracting the worksheets from instructions. [worksheets]
 	- Add the ability to process US state forms. [stateForms]
 	- Fix countless bugs, especially in forms that contain tables (see [issues])
 	- Don't seek in a separate file a schedule that occurs within a form. [refsToEmbeddedSchedules]
-	- Take any needed action regarding this from tox.readthedocs.io: Warning  Integrating tox with setup.py test is as of October 2016 discouraged as it breaks packaging/testing approaches as used by downstream distributions which expect setup.py test to run tests with the invocation interpreter rather than setting up many virtualenvs and installing packages. [toxSansSetup]
-	- separate dirName into pdfInputDir,htmlOutputDir [splitIoDirs]
+	- Separate dirName command line option into pdfInputDir,htmlOutputDir. [splitIoDirs]
 

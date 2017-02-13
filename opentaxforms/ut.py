@@ -14,14 +14,6 @@ TAB = '\t'
 quiet = False
 
 
-class Pass(object):
-    def __getattr__(self, *args, **kw):
-        print 'Pass', args, kw
-        return lambda *args, **kw: None
-
-
-log = Pass()
-
 Bbox = ntuple('Bbox', 'x0 y0 x1 y1')
 
 
@@ -163,24 +155,30 @@ alreadySetupLogging = False
 
 
 def setupLogging(loggerId, args=None):
-    global alreadySetupLogging
+    global log,alreadySetupLogging
     if alreadySetupLogging:
         log.warn('ignoring extra call to setupLogging')
-        return log
-    if args:
-        loglevel = args.loglevel.upper()
+        fname = log.name
     else:
-        loglevel = defaultLoglevel
-    loglevel = getattr(logging, loglevel)
-    if not isinstance(loglevel, int):
-        allowedLogLevels = 'debug info warn warning error critical exception'
-        raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (
-            args.loglevel, allowedLogLevels))
-    fname = loggerId + '.log'
-    logging.basicConfig(filename=fname, filemode='w', level=loglevel)
-    alreadySetupLogging = True
-    log.name = loggerId
-    return log, fname
+        if args:
+            loglevel = args.loglevel.upper()
+        else:
+            loglevel = defaultLoglevel
+        loglevel = getattr(logging, loglevel)
+        if not isinstance(loglevel, int):
+            allowedLogLevels = 'debug info warn warning error critical exception'
+            raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (
+                args.loglevel, allowedLogLevels))
+        fname = loggerId + '.log'
+        logging.basicConfig(filename=fname, filemode='w', level=loglevel)
+        alreadySetupLogging = True
+    return fname
+
+
+def unsetupLogging():
+    global alreadySetupLogging
+    alreadySetupLogging=False
+    logging.shutdown()
 
 
 defaultOutput = stdout
@@ -349,6 +347,9 @@ class Bag(object):
             >>> assert b('a','b')==(1,2)
             '''
         return tuple(self.__dict__[k] for k in keys)
+
+    def clear(self):
+        self.__dict__={}
 
     def update(self, *maps):
         '''

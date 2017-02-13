@@ -133,7 +133,6 @@ def logRunStatus(formsdone, formsfail, status):
         msg = 'failed to process %d forms: %s' % (
               len(formsfail), [irs.computeFormId(f) for f in formsfail])
         logg(msg, [log.error, stdout])
-        logg('logfilename is "{}"'.format(cfg.logfilename))
     import json
     status.update({'f' + irs.computeFormId(f).lower(): None
                   for f in formsfail})
@@ -144,6 +143,15 @@ def logRunStatus(formsdone, formsfail, status):
 
 
 def indicateProgress(form):
+    def guessFormPrefix(form):
+        try:
+            f,sched=form.name
+            sched='' if sched is None else 's'+sched.lower()
+        except ValueError:
+            f=form.name
+            sched=''
+        return 'f'+f+sched
+    log.name=guessFormPrefix(form)
     if cfg.indicateProgress:
         msg = '--------' + jj(
               form.name,

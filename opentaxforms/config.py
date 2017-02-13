@@ -14,24 +14,24 @@ SkippableSteps = (
     (r='referenceParsing')
     (d='databaseOutput')
     (h='htmlOutput')
-    (c='cleanupFiles'))
-# remove intermediate files
+    (c='cleanupFiles')) # remove intermediate files
 
 defaults = Bag(dict(
-    # todo separate dirName into pdfInputDir,htmlOutputDir: #pdfInputDir='pdf',
-    # htmlOutputDir='html',
+    # todo separate dirName into pdfInputDir,htmlOutputDir
+    #      pdfInputDir='pdf', htmlOutputDir='html',
     dirName='forms',
     checkFileList=True,
     computeOverlap=True,
     debug=False,
     rootForms=None,
     formyear=None,
-    ignoreCaches=False,
+    useCaches=False,
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho
     # could be incomplete eg during dec2016 the 2016 1040 and 400ish other
     # forms are ready but not schedule D and 200ish others
     latestTaxYear=2016,
     loglevel='warn',
+    logPrefix=None,
     maxrecurselevel=RecurseInfinitely,
     okToDownload=True,
     # todo replace postgres option with dbpath/dburl
@@ -55,8 +55,8 @@ def parseCmdline():
                     ' must specify either form or directory option'
         )
     addarg = parser.add_argument
-    addarg('-f', '--form', dest='rootForms', nargs='*',
-           help='form file name, eg f1040')
+    addarg('-f', '--form', dest='rootForms', nargs='?',
+           help='forms to parse, eg f1040 or f1040sa,f1040sab')
     # disallowing --year option for now the code currently assumes all forms
     # are available at irs-prior/ [the collection of all past forms] for each
     # year, eg f1040--2015.pdf; but some forms arent revised every year, so eg
@@ -94,14 +94,12 @@ def parseCmdline():
     addarg('-k', '--skip', nargs='?', default=[],
            help='steps to skip, can be any combination of: ' + ' '.join(
            '='.join((k, v)) for k, v in SkippableSteps.items()), dest='skip')
-    addarg('-C', '--ignoreCaches',
+    addarg('-C', '--useCaches',
            help='recompute cached intermediate results', action="store_true")
     addarg('-P', '--postgres',
            help='use postgres database [default=sqlite]', action="store_true")
     addarg('-V', '--version', help='report version and exit',
            default=False, action="store_true")
-    addarg('-Z', '--dropall', help='drop all database tables',
-           action="store_true")
     addarg('--calledFromCmdline',
            help='signals that script is run from commandline', default=True)
     return parser.parse_args()
@@ -155,9 +153,9 @@ alreadySetup = False
 def setup(**overrideArgs):
     from os import makedirs, symlink
     # note formyear will default to latestTaxYear even if dirName=='2014'
-    global alreadySetup, log, cfg
+    global alreadySetup
     if alreadySetup:
-        return cfg, log
+        return
     args = None
     if overrideArgs.get('readCmdlineArgs'):
         args = parseCmdline()
@@ -183,8 +181,13 @@ def setup(**overrideArgs):
     if cfg.formyear is None:
         cfg.formyear = cfg.latestTaxYear
     dirName = cfg.dirName
-    rootForms = cfg.rootForms
-    if rootForms:
+    if cfg.rootForms:
+        rootForms = [f.strip() for f in cfg.rootForms[0].split(',')]
+    else:
+        rootForms=['']
+    if cfg.logPrefix:
+        logname=cfg.logPrefix
+    elif rootForms:
         logname = rootForms[0]
         if len(rootForms) > 1:
             logname += 'etc'
@@ -193,12 +196,11 @@ def setup(**overrideArgs):
     else:
         logname = appname
     loginfo = setupLogging(logname, cfg)
-    log, cfg.logfilename = loginfo
+    cfg.logfilename = loginfo
     cfg.log = log
     if not cfg.quiet:
         logg('logfilename is "{}"'.format(cfg.logfilename))
-        logg('commandline: {} at {}'.format(' '.join(sys.argv), ut.now()), [
-            log.warn])
+        log.warn('commandline: %s at %s', ' '.join(sys.argv), ut.now())
 
     if dirName is not None:
         from opentaxforms.Form import Form
@@ -235,7 +237,17 @@ def setup(**overrideArgs):
             getFileList(dirName)
 
     alreadySetup = True
-    return cfg, log
+
+
+def unsetup():
+    global alreadySetup
+    alreadySetup = False
+    # clear cfg but preserve logfilename
+    logfilename=cfg.logfilename
+    cfg.clear()
+    cfg.update(defaults)
+    cfg.logfilename=logfilename
+    #ut.unsetupLogging()  # continue using same log setup
 
 
 if __name__ == "__main__":
