@@ -44,9 +44,11 @@ def computePageTitle(titlebase, npage, npages):
 
 def createSvgFile(dirName, prefix, npage):
     ipage = npage - 1
-    infpath = '{}/{}.pdf'.format(dirName, prefix)
-    outfpath = '{}/{}-p{}-fixedDims.svg'.format(dirName, prefix, ipage)
-    outfpathFinal = '{}/{}-p{}.svg'.format(dirName, prefix, npage)
+    import os.path
+    infpath = os.path.join(dirName,'{}.pdf'.format(prefix))
+    print 'infpath',infpath
+    outfpath = os.path.join(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
+    outfpathFinal = os.path.join(dirName,'{}-p{}.svg'.format(prefix, npage))
     cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
     out, err = ut.run(cmd)
     if err:

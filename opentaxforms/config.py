@@ -112,9 +112,12 @@ def getFileList(dirName):
         if 1:  # until resolve urllib2 code below
             allpdfpath = ut.Resource(appname, 'static/allpdfnames.txt').path()
             allpdfLink = dirName + '/allpdfnames.txt'
-            if not ut.exists(allpdfLink):
-                from os import symlink
-                symlink(allpdfpath, allpdfLink)
+            try:
+                if not ut.exists(allpdfLink):
+                    from os import symlink
+                    symlink(allpdfpath, allpdfLink)
+            except Exception as e:
+                log.warn('cannot symlink %s, %s'%(allpdfpath,allpdfLink,))
         elif not cfg.okToDownload:
             msg = 'allPdfNames file [%s] not found but dontDownload' % (
                 allpdfpath)
@@ -151,7 +154,7 @@ alreadySetup = False
 
 
 def setup(**overrideArgs):
-    from os import makedirs, symlink
+    from os import makedirs
     # note formyear will default to latestTaxYear even if dirName=='2014'
     global alreadySetup
     if alreadySetup:
@@ -230,8 +233,12 @@ def setup(**overrideArgs):
         staticDir = ut.Resource(appname, 'static').path()
         staticLink = dirName + '/static'
         import os.path
-        if not os.path.lexists(staticLink):
-            symlink(staticDir, staticLink)
+        try:
+            if not os.path.lexists(staticLink):
+                from os import symlink
+                symlink(staticDir, staticLink)
+        except Exception as e:
+            log.warn('cannot symlink %s, %s'%(staticDir,staticLink,))
 
         if cfg.checkFileList:
             getFileList(dirName)
