@@ -58,11 +58,12 @@ def createSvgFile(dirName, prefix, npage):
     with open(outfpath) as f:
         svg = f.read()
     # todo move draftNotice to separate file
-    draftNotice = '<svg width="612" height="792">' \
+    #draftNotice = '<svg width="612" height="792">'
+    draftNotice = '<svg>' \
         '<g fill="gray70" opacity="0.40"' \
-        'transform="rotate(-50 420 350)"><text x="6" y="24"' \
-        'transform="scale(10)">DRAFT</text><text x="-6" y="60"' \
-        'transform="scale(7)">DO NOT USE</text></g></svg>'
+        ' transform="rotate(-50 420 350)"><text x="6" y="24"' \
+        ' transform="scale(10)">DRAFT</text><text x="-6" y="60"' \
+        ' transform="scale(7)">DO NOT USE</text></g></svg>'
     # insert draftNotice at end of svg file
     svg = svg \
         .replace(' width="612pt" height="792pt"', '') \
