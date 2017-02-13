@@ -5,6 +5,10 @@ create their own tax applications. The converted forms will be available
 to test (and ultimately use) at
 `OpenTaxForms.org <http://OpenTaxForms.org/>`__.
 
+-  **PyPI**
+
+   |PyPI version|
+
 -  **License**
 
    `GNU AGPLv3 <http://choosealicense.com/licenses/agpl-3.0/>`__
@@ -86,21 +90,21 @@ to test (and ultimately use) at
    A). Eventually those forms may be updated to contain XFA, but until
    then, the best automated approach is probably
    `OCR <link:https://en.wikipedia.org/wiki/Optical_character_recognition>`__
-   (optical character recognition). OCR maybe a less fool-proof approach
-   in general, especially for state (NJ, NY, etc) forms, which generally
-   are not XFA-based.
+   (optical character recognition). OCR may be a less fool-proof
+   approach in general, especially for state (NJ, NY, etc) forms, which
+   generally are not XFA-based.
 
 -  **To do**
 
-   -  Replace ToDo with a link to github/issues.
+   -  Move lower-level ToDo items to github/issues.
    -  Refactor toward a less script-ish architecture that will scale to
       more developers. [architecturePlease]
    -  Switch to a pdf-to-svg converter that preserves text (rather than
       converting text to paths), perhaps pdfjs, so that testers can
       easily copy and paste text from forms. [copyableText]
    -  Should extractFillableFields.py be a separate project called
-      xfadump? [xfadump] This might provide a cleaner target output
-      interface for an OCR effort.
+      xfadump? This might provide a cleaner target output interface for
+      an OCR effort. [xfadump]
    -  Replace allpdfnames.txt with a more detailed form dictionary via a
       preprocess step. [formDictionary]
    -  Offer entire-form html interface (currently presenting each page
@@ -112,13 +116,26 @@ to test (and ultimately use) at
       [issues])
    -  Don't seek in a separate file a schedule that occurs within a
       form. [refsToEmbeddedSchedules]
-   -  Take any needed action regarding this from tox.readthedocs.io:
-      Warning Integrating tox with setup.py test is as of October 2016
-      discouraged as it breaks packaging/testing approaches as used by
-      downstream distributions which expect setup.py test to run tests
-      with the invocation interpreter rather than setting up many
-      virtualenvs and installing packages. [toxSansSetup]
-   -  separate dirName into pdfInputDir,htmlOutputDir [splitIoDirs]
+   -  Separate dirName command line option into
+      pdfInputDir,htmlOutputDir. [splitIoDirs]
+
+0.5.0 (2017-02-13)
+
+-  css,template: add minimal tester interface.
+-  extract: make cryptic forms annotatable.
+-  html: add pdf link to html page.
+-  main: fix log.name in indicateProgress [still refers to the previous
+   form].
+-  commandline: -f now takes multiple forms, comma-delimited.
+-  commandline: -C now means useCaches [not ignoreCaches], so the
+   default runs [avoiding the pint registry error].
+-  make 'setup.py test' work again by adding pytest-runner.
+-  add PyPI version badge to README.md.
+-  remove unused db functions.
+-  bugfix: just import cross-module globals, dont assign.
+-  add logPrefix to config.
+-  add unsetup functions to config and ut for teardown between tests.
+-  pin versions of requirements in setup.py.
 
 0.4.19 (2017-01-24)
 
@@ -215,5 +232,7 @@ commandline. - output form statuses for external processing. - clean up
 categories into the form status message. - use bumpversion as
 cookiecutter does.
 
+.. |PyPI version| image:: https://badge.fury.io/py/opentaxforms.svg
+   :target: https://badge.fury.io/py/opentaxforms
 .. |Build Status| image:: https://travis-ci.org/jsaponara/opentaxforms.svg?branch=0.4.9
    :target: https://travis-ci.org/jsaponara/opentaxforms
