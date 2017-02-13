@@ -1,3 +1,19 @@
+0.5.0 (2017-02-13)
+
+- css,template: add minimal tester interface.
+- extract: make cryptic forms annotatable.
+- html: add pdf link to html page.
+- main: fix log.name in indicateProgress [still refers to the previous form].
+- commandline: -f now takes multiple forms, comma-delimited.
+- commandline: -C now means useCaches [not ignoreCaches], so the default runs [avoiding the pint registry error].
+- make 'setup.py test' work again by adding pytest-runner.
+- add PyPI version badge to README.md.
+- remove unused db functions.
+- bugfix: just import cross-module globals, dont assign.
+- add logPrefix to config.
+- add unsetup functions to config and ut for teardown between tests.
+- pin versions of requirements in setup.py.
+
 0.4.19 (2017-01-24)
 
 - add pylint config file.
