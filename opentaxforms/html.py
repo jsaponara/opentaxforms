@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 from os import remove as removeFile
 import re
 from itertools import chain
@@ -46,7 +46,7 @@ def createSvgFile(dirName, prefix, npage):
     ipage = npage - 1
     import os.path
     infpath = os.path.join(dirName,'{}.pdf'.format(prefix))
-    print 'infpath',infpath
+    print('infpath', infpath)
     outfpath = os.path.join(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
     outfpathFinal = os.path.join(dirName,'{}-p{}.svg'.format(prefix, npage))
     cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
@@ -386,12 +386,15 @@ def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
                       % (whichway))
         jdb('<pagelinktmpl', result)
         return result
-    return NL.encode('utf8').join(
-        pagelinktmpl(nnpage, npages, whichway).format(
-            prefix=prefix, npage=nnpage, whichway=whichway, top=0,
-            left=imgw * (1 - nicon * linkwidthprop),)
-        for nicon, nnpage, whichway
-        in ((2, npage - 1, 'prev'), (1, npage + 1, 'next')))
+
+    l1 = pagelinktmpl(npage - 1, npages, b'prev').format(
+            prefix=prefix, npage=npage - 1, whichway=b'prev', top=0,
+            left=imgw * (1 - 2 * linkwidthprop))
+    l2 = pagelinktmpl(npage + 1, npages, b'next').format(
+            prefix=prefix, npage=npage + 1, whichway=b'next', top=0,
+            left=imgw * (1 - 1 * linkwidthprop))
+
+    return NL.join((l1, l2))
 
 
 def pdflinkhtml(prefix,imgw,linkwidthprop):
@@ -430,11 +433,11 @@ def writeEmptyHtmlPages(form):
     formrefs = form.refs
     npages = len(pageinfo)
     template = ut.Resource('opentaxforms', 'template/form.html').content()
-    emptyHtml = template     \
-        .replace('{', '{{')  \
-        .replace('}', '}}')  \
-        .replace('[=[', '{') \
-        .replace(']=]', '}')
+    template = template.decode('utf8')
+    emptyHtml = (template.replace('{', '{{')
+                         .replace('}', '}}')
+                         .replace('[=[', '{')
+                         .replace(']=]', '}'))
     titlebase = computeTitle(prefix)
     for npage in range(1, 1 + npages):
         title = computePageTitle(titlebase, npage, npages)
@@ -595,23 +598,21 @@ def writeEmptyHtmlPages(form):
             for form, data in formrefs.items()
             if data['draw']['npage'] == npage and 'bboxz' in data
             for bbox in data['bboxz'])
-        open(
-            dirName + '/%s-p%d.html' % (prefix, npage), 'w')  \
-            .write(
-                emptyHtml.format(
-                    title=title,
-                    bkgdimgfname=bkgdimgfname,
-                    dbid=dbid,
-                    formid=formid,
-                    pagelinks=pagelinks,
-                    pdflink=pdflink,
-                    inputboxes=inputboxes,
-                    formlinks=formlinks,
-                    readonlyz=readonlyz,
-                    nonobsvblz=nonobsvblz,
-                    obsvblz=obsvblz,
-                    inputdeps=inputdeps,
-                    computedz=computedz,))
+        with open(dirName + '/%s-p%d.html' % (prefix, npage), 'w') as fh:
+            fh.write(emptyHtml.format(
+                title=title,
+                bkgdimgfname=bkgdimgfname,
+                dbid=dbid,
+                formid=formid,
+                pagelinks=pagelinks,
+                pdflink=pdflink,
+                inputboxes=inputboxes,
+                formlinks=formlinks,
+                readonlyz=readonlyz,
+                nonobsvblz=nonobsvblz,
+                obsvblz=obsvblz,
+                inputdeps=inputdeps,
+                computedz=computedz,))
 
 
 if __name__ == "__main__":

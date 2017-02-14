@@ -1,5 +1,7 @@
+from __future__ import print_function
 import os
 import logging
+import six
 from collections import (
     namedtuple as ntuple,
     defaultdict as ddict,
@@ -8,6 +10,11 @@ from decimal import Decimal as dc
 from pprint import pprint as pp, pformat as pf
 from sys import stdout, exc_info
 from pint import UnitRegistry
+try:
+    from cPickle import dump, load
+except ImportError:
+    from pickle import dump, load
+
 NL = '\n'
 TAB = '\t'
 
@@ -90,27 +97,25 @@ class PickleException(Exception):
 
 
 def pickle(data, pickleFilePrefix):
-    from cPickle import dump
     picklname = '%s.pickl' % (pickleFilePrefix)
-    with open(picklname, 'w') as pickl:
+    with open(picklname, 'wb') as pickl:
         dump(data, pickl)
 
 
 def unpickle(pickleFilePrefix, default=None):
-    from cPickle import load
     picklname = '%s.pickl' % (pickleFilePrefix)
     try:
-        with open(picklname) as pickl:
+        with open(picklname, 'rb') as pickl:
             data = load(pickl)
     except IOError as e:
         clas, exc, tb = exc_info()
         if e.errno == 2:  # no such file
             if default == 'raise':
-                raise NoSuchPickle, NoSuchPickle(exc.args), tb
+                raise NoSuchPickle(NoSuchPickle(exc.args)).with_traceback(tb)
             else:
                 data = default
         else:
-            raise PickleException, PickleException(exc.args), tb
+            raise PickleException(PickleException(exc.args)).with_traceback(tb)
     return data
 
 
@@ -121,9 +126,9 @@ def flattened(l):
 
 def hasdups(l, key=None):
     if key is None:
-        key = lambda x: x
-        # def key(x): return x
-    ll = [key(it) for it in l]
+        ll = l
+    else:
+        ll = [key(it) for it in l]
     return any(it in ll[1 + i:] for i, it in enumerate(ll))
 
 
@@ -211,7 +216,7 @@ def jj(*args, **kw):
     try:
         return delim.join(str(x) for x in args)
     except Exception:
-        return delim.join(unicode(x) for x in args)
+        return delim.join(six.text_type(x) for x in args)
 
 
 def jdb(*args, **kw):
@@ -266,18 +271,15 @@ class CharEnum(object):
     # http://stackoverflow.com/questions/2676133/
     @classmethod
     def keys(cls):
-        return [k for k in cls.__dict__.iterkeys() if not k.startswith('_')]
+        return [k for k in cls.__dict__ if not k.startswith('_')]
 
     @classmethod
     def vals(cls):
-        return [
-            v for k, v in cls.__dict__.iteritems() if not k.startswith('_')]
+        return [cls.__dict__[k] for k in cls.keys()]
 
     @classmethod
     def items(cls):
-        return [
-            (k, v) for k, v in cls.__dict__.iteritems()
-            if not k.startswith('_')]
+        return zip(cls.keys(), cls.vals())
 
 
 class ChainablyUpdatableOrderedDict(odict):
@@ -398,7 +400,7 @@ class Bag(object):
         return self.__dict__.values()
 
     def items(self):
-        return self.__dict__.iteritems()
+        return self.__dict__.items()
 
     def iteritems(self):
         return self.__dict__.iteritems()
@@ -454,19 +456,22 @@ class Qnty(qq):
             }.get(unit, unit)
         return Qnty(qnty, unit)
 
+    def __hash__(self):
+        return hash(repr(self))
+
 
 def playQnty():
     # pagewidth=Qnty(page.cropbox[2]-page.cropbox[0],'printers_point')
     a = Qnty.fromstring('2in')
     b = Qnty.fromstring('1in')
-    print Qnty(a - b, 'printers_point')
-    print Qnty.fromstring('72pt')
+    print(Qnty(a - b, 'printers_point'))
+    print(Qnty.fromstring('72pt'))
     # cumColWidths=[sum(columnWidths[0:i],Qnty(0,columnWidths[0].units)) for i
     # in range(len(columnWidths))]
-    print Qnty(0, a.units)
+    print(Qnty(0, a.units))
     # maxh=max([Qnty.fromstring(c.attrib.get('h',c.attrib.get('minH'))) for c
     # in cells])
-    print max(a, b)
+    print(max(a, b))
     s = set()
     s.update([a, b])
     assert len(s) == 1

@@ -2,7 +2,7 @@
 '''
     The tests.
 '''
-
+from __future__ import print_function
 from os.path import join as pathjoin,basename
 from shutil import copy
 from opentaxforms import ut
@@ -69,8 +69,8 @@ class TestBase(object):
                 shallow)
             if files_match:
                 result, verb = 'PASS', 'matches'
-                print fmtmsg(result, verb, file_to_check,
-                             self.outdir, targetdir)
+                print(fmtmsg(result, verb, file_to_check,
+                             self.outdir, targetdir))
             else:
                 result, verb = 'FAIL', 'does NOT match'
                 raise Exception(
@@ -141,8 +141,8 @@ class TestApi(TestApiBase):
         '''get list of organizations (currently just IRS)'''
         request = '/api/v1/orgn'
         response = self.client.get(request)
-        print request, '->', response.data
-        assert '"code": "us_irs"' in response.data
+        print(request, '->', response.data)
+        assert b'"code": "us_irs"' in response.data
         assert response.status_code == 200
 
     def test_api_f1040(self):
@@ -151,8 +151,8 @@ class TestApi(TestApiBase):
             '/api/v1/form?q='
             '{"filters":[{"name":"code","op":"eq","val":"1040"}]}')
         response = self.client.get(request)
-        print request, '->', response.data
-        assert '"title": "Form 1040"' in response.data
+        print(request, '->', response.data)
+        assert b'"title": "Form 1040"' in response.data
         assert response.status_code == 200
 
     def test_api_noresults(self):
@@ -161,8 +161,8 @@ class TestApi(TestApiBase):
             '/api/v1/form?q='
             '{"filters":[{"name":"code","op":"eq","val":"0000"}]}')
         response = self.client.get(request)
-        print request, '->', response.data
-        assert '"num_results": 0' in response.data
+        print(request, '->', response.data)
+        assert b'"num_results": 0' in response.data
         assert response.status_code == 200
 
     def test_api_filterslots(self):
@@ -180,21 +180,21 @@ class TestApi(TestApiBase):
         paramstring = json.dumps(dict(filters=filters))
         request = url % (paramstring, )
         response = self.client.get(request)
-        print request, '->', response.data
+        print(request, '->', response.data)
         assert response.status_code == 200
-        assert '"num_results": 15' in response.data
+        assert b'"num_results": 15' in response.data
 
 
 def main(args):
     ''' for commandline invocation '''
     def usage():
         ''' print usage note '''
-        print 'usage: "%s [-q|-s|-f|-x|-a]"\n' \
-              '-q=quick script tests\n' \
-              '-s=slow script tests\n' \
-              '-f=full 1040\n' \
-              '-x=xfa-only 1040\n' \
-              '-a=api tests' % (args[0], )
+        print('usage: "%s [-q|-s|-f|-x|-a]"\n'
+              '-q=quick script tests\n'
+              '-s=slow script tests\n'
+              '-f=full 1040\n'
+              '-x=xfa-only 1040\n'
+              '-a=api tests' % (args[0], ))
     if len(args) >= 2:
         if any(arg in args for arg in ('-q', '-s', '-f', '-x', '-sf')):
             step_test_runner = TestSteps()

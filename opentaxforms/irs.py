@@ -95,7 +95,7 @@ def sortableFieldname(fieldname):
         excclass, exc, tb = sys.exc_info()
         new_exc = Exception(
             'sortableFieldname: new exception: fieldname= ' + fieldname)
-        raise new_exc.__class__, new_exc, tb
+        raise new_exc.__class__(new_exc).with_traceback(tb)
 
 # todo eliminate guesswork in setup()/allpdfnames and possibleFilePrefixes by
 # reading document metadata as in pdfInfo() and mapping formName<->filename.

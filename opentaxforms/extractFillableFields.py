@@ -1,4 +1,4 @@
-
+import six
 from sys import exc_info
 import re
 from itertools import chain
@@ -6,6 +6,14 @@ from argparse import ArgumentParser
 from opentaxforms.config import cfg
 from opentaxforms.ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
 from opentaxforms.irs import commandPtn, possibleColTypes, CrypticXml
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
+try:
+    from cPickle import dump
+except ImportError:
+    from pickle import dump
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 UNESC_PAT = re.compile(r'&#(\d+);')
@@ -159,7 +167,6 @@ def parseXml(xmlAsStr, pathPrefix=None):
         optionally write pretty_print'd xml to "-fmt.xml" file
         '''
     from lxml import etree
-    from StringIO import StringIO
     parser = etree.XMLParser(encoding='utf-8', recover=True)
     tree = etree.parse(StringIO(xmlAsStr), parser)
     if pathPrefix:
@@ -225,23 +232,24 @@ def extractFields(form):
                 # caption node isnt v.informative (or even common), at least for
                 # f1040schedB
                 istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=nsz))
-                ischeckbox = bool(el.xpath('t:ui/t:checkButton', namespaces=nsz))
+                ischeckbox = bool(el.xpath('t:ui/t:checkButton',namespaces=nsz))
                 isReadonly = el.attrib.get('access') == 'readOnly'
                 speakNodes = el.xpath('t:assist/t:speak', namespaces=nsz)
                 if speakNodes:
-                    speak = unicode(speakNodes[0].text).encode('utf-8')
+                    speak = six.text_type(speakNodes[0].text).encode('utf-8')
                 else:
                     speak = ''
                 code = el.xpath('t:items/t:text', namespaces=nsz)
                 if code:
-                    code = unicode(code[0].text).encode('utf-8')
+                    code = six.text_type(code[0].text).encode('utf-8')
                 else:
                     code = None
                 captionText = el.xpath(
                     't:caption/descendant-or-self::text()',
                     namespaces=nsz)
                 if captionText:
-                    captionText = u'|'.join(unicode(t) for t in captionText)
+                    captionText = u'|'.join(six.text_type(t)
+                                            for t in captionText)
                 else:
                     captionText = ''
                 # captionReserve info allows our textbox to avoid encompassing the
@@ -395,18 +403,24 @@ def extractFields(form):
                     wdim = columnWidths[icol]
                 except Exception as e:
                     msg = '; icol,columnWidths=%s,%s' % (icol, columnWidths)
-                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                    etype = type(e)
+                    tb = exc_info()[2]
+                    raise etype(etype(e.message + msg)).with_traceback(tb)
                 try:
                     ypos += rowheights[irow]
                 except Exception as e:
                     msg = '; irow,rowheights=%s,%s\n%s' % (irow, rowheights, pf(
                         locals()))
-                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                    etype = type(e)
+                    tb = exc_info()[2]
+                    raise etype(etype(e.message + msg)).with_traceback(tb)
                 try:
                     xpos += cumColWidths[icol]
                 except Exception as e:
                     msg = '; icol,cumColWidths=%s,%s' % (icol, cumColWidths)
-                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                    etype = type(e)
+                    tb = exc_info()[2]
+                    raise etype(etype(e.message + msg)).with_traceback(tb)
                 try:
                     coltitle = coltitles[icol]
                     coltype = coltypes[icol]
@@ -424,7 +438,7 @@ def extractFields(form):
                 log.warn('rejecting visibl [{}] on invalid page [{}]'.format(
                     elname, npage))
                 continue
-            d = dict(el.attrib.iteritems())  # todo is el.attrib needed here?
+            d = dict(el.attrib.items())  # todo is el.attrib needed here?
             d.update(dict(
                 i=iel,
                 # this way there's a name key even if element has no name attrib
@@ -498,8 +512,8 @@ def extractFields(form):
         ensurePathsAreUniq(fields)
         log.info(
             'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
-        with open(dirName + '/' + prefix + '-visiblz.txt', 'w') as f:
-            f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
+        with open(dirName + '/' + prefix + '-visiblz.txt', 'wb') as f:
+            f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;
         # draws are all (fillable and read-only/non-fillable) visible fields
         form.fields = fields
@@ -509,7 +523,6 @@ def extractFields(form):
 
 
 def saveFields(fields, prefix):
-    from cPickle import dump
     picklname = '%s.pickl' % (prefix)
     pickl = open(picklname, 'w')
     dump(fields, pickl)
