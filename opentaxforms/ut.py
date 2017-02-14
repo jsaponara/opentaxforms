@@ -235,7 +235,7 @@ def run(cmd, **kw):
     loglevel = logging.INFO if 'loglevel' not in kw else getattr(logging, kw[
         'loglevel'].upper(), None)
     out, err = run0(cmd)
-    out, err = err.strip(), out.strip()
+    out, err = out.strip(), err.strip()
     msg = logprefix + ': command [%s] returned error [%s] and output [%s]' % (
         cmd, err, out)
     if err:
