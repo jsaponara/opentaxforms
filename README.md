@@ -17,6 +17,10 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
 	pip install opentaxforms
 
+  - **External dependencies**
+
+  [pdf2svg](https://github.com/dawbarton/pdf2svg)
+
   - **Github**
 
     - [code](https://github.com/jsaponara/opentaxforms/)
