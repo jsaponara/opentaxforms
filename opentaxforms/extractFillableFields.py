@@ -1,19 +1,18 @@
+from __future__ import print_function, absolute_import
 import six
-from sys import exc_info
 import re
+from sys import exc_info
 from itertools import chain
 from argparse import ArgumentParser
-from opentaxforms.config import cfg
-from opentaxforms.ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
-from opentaxforms.irs import commandPtn, possibleColTypes, CrypticXml
-try:
-    from io import StringIO
-except ImportError:
-    from StringIO import StringIO
+from six import StringIO
 try:
     from cPickle import dump
 except ImportError:
     from pickle import dump
+
+from .config import cfg
+from .ut import log, setupLogging, exists, skip, Qnty, pf, run
+from .irs import commandPtn, possibleColTypes, CrypticXml
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 UNESC_PAT = re.compile(r'&#(\d+);')
@@ -36,6 +35,8 @@ def unescape(s):
 
 
 def unescapeline(line):
+    if isinstance(line, six.binary_type):
+        line = line.decode('utf8')
     return unescape(line.replace('&#10;', '').replace('&#13;', ''))
 
 
@@ -43,13 +44,13 @@ def getRawXml(prefix, path='.'):
     xmltextfname = '%s/%s-text.xml' % (path, prefix)
     if exists(xmltextfname):
         log.debug('xml text file already exists [{}]'.format(xmltextfname))
-        xmlAsStr = open(xmltextfname).read()
-    else:
-        log.debug('creating xml text file [%s]', xmltextfname)
-        f = open('%s/%s.xml' % (path, prefix), 'rb')
-        datanamespace = 'xfa-template'
+        return open(xmltextfname).read()
+
+    log.debug('creating xml text file [%s]', xmltextfname)
+    with open('%s/%s.xml' % (path, prefix), 'rb') as fh:
+        datanamespace = b'xfa-template'
         fieldFrags = []
-        for line in f:
+        for line in fh:
             if datanamespace in line:
                 # just in case there are multiple data elements with the target
                 # datanamespace--must not give multiple toplevel elements to
@@ -67,11 +68,10 @@ def getRawXml(prefix, path='.'):
         if not xmlAsStr:
             xmlAsStr = '\n'.join(f for f in fieldFrags if f)
         if not xmlAsStr.strip():
-            msg='CrypticXml: cannot textify xml file for form %s'%(prefix,)
+            msg = 'CrypticXml: cannot textify xml file for form %s' % prefix
             log.warn(msg)
             raise CrypticXml(msg)
         open(xmltextfname, 'w').write(xmlAsStr)
-        f.close()
     return xmlAsStr
 
 
@@ -172,7 +172,7 @@ def parseXml(xmlAsStr, pathPrefix=None):
     if pathPrefix:
         xmlfmtfname = '%s-fmt.xml' % (pathPrefix)
         if not exists(xmlfmtfname):
-            open(xmlfmtfname, 'w').write(
+            open(xmlfmtfname, 'wb').write(
                 etree.tostring(tree, pretty_print=True)
                 )
     return tree
@@ -523,10 +523,8 @@ def extractFields(form):
 
 
 def saveFields(fields, prefix):
-    picklname = '%s.pickl' % (prefix)
-    pickl = open(picklname, 'w')
-    dump(fields, pickl)
-    pickl.close()
+    with open('%s.pickl' % prefix, 'w') as pickl:
+        dump(fields, pickl)
 
 
 def parse_cli():
