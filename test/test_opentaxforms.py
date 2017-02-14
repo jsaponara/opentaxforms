@@ -46,7 +46,19 @@ class TestBase(object):
             logPrefix=logPrefix,
             **kw)
         if returnval != 0:
-            raise Exception('run failed, no output to compare against target')
+            logfname=logPrefix+'.log'
+            try:
+                logerrors=open(logfname).read()
+                try:
+                    # filter out the oft-voluminous warnings
+                    logerrors='\n'.join(line
+                        for line in open(logfname).read().split('\n')
+                        if 'WARNING:' not in line)
+                except Exception as e:
+                    logerrors="oops, couldn't process log file [%s], error was [%s]"%(logfname,e,)
+            except IOError:
+                logerrors="oops, couldn't read log file [%s]"%(logfname,)
+            raise Exception('run failed, no output to compare against target--check log file.\nlog errors:\n'+logerrors)
         self.check_output(**kw)
 
     def check_output(self, **kw):
