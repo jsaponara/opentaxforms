@@ -1,3 +1,7 @@
+0.5.4 (2017-02-14)
+
+- install pdf2svg in travis before_script step.
+
 0.5.3 (2017-02-14)
 
 - test: add non-warning lines from log file to output [convenient to know what went wrong with the travis build; helpful for new users too].
