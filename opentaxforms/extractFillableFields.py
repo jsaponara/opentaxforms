@@ -1,10 +1,12 @@
 from __future__ import print_function, absolute_import
+import sys
 import six
 import re
 from sys import exc_info
 from itertools import chain
 from argparse import ArgumentParser
-from six import StringIO
+from six import StringIO, unichr
+from lxml import etree
 try:
     from cPickle import dump
 except ImportError:
@@ -14,8 +16,8 @@ from .config import cfg
 from .ut import log, setupLogging, exists, skip, Qnty, pf, run
 from .irs import commandPtn, possibleColTypes, CrypticXml
 
-ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
-UNESC_PAT = re.compile(r'&#(\d+);')
+ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]', re.U)
+UNESC_PAT = re.compile(r'&#(\d+);', re.U)
 
 
 def escape(s):
@@ -31,7 +33,7 @@ def unescape(s):
         >>> unescape('&#60;field name=&#34;blah&#34;&#62;')
         '<field name="blah">'
         '''
-    return UNESC_PAT.sub(lambda m: chr(int(m.group(1))), s)
+    return UNESC_PAT.sub(lambda m: unichr(int(m.group(1))), s)
 
 
 def unescapeline(line):
@@ -71,7 +73,7 @@ def getRawXml(prefix, path='.'):
             msg = 'CrypticXml: cannot textify xml file for form %s' % prefix
             log.warn(msg)
             raise CrypticXml(msg)
-        open(xmltextfname, 'w').write(xmlAsStr)
+        open(xmltextfname, 'w').write(xmlAsStr.encode('utf8'))
     return xmlAsStr
 
 
@@ -166,7 +168,6 @@ def parseXml(xmlAsStr, pathPrefix=None):
         xmlAsStr -> etree parse tree
         optionally write pretty_print'd xml to "-fmt.xml" file
         '''
-    from lxml import etree
     parser = etree.XMLParser(encoding='utf-8', recover=True)
     tree = etree.parse(StringIO(xmlAsStr), parser)
     if pathPrefix:
@@ -556,10 +557,8 @@ def main():
     if args.doctests:
         import doctest
         doctest.testmod()
-        import sys
         sys.exit()
     if infile == 'stdin':
-        import sys
         f = sys.stdin
     else:
         f = open(infile)
