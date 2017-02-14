@@ -1,3 +1,10 @@
+0.5.3 (2017-02-14)
+
+- test: add non-warning lines from log file to output [convenient to know what went wrong with the travis build; helpful for new users too].
+- 2 patches from meetup.com/pug-ip sprint on 13feb2017:
+- dependency in README,README.md [by polera--thanks James!].
+- bugfix in ut.run [by perimosocordiae--thanks CJ!].
+
 0.5.2 (2017-02-13)
 
 - start port to windows.
