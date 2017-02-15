@@ -110,6 +110,8 @@ def getFileList(dirName):
     allpdfpath = '{dirName}/allpdfnames.txt'.format(**vars())
     if not ut.exists(allpdfpath):
         if 1:  # until resolve urllib2 code below
+            # todo either use allpdfnames file in place,
+            #      or run all symlinking as a separate pass
             allpdfpath = ut.Resource(appname, 'static/allpdfnames.txt').path()
             allpdfLink = dirName + '/allpdfnames.txt'
             try:
@@ -117,7 +119,10 @@ def getFileList(dirName):
                     from os import symlink
                     symlink(allpdfpath, allpdfLink)
             except Exception as e:
-                log.warn('cannot symlink %s, %s'%(allpdfpath,allpdfLink,))
+                log.warn('cannot symlink %s to %s because %s, copying instead'%(
+                    allpdfpath, allpdfLink, e, ))
+                import shutil
+                shutil.copy(allpdfpath,allpdfLink)
         elif not cfg.okToDownload:
             msg = 'allPdfNames file [%s] not found but dontDownload' % (
                 allpdfpath)
@@ -238,7 +243,16 @@ def setup(**overrideArgs):
                 from os import symlink
                 symlink(staticDir, staticLink)
         except Exception as e:
-            log.warn('cannot symlink %s, %s'%(staticDir,staticLink,))
+            log.warn('cannot symlink %s to %s because %s, copying instead'%(
+                staticDir, staticLink, e))
+            try:
+                import shutil
+                shutil.copytree(staticDir, staticLink)
+            except Exception as e:
+                log.warn('cannot copy %s to %s because %s,'
+                    ' continuing without static files,'
+                    ' which are used only when serving html files'%(
+                    staticDir, staticLink, e))
 
         if cfg.checkFileList:
             getFileList(dirName)
