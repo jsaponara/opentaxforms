@@ -1,5 +1,7 @@
 from __future__ import print_function
 import sys
+import os
+import os.path
 from argparse import ArgumentParser
 import opentaxforms.ut as ut
 from opentaxforms.ut import log, Bag, setupLogging, logg, NL
@@ -114,8 +116,7 @@ def getFileList(dirName):
             allpdfLink = dirName + '/allpdfnames.txt'
             try:
                 if not ut.exists(allpdfLink):
-                    from os import symlink
-                    symlink(allpdfpath, allpdfLink)
+                    os.symlink(allpdfpath, allpdfLink)
             except Exception as e:
                 log.warn('cannot symlink %s, %s', allpdfpath, allpdfLink)
         elif not cfg.okToDownload:
@@ -228,8 +229,6 @@ def setup(**overrideArgs):
         ut.ensure_dir(dirName)
         staticDir = ut.Resource(appname, 'static').path()
         staticLink = dirName + '/static'
-        import os
-        import os.path
         try:
             if not os.path.lexists(staticLink):
                 os.symlink(staticDir, staticLink)
