@@ -108,10 +108,9 @@ def findRefs(form):
             if formFname in cfg.allpdfnames:
                 context['fprefix'] = formFname
                 return (form, sched), context
-        log.warn(
-            'unrecognizedRefs: not in allpdfnames:'
-            ' {} from {} originally {} eg {}'
-            .format(formFnames, formish, context, cfg.allpdfnames[:4]))
+        log.warn(u'unrecognizedRefs: not in allpdfnames:'
+                 u' %s from %s originally %s eg %s',
+                 formFnames, formish, context, cfg.allpdfnames[:4])
         return ['err']
 
     def relaxRegex(pttnstr):
