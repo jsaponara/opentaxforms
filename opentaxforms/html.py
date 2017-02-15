@@ -170,15 +170,10 @@ def jsterm(field, key='uniqname', display=False):
 def math(cfield):
     def opjoin(op, ll, termz):
         return op.join(termz)
-    return (
-        '%(lhsline)s=%(rhsexpr)s' % dict(
-            lhsline=(cfield['linenum'] or '') + cfield.get('coltitle', ''),
-            rhsexpr=opjoin(
-                cfield['op'],
-                cfield['linenum'],
-                [jsterm(depfield, 'linenum', True)
-                    for depfield in cfield['deps']]),
-            )).replace('s.', '')
+    lhsline = (cfield['linenum'] or '') + cfield.get('coltitle', '')
+    termz = [jsterm(depfield, 'linenum', True) for depfield in cfield['deps']]
+    rhsexpr = opjoin(cfield['op'], cfield['linenum'], termz)
+    return (lhsline + '=' + rhsexpr).replace('s.', '')
 
 
 def ratio(qnty1, qnty2):
@@ -352,8 +347,8 @@ def computeSteps(cfield):
                     # for cols a and b]
                     log.error(
                         'computeSteps: zcond term %s [%s]'
-                        ' matches w/ more than one of deps [%s] in field [%s]'
-                        % (whichside, sideval, uniqlinenums, cfield['speak']))
+                        ' matches w/ more than one of deps [%s] in field [%s]',
+                        whichside, sideval, uniqlinenums, cfield['speak'])
             if sideval != sideval0:
                 ut.jdb('<uniqifyDep', sideval)
             return sideval

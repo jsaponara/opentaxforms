@@ -117,7 +117,7 @@ def getFileList(dirName):
                     from os import symlink
                     symlink(allpdfpath, allpdfLink)
             except Exception as e:
-                log.warn('cannot symlink %s, %s'%(allpdfpath,allpdfLink,))
+                log.warn('cannot symlink %s, %s', allpdfpath, allpdfLink)
         elif not cfg.okToDownload:
             msg = 'allPdfNames file [%s] not found but dontDownload' % (
                 allpdfpath)
@@ -154,7 +154,6 @@ alreadySetup = False
 
 
 def setup(**overrideArgs):
-    from os import makedirs
     # note formyear will default to latestTaxYear even if dirName=='2014'
     global alreadySetup
     if alreadySetup:
@@ -187,9 +186,9 @@ def setup(**overrideArgs):
     if cfg.rootForms:
         rootForms = [f.strip() for f in cfg.rootForms.split(',')]
     else:
-        rootForms=['']
+        rootForms = ['']
     if cfg.logPrefix:
-        logname=cfg.logPrefix
+        logname = cfg.logPrefix
     elif rootForms:
         logname = rootForms[0]
         if len(rootForms) > 1:
@@ -211,11 +210,10 @@ def setup(**overrideArgs):
             cfg.formsRequested = [
                 Form(rootForm, RecursionRootLevel) for rootForm in rootForms]
         else:
-            from os import listdir
             from os.path import isfile, join as joinpath
             cfg.formsRequested = [
                 Form(f, RecursionRootLevel)
-                for f in listdir(dirName)
+                for f in os.listdir(dirName)
                 if isfile(joinpath(dirName, f)) and f.lower().endswith('.pdf')]
         if not cfg.formsRequested and not cfg.relaxRqmts:
             raise Exception(
@@ -227,18 +225,16 @@ def setup(**overrideArgs):
         # log entire config .before. getFileList makes it huge
         logg('config:' + str(cfg), [log.warn])
 
-        import os
-        if not ut.exists(dirName):
-            makedirs(dirName)
+        ut.ensure_dir(dirName)
         staticDir = ut.Resource(appname, 'static').path()
         staticLink = dirName + '/static'
+        import os
         import os.path
         try:
             if not os.path.lexists(staticLink):
-                from os import symlink
-                symlink(staticDir, staticLink)
-        except Exception as e:
-            log.warn('cannot symlink %s, %s'%(staticDir,staticLink,))
+                os.symlink(staticDir, staticLink)
+        except Exception:
+            log.warn('cannot symlink %s, %s', staticDir,staticLink)
 
         if cfg.checkFileList:
             getFileList(dirName)

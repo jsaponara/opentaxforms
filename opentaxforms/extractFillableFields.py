@@ -183,8 +183,9 @@ def ensurePathsAreUniq(fields):
     fieldsbyid = set()
     for f in fields:
         if f['path'] in fieldsbyid:
-            log.error('dup paths [%s]' % (f['path']))
-        fieldsbyid.add(f['path'])
+            log.error('dup paths [%s]', f['path'])
+        else:
+            fieldsbyid.add(f['path'])
     assert len(fields) == len(fieldsbyid), 'dup paths?  see log'
 
 
@@ -200,17 +201,13 @@ def extractFields(form):
         return
     pathprefix = '%s/%s' % (dirName, prefix)
 
-    def xmlFromPdf(pathprefix):
-        outname = '%s.xml' % (pathprefix)
-        if not exists(outname):
-            dumppdfName = 'dumppdf.py'
-            run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathprefix,
-                pathprefix))
-    xmlFromPdf(pathprefix)
+    if not exists(pathprefix + '.xml'):
+        run('dumppdf.py -at %s.pdf > %s.xml' % (pathprefix, pathprefix))
+
     try:
         xmlAsStr = getRawXml(prefix, dirName)
         tree = parseXml(xmlAsStr, pathprefix)
-        namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+        nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
         tables = collectTables(tree, nsz)
         fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
         prevTable = None
@@ -436,8 +433,8 @@ def extractFields(form):
                 continue
                 # skip draw elements not assoc'd w/ a page; they are in some header
             if npage < 1:
-                log.warn('rejecting visibl [{}] on invalid page [{}]'.format(
-                    elname, npage))
+                log.warn('rejecting visibl [%s] on invalid page [%s]',
+                         elname, npage)
                 continue
             d = dict(el.attrib.items())  # todo is el.attrib needed here?
             d.update(dict(
@@ -511,8 +508,7 @@ def extractFields(form):
             else:
                 visiblz.append(d)
         ensurePathsAreUniq(fields)
-        log.info(
-            'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
+        log.info('found [%d] fields, [%d] visiblz', len(fields), len(visiblz))
         with open(dirName + '/' + prefix + '-visiblz.txt', 'wb') as f:
             f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;

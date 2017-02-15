@@ -109,7 +109,7 @@ def unifyTableRows(fieldsByRow):
 
 def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
     # compute and assign unique linenums
-    for lnum, ypoz in ypozByLinenum.items():
+    for lnum in ypozByLinenum:
         # using noncentFields to ensure just one field per ypos
         # eg dollar-and-cent pair usu at same ypos
         # newcode but wks for 1040,1040sb
@@ -167,10 +167,10 @@ def linkfields(form):
                 # 2015/f1040sse/line7 and 2015/f8814/line5 [hmm, both are pre-
                 # filled fields...; speak has the amt but not always with a
                 # "$"]
-                msgtmpl = 'expectedDollars: expected field [%s]'      \
-                          ' to have unit==dollars, instead got [%s]'  \
-                          ' from previous speak: [%s]'
-                log.warn(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak']))
+                log.warn('expectedDollars: expected field [%s]'
+                         ' to have unit==dollars, instead got [%s]'
+                         ' from previous speak: [%s]',
+                         dd['uniqname'], dd['unit'], dd['speak'])
                 #log.warn('UnicodeError:'+(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak'])).encode('utf-8'))
                 dd['unit'] = 'dollars'
             dd['centfield'] = cc

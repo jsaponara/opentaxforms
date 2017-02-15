@@ -135,19 +135,20 @@ def logRunStatus(formsdone, formsfail, status):
     statusStr = json.dumps(status.__dict__)
     # status is partial because missing,spurious values are unknown and thus
     # omitted
-    log.warn('status partial data: %s' % (statusStr))
+    log.warn('status partial data: %s', statusStr)
 
 
 def indicateProgress(form):
     def guessFormPrefix(form):
+        sched = ''
         try:
-            f,sched=form.name
-            sched='' if sched is None else 's'+sched.lower()
+            f, sched = form.name
         except ValueError:
-            f=form.name
-            sched=''
-        return 'f'+f+sched
-    log.name=guessFormPrefix(form)
+            f = form.name
+        if sched:
+            sched = 's' + sched.lower()
+        return 'f' + f + sched
+    log.name = guessFormPrefix(form)
     if cfg.indicateProgress:
         msg = '--------' + jj(
               form.name,
