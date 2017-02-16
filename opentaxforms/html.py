@@ -5,7 +5,7 @@ from itertools import chain
 from opentaxforms.config import cfg,setup
 from opentaxforms.irs import computeTitle, computeFormId, sortableFieldname
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, jdb, Qnty, NL
+from opentaxforms.ut import log, jdb, Qnty, NL, pathjoin
 
 
 def computeFormFilename(form):
@@ -78,8 +78,10 @@ def createSvgFile(dirName, prefix, npage):
 def createGifFile(dirName, prefix, npage):
     ipage = npage - 1
     imgfname = prefix + '.gif'
-    cmd = 'convert -density 144 %s/%s.pdf[%d] %s/%s' % (
-          dirName, prefix, ipage, dirName, imgfname)
+    pathPlusPrefix = pathjoin(dirName, prefix)
+    imgfpath = pathjoin(dirName, imgfname)
+    cmd = 'convert -density 144 %s.pdf [%d] %s' % (
+          pathPlusPrefix, ipage, imgfpath)
     out, err = ut.run(cmd)
     if err:
         msg = (
@@ -430,6 +432,7 @@ def writeEmptyHtmlPages(form):
     formrefs = form.refs
     npages = len(pageinfo)
     template = ut.Resource('opentaxforms', 'template/form.html').content()
+    # todo maybe use a real templating lib like jinja2
     emptyHtml = template     \
         .replace('{', '{{')  \
         .replace('}', '}}')  \
@@ -517,6 +520,7 @@ def writeEmptyHtmlPages(form):
                     jsterm(depfield)
                     for depfield in cfield['deps']),
                 signs=getSigns(cfield),
+                # '//' starts a javascript comment
                 math='//' + math(cfield) if cfg.debug else '',)
             for cfield in form.computedFields.values()
             if cfield['unit'] is None
@@ -596,7 +600,7 @@ def writeEmptyHtmlPages(form):
             if data['draw']['npage'] == npage and 'bboxz' in data
             for bbox in data['bboxz'])
         open(
-            dirName + '/%s-p%d.html' % (prefix, npage), 'w')  \
+            pathjoin(dirName, '/%s-p%d.html' % (prefix, npage)), 'w')  \
             .write(
                 emptyHtml.format(
                     title=title,

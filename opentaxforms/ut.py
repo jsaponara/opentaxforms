@@ -1,4 +1,5 @@
 import os
+from os.path import join as pathjoin
 import logging
 from collections import (
     namedtuple as ntuple,
@@ -524,7 +525,7 @@ def exists(fname):
         False
     '''
     from os import access, F_OK
-    fname = fname.rstrip('/')
+    fname = fname.rstrip('/\\')
     return access(fname, F_OK)
 
 
@@ -544,7 +545,7 @@ def now(**kw):
 
 def readImgSize(fname, dirName):
     from PIL import Image
-    f = open(dirName + '/' + fname, 'rb')
+    f = open(pathjoin(dirName,fname), 'rb')
     img = Image.open(f)
     imgw, imgh = img.size
     f.close()

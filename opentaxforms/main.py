@@ -14,7 +14,8 @@ import sys
 from os import remove as removeFile
 import traceback
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, jj, Bag, logg, stdout, Qnty
+from opentaxforms.ut import (log, jj, Bag, logg, stdout, Qnty,
+    pathjoin)
 from opentaxforms.config import cfg, setup, RecurseInfinitely
 import opentaxforms.irs as irs
 import opentaxforms.link as link
@@ -28,8 +29,8 @@ def cleanup_files(form):
     '''remove intermediate files'''
     prefix = form.prefix
     if 'c' in cfg.steps:
-        rawXmlFname = '{}/{}-text.xml'.format(cfg.dirName, prefix)
-        fmtXmlFname = '{}/{}-fmt.xml'.format(cfg.dirName, prefix)
+        rawXmlFname = pathjoin(cfg.dirName, '{}-text.xml'.format(prefix))
+        fmtXmlFname = pathjoin(cfg.dirName, '{}-fmt.xml'.format(prefix))
         if ut.exists(rawXmlFname):
             removeFile(rawXmlFname)
         if ut.exists(fmtXmlFname):

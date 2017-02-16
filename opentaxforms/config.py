@@ -2,7 +2,7 @@
 import sys
 from argparse import ArgumentParser
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, Bag, setupLogging, logg, NL
+from opentaxforms.ut import log, Bag, setupLogging, logg, NL, pathjoin
 from opentaxforms.version import appname, appversion
 
 RecurseInfinitely = -1
@@ -107,13 +107,14 @@ def parseCmdline():
 
 def getFileList(dirName):
     # todo replace this section in task formDictionary
-    allpdfpath = '{dirName}/allpdfnames.txt'.format(**vars())
+    allpdffname='allpdfnames.txt'
+    allpdfpath = pathjoin(dirName,allpdffname)
     if not ut.exists(allpdfpath):
         if 1:  # until resolve urllib2 code below
             # todo either use allpdfnames file in place,
             #      or run all symlinking as a separate pass
-            allpdfpath = ut.Resource(appname, 'static/allpdfnames.txt').path()
-            allpdfLink = dirName + '/allpdfnames.txt'
+            allpdfpath = ut.Resource(appname, 'static/'+allpdffname).path()
+            allpdfLink = pathjoin(dirName,allpdffname)
             try:
                 if not ut.exists(allpdfLink):
                     from os import symlink
@@ -200,7 +201,7 @@ def setup(**overrideArgs):
         if len(rootForms) > 1:
             logname += 'etc'
     elif dirName:
-        logname = dirName.replace('/', '_').strip('._')
+        logname = dirName.replace('/', '_').replace('\\', '_').strip('._')
     else:
         logname = appname
     loginfo = setupLogging(logname, cfg)
@@ -236,7 +237,7 @@ def setup(**overrideArgs):
         if not ut.exists(dirName):
             makedirs(dirName)
         staticDir = ut.Resource(appname, 'static').path()
-        staticLink = dirName + '/static'
+        staticLink = pathjoin(dirName, 'static')
         import os.path
         try:
             if not os.path.lexists(staticLink):

@@ -4,7 +4,8 @@ import re
 from itertools import chain
 from argparse import ArgumentParser
 from opentaxforms.config import cfg
-from opentaxforms.ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
+from opentaxforms.ut import (log, setupLogging, exists, skip,
+    NL, Qnty, pf, run, pathjoin)
 from opentaxforms.irs import commandPtn, possibleColTypes, CrypticXml
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
@@ -32,13 +33,14 @@ def unescapeline(line):
 
 
 def getRawXml(prefix, path='.'):
-    xmltextfname = '%s/%s-text.xml' % (path, prefix)
+    pathPlusPrefix = pathjoin(path, prefix)
+    xmltextfname = pathPlusPrefix+'-text.xml'
     if exists(xmltextfname):
         log.debug('xml text file already exists [{}]'.format(xmltextfname))
         xmlAsStr = open(xmltextfname).read()
     else:
         log.debug('creating xml text file [%s]', xmltextfname)
-        f = open('%s/%s.xml' % (path, prefix), 'rb')
+        f = open(pathPlusPrefix+'.xml', 'rb')
         datanamespace = 'xfa-template'
         fieldFrags = []
         for line in f:
@@ -153,7 +155,7 @@ def indexAmongSibs(el, tag=None, namespaces=None):
     return p.xpath('%s' % (tag, ), namespaces=namespaces).index(el)
 
 
-def parseXml(xmlAsStr, pathPrefix=None):
+def parseXml(xmlAsStr, pathPlusPrefix=None):
     '''
         xmlAsStr -> etree parse tree
         optionally write pretty_print'd xml to "-fmt.xml" file
@@ -162,8 +164,8 @@ def parseXml(xmlAsStr, pathPrefix=None):
     from StringIO import StringIO
     parser = etree.XMLParser(encoding='utf-8', recover=True)
     tree = etree.parse(StringIO(xmlAsStr), parser)
-    if pathPrefix:
-        xmlfmtfname = '%s-fmt.xml' % (pathPrefix)
+    if pathPlusPrefix:
+        xmlfmtfname = '%s-fmt.xml' % (pathPlusPrefix)
         if not exists(xmlfmtfname):
             open(xmlfmtfname, 'w').write(
                 etree.tostring(tree, pretty_print=True)
@@ -190,18 +192,18 @@ def extractFields(form):
     assert len(fields)==0
     if 'x' not in cfg.steps:
         return
-    pathprefix = '%s/%s' % (dirName, prefix)
+    pathPlusPrefix = pathjoin(dirName, prefix)
 
-    def xmlFromPdf(pathprefix):
-        outname = '%s.xml' % (pathprefix)
+    def xmlFromPdf(pathPlusPrefix):
+        outname = '%s.xml' % (pathPlusPrefix)
         if not exists(outname):
             dumppdfName = 'dumppdf.py'
-            run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathprefix,
-                pathprefix))
-    xmlFromPdf(pathprefix)
+            run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathPlusPrefix,
+                pathPlusPrefix))
+    xmlFromPdf(pathPlusPrefix)
     try:
         xmlAsStr = getRawXml(prefix, dirName)
-        tree = parseXml(xmlAsStr, pathprefix)
+        tree = parseXml(xmlAsStr, pathPlusPrefix)
         namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
         tables = collectTables(tree, nsz)
         fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
@@ -498,7 +500,7 @@ def extractFields(form):
         ensurePathsAreUniq(fields)
         log.info(
             'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
-        with open(dirName + '/' + prefix + '-visiblz.txt', 'w') as f:
+        with open(pathjoin(dirName, prefix) + '-visiblz.txt', 'w') as f:
             f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;
         # draws are all (fillable and read-only/non-fillable) visible fields
