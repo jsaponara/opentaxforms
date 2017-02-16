@@ -3,10 +3,78 @@
     The tests.
 '''
 
-from os.path import join as pathjoin,basename
+from os.path import basename
 from shutil import copy
+from opentaxforms.ut import pathjoin
 from opentaxforms import ut
 from opentaxforms import config
+
+
+class TestApiBase(object):
+    '''setup/teardown'''
+    def setup_method(self):
+        '''pre-test setup'''
+        from opentaxforms.serve import createApp
+        # we just read from this db
+        dbpath = 'sqlite:///' + ut.Resource(
+            'test', 'forms-common/f1040.sqlite3').path()
+        # dirName=None means dont look for a forms/ directory
+        self.app = createApp(dbpath=dbpath, dirName=None)
+        self.client = self.app.test_client()
+
+    def teardown_method(self):
+        '''post-test teardown'''
+        pass
+
+
+class TestApi(TestApiBase):
+    '''test the api'''
+    def test_api_orgn(self):
+        '''get list of organizations (currently just IRS)'''
+        request = '/api/v1/orgn'
+        response = self.client.get(request)
+        print request, '->', response.data
+        assert '"code": "us_irs"' in response.data
+        assert response.status_code == 200
+
+    def test_api_f1040(self):
+        '''get form 1040'''
+        request = (
+            '/api/v1/form?q='
+            '{"filters":[{"name":"code","op":"eq","val":"1040"}]}')
+        response = self.client.get(request)
+        print request, '->', response.data
+        assert '"title": "Form 1040"' in response.data
+        assert response.status_code == 200
+
+    def test_api_noresults(self):
+        '''request a nonexistent form'''
+        request = (
+            '/api/v1/form?q='
+            '{"filters":[{"name":"code","op":"eq","val":"0000"}]}')
+        response = self.client.get(request)
+        print request, '->', response.data
+        assert '"num_results": 0' in response.data
+        assert response.status_code == 200
+
+    def test_api_filterslots(self):
+        '''demo of how to filter
+            get all checkbox fields on page 1 of form 1040
+        '''
+        import json
+        url = '/api/v1/slot?q=%s'
+        filters = [
+            dict(name='inptyp', op='eq', val='k'),  # k=checkbox [vs x=textbox]
+            dict(name='page', op='eq', val=1),  # on page 1
+            dict(name='form', op='has',
+                 val=dict(name='code', op='eq', val='1040')),  # of form 1040
+            ]
+        paramstring = json.dumps(dict(filters=filters))
+        request = url % (paramstring, )
+        response = self.client.get(request)
+        print request, '->', response.data
+        assert response.status_code == 200
+        assert '"num_results": 15' in response.data
 
 
 class TestBase(object):
@@ -97,18 +165,7 @@ class TestSteps(TestBase):
         start with 'test_' because it runs for several seconds
         '''
 
-    # todo use a less complex form than 1040 to speed testing
-    #      yet maintain 75% coverage
-    def test_run_1040_full(self, **kw):
-        '''full run of form 1040'''
-        dir_name = pathjoin(self.testdir, 'forms_1040_full')
-        self.run(
-            rootForms='1040',
-            filesToCheck=['f1040-p1.html'],
-            dirName=dir_name,
-            ignoreCaches=True,
-            **kw
-            )
+    xfaFinished = False
 
     def test_run_1040_xfa(self, **kw):
         '''xfa-only run of form 1040'''
@@ -125,76 +182,25 @@ class TestSteps(TestBase):
             computeOverlap=False,  # speeds testing
             **kw
             )
+        self.xfaFinished = True
 
     # todo add tests of further steps,
     #      made fast via pickled results of previous step
 
-
-class TestApiBase(object):
-    '''setup/teardown'''
-    def setup_method(self):
-        '''pre-test setup'''
-        from opentaxforms.serve import createApp
-        # we just read from this db
-        dbpath = 'sqlite:///' + ut.Resource(
-            'test', 'forms-common/f1040.sqlite3').path()
-        # dirName=None means dont look for a forms/ directory
-        self.app = createApp(dbpath=dbpath, dirName=None)
-        self.client = self.app.test_client()
-
-    def teardown_method(self):
-        '''post-test teardown'''
-        pass
-
-
-class TestApi(TestApiBase):
-    '''test the api'''
-    def test_api_orgn(self):
-        '''get list of organizations (currently just IRS)'''
-        request = '/api/v1/orgn'
-        response = self.client.get(request)
-        print request, '->', response.data
-        assert '"code": "us_irs"' in response.data
-        assert response.status_code == 200
-
-    def test_api_f1040(self):
-        '''get form 1040'''
-        request = (
-            '/api/v1/form?q='
-            '{"filters":[{"name":"code","op":"eq","val":"1040"}]}')
-        response = self.client.get(request)
-        print request, '->', response.data
-        assert '"title": "Form 1040"' in response.data
-        assert response.status_code == 200
-
-    def test_api_noresults(self):
-        '''request a nonexistent form'''
-        request = (
-            '/api/v1/form?q='
-            '{"filters":[{"name":"code","op":"eq","val":"0000"}]}')
-        response = self.client.get(request)
-        print request, '->', response.data
-        assert '"num_results": 0' in response.data
-        assert response.status_code == 200
-
-    def test_api_filterslots(self):
-        '''demo of how to filter
-            get all checkbox fields on page 1 of form 1040
-        '''
-        import json
-        url = '/api/v1/slot?q=%s'
-        filters = [
-            dict(name='inptyp', op='eq', val='k'),  # k=checkbox [vs x=textbox]
-            dict(name='page', op='eq', val=1),  # on page 1
-            dict(name='form', op='has',
-                 val=dict(name='code', op='eq', val='1040')),  # of form 1040
-            ]
-        paramstring = json.dumps(dict(filters=filters))
-        request = url % (paramstring, )
-        response = self.client.get(request)
-        print request, '->', response.data
-        assert response.status_code == 200
-        assert '"num_results": 15' in response.data
+    # todo use a less complex form than 1040 to speed testing
+    #      yet maintain 75% coverage
+    def test_run_1040_full(self, **kw):
+        '''full run of form 1040'''
+        if not self.xfaFinished:
+            raise Exception('skipping this test because previous test failed')
+        dir_name = pathjoin(self.testdir, 'forms_1040_full')
+        self.run(
+            rootForms='1040',
+            filesToCheck=['f1040-p1.html'],
+            dirName=dir_name,
+            ignoreCaches=True,
+            **kw
+            )
 
 
 def main(args):
