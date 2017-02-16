@@ -1,10 +1,13 @@
 import re
+import six
 import opentaxforms.ut as ut
 from opentaxforms.ut import log, jj, numerify
 import opentaxforms.irs as irs
 
 
 def normalize(s):
+    if isinstance(s, six.binary_type):
+        s = s.decode('utf8')
     # replace each whitespace string with a single space
     return re.sub(r'\s+', ' ', s)
 
@@ -44,10 +47,10 @@ def lineOrRange(s, pg, fieldsByLine, col=None):
                   ' fieldsByLine.pg,end=%s',
                   pg, start, end, fieldsByLine[(pg, start)],
                   fieldsByLine[(pg, end)])
-        startxpoz = [f['xpos'] for f in fieldsByLine[(pg, start)] if f['unit']
-                     != 'cents']
-        endxpoz = [f['xpos'] for f in fieldsByLine[(pg, end)] if f['unit'] !=
-                   'cents']
+        startxpoz = [f['xpos'] for f in fieldsByLine[(pg, start)]
+                     if f['unit'] != 'cents']
+        endxpoz = [f['xpos'] for f in fieldsByLine[(pg, end)]
+                   if f['unit'] != 'cents']
         for pos in startxpoz:
             if pos in endxpoz:
                 startxpos = endxpos = pos
@@ -62,7 +65,7 @@ def lineOrRange(s, pg, fieldsByLine, col=None):
         # writeEmptyHtmlPages/adjustxpos
         lines = ut.uniqify(
                     [(f['linenum'], f['unit'], f['xpos'])
-                     for k, fs in fieldsByLine.iteritems()
+                     for k, fs in fieldsByLine.items()
                      for f in fs
                      if f['linenum']
                         and startnum <= numerify(f['linenum']) <= endnum

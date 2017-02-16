@@ -9,19 +9,15 @@
     trailing z pluralizes, eg chrz=characters
     pos,poz=position,positions
 '''
-
+from __future__ import print_function, absolute_import
 import sys
 from os import remove as removeFile
 import traceback
-import opentaxforms.ut as ut
-from opentaxforms.ut import log, jj, Bag, logg, stdout, Qnty
-from opentaxforms.config import cfg, setup, RecurseInfinitely
-import opentaxforms.irs as irs
-import opentaxforms.link as link
-import opentaxforms.schema as schema
-import opentaxforms.html as html
-import opentaxforms.refs as references
-from opentaxforms.extractFillableFields import extractFields
+
+from . import ut, irs, link, schema, html, refs as references
+from .ut import log, jj, Bag, logg, stdout, Qnty
+from .config import cfg, setup, RecurseInfinitely
+from .extractFillableFields import extractFields
 
 
 def cleanup_files(form):
@@ -124,7 +120,7 @@ def logFormStatus(form):
 
 def logRunStatus(formsdone, formsfail, status):
     if len(formsdone) > 1:
-        print 'successfully processed {} forms'.format(len(formsdone))
+        print('successfully processed {} forms'.format(len(formsdone)))
         statusTotals = sum(status.values(), Bag())
         msg = 'status totals:' + statusmsgtmpl.format(
               *statusTotals(*'lgood lerrs rgood rerrs mgood merrs'.split()))

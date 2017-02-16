@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 from opentaxforms.version import appname, apiVersion
 from flask import Flask
 
@@ -84,8 +84,8 @@ def createApp(**kw):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # to suppress warning
     counts = createApi(app,postgres=args.postgres, **kw)
     if verbose:
-        print 'serving {slot} slots in {form} forms from {orgn} orgns'.format(
-            **counts)
+        print('serving {slot} slots in {form} forms from {orgn} orgns'.format(
+              **counts))
     return app
 
 

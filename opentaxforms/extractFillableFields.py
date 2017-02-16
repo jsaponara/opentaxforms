@@ -1,14 +1,23 @@
-
-from sys import exc_info
+from __future__ import print_function, absolute_import
+import sys
+import six
 import re
+from sys import exc_info
 from itertools import chain
 from argparse import ArgumentParser
-from opentaxforms.config import cfg
-from opentaxforms.ut import log, setupLogging, exists, skip, NL, Qnty, pf, run
-from opentaxforms.irs import commandPtn, possibleColTypes, CrypticXml
+from six import StringIO, unichr
+from lxml import etree
+try:
+    from cPickle import dump
+except ImportError:
+    from pickle import dump
 
-ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
-UNESC_PAT = re.compile(r'&#(\d+);')
+from .config import cfg
+from .ut import log, setupLogging, exists, skip, Qnty, pf, run
+from .irs import commandPtn, possibleColTypes, CrypticXml
+
+ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]', re.U)
+UNESC_PAT = re.compile(r'&#(\d+);', re.U)
 
 
 def escape(s):
@@ -24,10 +33,12 @@ def unescape(s):
         >>> unescape('&#60;field name=&#34;blah&#34;&#62;')
         '<field name="blah">'
         '''
-    return UNESC_PAT.sub(lambda m: chr(int(m.group(1))), s)
+    return UNESC_PAT.sub(lambda m: unichr(int(m.group(1))), s)
 
 
 def unescapeline(line):
+    if isinstance(line, six.binary_type):
+        line = line.decode('utf8')
     return unescape(line.replace('&#10;', '').replace('&#13;', ''))
 
 
@@ -35,13 +46,13 @@ def getRawXml(prefix, path='.'):
     xmltextfname = '%s/%s-text.xml' % (path, prefix)
     if exists(xmltextfname):
         log.debug('xml text file already exists [{}]'.format(xmltextfname))
-        xmlAsStr = open(xmltextfname).read()
-    else:
-        log.debug('creating xml text file [%s]', xmltextfname)
-        f = open('%s/%s.xml' % (path, prefix), 'rb')
-        datanamespace = 'xfa-template'
+        return open(xmltextfname).read()
+
+    log.debug('creating xml text file [%s]', xmltextfname)
+    with open('%s/%s.xml' % (path, prefix), 'rb') as fh:
+        datanamespace = b'xfa-template'
         fieldFrags = []
-        for line in f:
+        for line in fh:
             if datanamespace in line:
                 # just in case there are multiple data elements with the target
                 # datanamespace--must not give multiple toplevel elements to
@@ -59,11 +70,10 @@ def getRawXml(prefix, path='.'):
         if not xmlAsStr:
             xmlAsStr = '\n'.join(f for f in fieldFrags if f)
         if not xmlAsStr.strip():
-            msg='CrypticXml: cannot textify xml file for form %s'%(prefix,)
+            msg = 'CrypticXml: cannot textify xml file for form %s' % prefix
             log.warn(msg)
             raise CrypticXml(msg)
-        open(xmltextfname, 'w').write(xmlAsStr)
-        f.close()
+        open(xmltextfname, 'w').write(xmlAsStr.encode('utf8'))
     return xmlAsStr
 
 
@@ -158,14 +168,12 @@ def parseXml(xmlAsStr, pathPrefix=None):
         xmlAsStr -> etree parse tree
         optionally write pretty_print'd xml to "-fmt.xml" file
         '''
-    from lxml import etree
-    from StringIO import StringIO
     parser = etree.XMLParser(encoding='utf-8', recover=True)
     tree = etree.parse(StringIO(xmlAsStr), parser)
     if pathPrefix:
         xmlfmtfname = '%s-fmt.xml' % (pathPrefix)
         if not exists(xmlfmtfname):
-            open(xmlfmtfname, 'w').write(
+            open(xmlfmtfname, 'wb').write(
                 etree.tostring(tree, pretty_print=True)
                 )
     return tree
@@ -225,23 +233,24 @@ def extractFields(form):
                 # caption node isnt v.informative (or even common), at least for
                 # f1040schedB
                 istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=nsz))
-                ischeckbox = bool(el.xpath('t:ui/t:checkButton', namespaces=nsz))
+                ischeckbox = bool(el.xpath('t:ui/t:checkButton',namespaces=nsz))
                 isReadonly = el.attrib.get('access') == 'readOnly'
                 speakNodes = el.xpath('t:assist/t:speak', namespaces=nsz)
                 if speakNodes:
-                    speak = unicode(speakNodes[0].text).encode('utf-8')
+                    speak = six.text_type(speakNodes[0].text).encode('utf-8')
                 else:
                     speak = ''
                 code = el.xpath('t:items/t:text', namespaces=nsz)
                 if code:
-                    code = unicode(code[0].text).encode('utf-8')
+                    code = six.text_type(code[0].text).encode('utf-8')
                 else:
                     code = None
                 captionText = el.xpath(
                     't:caption/descendant-or-self::text()',
                     namespaces=nsz)
                 if captionText:
-                    captionText = u'|'.join(unicode(t) for t in captionText)
+                    captionText = u'|'.join(six.text_type(t)
+                                            for t in captionText)
                 else:
                     captionText = ''
                 # captionReserve info allows our textbox to avoid encompassing the
@@ -395,18 +404,24 @@ def extractFields(form):
                     wdim = columnWidths[icol]
                 except Exception as e:
                     msg = '; icol,columnWidths=%s,%s' % (icol, columnWidths)
-                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                    etype = type(e)
+                    tb = exc_info()[2]
+                    raise etype(etype(e.message + msg)).with_traceback(tb)
                 try:
                     ypos += rowheights[irow]
                 except Exception as e:
                     msg = '; irow,rowheights=%s,%s\n%s' % (irow, rowheights, pf(
                         locals()))
-                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                    etype = type(e)
+                    tb = exc_info()[2]
+                    raise etype(etype(e.message + msg)).with_traceback(tb)
                 try:
                     xpos += cumColWidths[icol]
                 except Exception as e:
                     msg = '; icol,cumColWidths=%s,%s' % (icol, cumColWidths)
-                    raise type(e), type(e)(e.message + msg), exc_info()[2]
+                    etype = type(e)
+                    tb = exc_info()[2]
+                    raise etype(etype(e.message + msg)).with_traceback(tb)
                 try:
                     coltitle = coltitles[icol]
                     coltype = coltypes[icol]
@@ -424,7 +439,7 @@ def extractFields(form):
                 log.warn('rejecting visibl [{}] on invalid page [{}]'.format(
                     elname, npage))
                 continue
-            d = dict(el.attrib.iteritems())  # todo is el.attrib needed here?
+            d = dict(el.attrib.items())  # todo is el.attrib needed here?
             d.update(dict(
                 i=iel,
                 # this way there's a name key even if element has no name attrib
@@ -498,8 +513,8 @@ def extractFields(form):
         ensurePathsAreUniq(fields)
         log.info(
             'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
-        with open(dirName + '/' + prefix + '-visiblz.txt', 'w') as f:
-            f.write(NL.join(x['text'].encode('utf8') for x in visiblz))
+        with open(dirName + '/' + prefix + '-visiblz.txt', 'wb') as f:
+            f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;
         # draws are all (fillable and read-only/non-fillable) visible fields
         form.fields = fields
@@ -509,11 +524,8 @@ def extractFields(form):
 
 
 def saveFields(fields, prefix):
-    from cPickle import dump
-    picklname = '%s.pickl' % (prefix)
-    pickl = open(picklname, 'w')
-    dump(fields, pickl)
-    pickl.close()
+    with open('%s.pickl' % prefix, 'w') as pickl:
+        dump(fields, pickl)
 
 
 def parse_cli():
@@ -545,10 +557,8 @@ def main():
     if args.doctests:
         import doctest
         doctest.testmod()
-        import sys
         sys.exit()
     if infile == 'stdin':
-        import sys
         f = sys.stdin
     else:
         f = open(infile)

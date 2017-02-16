@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 from os import remove as removeFile
 import re
 from itertools import chain
@@ -46,7 +46,7 @@ def createSvgFile(dirName, prefix, npage):
     ipage = npage - 1
     import os.path
     infpath = os.path.join(dirName,'{}.pdf'.format(prefix))
-    print 'infpath',infpath
+    print('infpath', infpath)
     outfpath = os.path.join(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
     outfpathFinal = os.path.join(dirName,'{}-p{}.svg'.format(prefix, npage))
     cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
@@ -372,26 +372,28 @@ def computeSteps(cfield):
 def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
     # generate the next and prev page links
     # marginw=.05
-    def pagelinktmpl(nnpage, npages, whichway):
+    next_page = (npage+1, 'next', imgw * (1 - linkwidthprop))
+    prev_page = (npage-1, 'prev', imgw * (1 - 2*linkwidthprop))
+
+    links = []
+    for nnpage, whichway, left in [prev_page, next_page]:
         jdb('>pagelinktmpl', nnpage, npages, whichway)
+        css = "style='top:0px; left:{left:.0f}px;'".format(left=left)
         if 1 <= nnpage <= npages:
-            result = \
-                "<a id='{whichway}pagelink' href='{prefix}-p{npage}.html'" \
-                " title='page {npage}' style='top:{top:.0f}px;" \
-                " left:{left:.0f}px;'>" \
-                "<img class='tff' src='/static/img/arrow_%s_32px.png'></a>" % (whichway)
+            result = (
+                "<a id='{whichway}pagelink' href='{prefix}-p{npage}.html'"
+                " title='page {npage}' {css}>"
+                "<img class='tff' src='/static/img/"
+                "arrow_{whichway}_32px.png'></a>"
+            ).format(prefix=prefix, npage=nnpage, whichway=whichway, css=css)
         else:
-            result = ("<img class='tff' src='/static/img/arrow_%s_gray_32px.png'"
-                      " style='top:{top:.0f}px; left:{left:.0f}px;'>"
-                      % (whichway))
+            result = (
+                "<img class='tff' src='/static/img/"
+                "arrow_{whichway}_gray_32px.png' {css}>"
+            ).format(whichway=whichway, css=css)
         jdb('<pagelinktmpl', result)
-        return result
-    return NL.encode('utf8').join(
-        pagelinktmpl(nnpage, npages, whichway).format(
-            prefix=prefix, npage=nnpage, whichway=whichway, top=0,
-            left=imgw * (1 - nicon * linkwidthprop),)
-        for nicon, nnpage, whichway
-        in ((2, npage - 1, 'prev'), (1, npage + 1, 'next')))
+        links.append(result)
+    return NL.join(links)
 
 
 def pdflinkhtml(prefix,imgw,linkwidthprop):
@@ -430,11 +432,11 @@ def writeEmptyHtmlPages(form):
     formrefs = form.refs
     npages = len(pageinfo)
     template = ut.Resource('opentaxforms', 'template/form.html').content()
-    emptyHtml = template     \
-        .replace('{', '{{')  \
-        .replace('}', '}}')  \
-        .replace('[=[', '{') \
-        .replace(']=]', '}')
+    template = template.decode('utf8')
+    emptyHtml = (template.replace('{', '{{')
+                         .replace('}', '}}')
+                         .replace('[=[', '{')
+                         .replace(']=]', '}'))
     titlebase = computeTitle(prefix)
     for npage in range(1, 1 + npages):
         title = computePageTitle(titlebase, npage, npages)
@@ -444,12 +446,12 @@ def writeEmptyHtmlPages(form):
         # <label for='c1_01' style='top:358px; ...; text-align:center'></label>
         # or textboxes: <input id='f1_01' type='text'
         #  style='top:120px; left:451px; width:182px; height:24px' >
-        inputboxes = '\n'.join(
-            checkbox(
-                f, form, pageinfo[npage], imgw, imgh, cfg.verbose)
-            if f.typ == 'checkbox'
-            else textbox(f, form, pageinfo[npage], imgw, imgh, cfg.verbose)
-            for f in form.bfields if f.npage == npage and not f.isReadonly)
+        inputboxes = '\n'.join((
+            checkbox(f, form, pageinfo[npage], imgw, imgh, cfg.verbose)
+            if f.typ == 'checkbox' else
+            textbox(f, form, pageinfo[npage], imgw, imgh, cfg.verbose))
+            for f in form.bfields
+            if f.npage == npage and not f.isReadonly)
         # generate js code for automath
         # math dependencies [examples from f1040]
         # todo accommodate multiple taxpayers or multiple w2 forms
@@ -571,47 +573,48 @@ def writeEmptyHtmlPages(form):
             and cfield['npage'] == npage]
         inputdeps = '\n'.join(chain(inputdepsSingle, inputdepsPair))
         # todo dont hardcode width of 24x24.png icon
-        linkwidthprop = float(24) / imgw
+        linkwidthprop = 24.0 / imgw
         pagelinks = pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop)
         pdflink = pdflinkhtml(prefix, imgw, linkwidthprop)
-        formlinks = '\n'.encode('utf8').join(
-            "<a id='{name}' href='{fname}-p1.html' title='{tip}' "
-            "style='font-color:orange; top:{top:.0f}px; left:{left:.0f}px;"
-            " width:{width:.0f}px; height:{height:.0f}px; '></a>"
-            .format(
-                name=data['draw']['name'],
-                fname=computeFormFilename(form),
-                tip=computeFormTitle(form, formName)
-                    + ('[match:%s]' % (data['match']) if cfg.debug else ''),
-                top=imgh *
-                    (1 - (bbox.y1 / pageinfo[npage].pageheight).magnitude),
-                left=imgw * (bbox.x0 / pageinfo[npage].pagewidth).magnitude,
-                width=imgw *
-                    ((bbox.x1 - bbox.x0) /
-                     pageinfo[npage].pagewidth).magnitude,
-                height=imgh * (
-                    (bbox.y1 - bbox.y0) /
-                    pageinfo[npage].pageheight).magnitude,).encode('utf8')
-            for form, data in formrefs.items()
-            if data['draw']['npage'] == npage and 'bboxz' in data
-            for bbox in data['bboxz'])
-        open(
-            dirName + '/%s-p%d.html' % (prefix, npage), 'w')  \
-            .write(
-                emptyHtml.format(
-                    title=title,
-                    bkgdimgfname=bkgdimgfname,
-                    dbid=dbid,
-                    formid=formid,
-                    pagelinks=pagelinks,
-                    pdflink=pdflink,
-                    inputboxes=inputboxes,
-                    formlinks=formlinks,
-                    readonlyz=readonlyz,
-                    nonobsvblz=nonobsvblz,
-                    obsvblz=obsvblz,
-                    inputdeps=inputdeps,
-                    computedz=computedz,))
+        form_links = []
+        for f, data in formrefs.items():
+            if data['draw']['npage'] != npage or 'bboxz' not in data:
+                continue
+            name = data['draw']['name']
+            fname = computeFormFilename(f)
+            tip = computeFormTitle(f, formName)
+            if cfg.debug:
+                tip += '[match:%s]' % data['match']
+            pw = pageinfo[npage].pagewidth
+            ph = pageinfo[npage].pageheight
+            for bbox in data['bboxz']:
+                top = imgh * (1 - (bbox.y1 / ph).magnitude)
+                left = imgw * (bbox.x0 / pw).magnitude
+                width = imgw * ((bbox.x1 - bbox.x0) / pw).magnitude
+                height = imgh * ((bbox.y1 - bbox.y0) / ph).magnitude
+                form_links.append((
+                    "<a id='{name}' href='{fname}-p1.html' title='{tip}'"
+                    " style='font-color:orange;"
+                    " top:{top:.0f}px; left:{left:.0f}px;"
+                    " width:{width:.0f}px; height:{height:.0f}px; '></a>"
+                    ).format(name=name, fname=fname, tip=tip, top=top,
+                             left=left, width=width, height=height))
+
+        with open(dirName + '/%s-p%d.html' % (prefix, npage), 'w') as fh:
+            fh.write(emptyHtml.format(
+                title=title,
+                bkgdimgfname=bkgdimgfname,
+                dbid=dbid,
+                formid=formid,
+                pagelinks=pagelinks,
+                pdflink=pdflink,
+                inputboxes=inputboxes,
+                formlinks='\n'.join(form_links),
+                readonlyz=readonlyz,
+                nonobsvblz=nonobsvblz,
+                obsvblz=obsvblz,
+                inputdeps=inputdeps,
+                computedz=computedz,))
 
 
 if __name__ == "__main__":
