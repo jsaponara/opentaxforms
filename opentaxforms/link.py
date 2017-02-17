@@ -1,4 +1,4 @@
-
+import six
 import re
 from opentaxforms.ut import log, jj, ddict
 import opentaxforms.irs as irs
@@ -32,6 +32,8 @@ def findLineAndUnit(speak):
         " for entry.")  # f2441
     ('line1', '')
     '''
+    if isinstance(speak, six.binary_type):
+        speak = speak.decode('utf8')
     findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?',
                              speak)
     # Line 62. a. etc
@@ -82,11 +84,12 @@ def unifyTableRows(fieldsByRow):
     # example [form/line] of where this is needed todo consider adding
     # tolerance, eg if y,y+ht overlap >=90% for two cells then theyre in the
     # same row
-    def byPageAndYpos(((pg, ypos), val)):
+    def byPageAndYpos(pg_ypos_val):
         '''
             >>> byPageAndYpos((1,'67.346 mm'),['et','cetera'])
             (1,67.346)
             '''
+        (pg, ypos), val = pg_ypos_val
         return (pg, float(ypos.split(None, 1)[0]))
     for row, fs in sorted(fieldsByRow.items(), key=byPageAndYpos):
         page, ht = row

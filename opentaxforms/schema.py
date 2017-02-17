@@ -5,6 +5,7 @@ form=blank forms
 orgn=organization that publishes the form
 slot=fillable slot in a form
 '''
+from __future__ import print_function
 from sqlalchemy import (
     Table, Column, Integer, SmallInteger, String,
     ForeignKey, Boolean, UniqueConstraint, CheckConstraint, CHAR)
@@ -46,9 +47,9 @@ class Op(CharEnum):
 def createdb(dbname):
     try:
         conn.execute('CREATE DATABASE %s' % (dbname))
-    except ProgrammingError, exc:
+    except ProgrammingError as exc:
         if 'already exists' not in str(exc).lower():
-            print exc
+            print(exc)
             exit()
 
 
