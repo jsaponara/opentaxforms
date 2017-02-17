@@ -73,7 +73,7 @@ def getRawXml(prefix, path='.'):
             msg = 'CrypticXml: cannot textify xml file for form %s' % prefix
             log.warn(msg)
             raise CrypticXml(msg)
-        open(xmltextfname, 'w').write(xmlAsStr.encode('utf8'))
+        open(xmltextfname, 'wb').write(xmlAsStr.encode('utf8'))
     return xmlAsStr
 
 

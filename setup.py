@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     setup_requires=['pytest-runner', ],
     install_requires=['Pint==0.7.2',
-        'argparse==1.2.1',
+        'argparse',
         'lxml>=3.6.4',
         'SQLAlchemy==1.0.15',
         'pdfminer.six',
