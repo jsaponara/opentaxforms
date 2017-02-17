@@ -165,8 +165,6 @@ class TestSteps(TestBase):
         start with 'test_' because it runs for several seconds
         '''
 
-    xfaFinished = False
-
     def test_run_1040_xfa(self, **kw):
         '''xfa-only run of form 1040'''
         dir_name = pathjoin(self.testdir, 'forms_1040_xfa')
@@ -182,7 +180,6 @@ class TestSteps(TestBase):
             computeOverlap=False,  # speeds testing
             **kw
             )
-        self.xfaFinished = True
 
     # todo add tests of further steps,
     #      made fast via pickled results of previous step
@@ -191,8 +188,6 @@ class TestSteps(TestBase):
     #      yet maintain 75% coverage
     def test_run_1040_full(self, **kw):
         '''full run of form 1040'''
-        if not self.xfaFinished:
-            raise Exception('skipping this test because previous test failed')
         dir_name = pathjoin(self.testdir, 'forms_1040_full')
         self.run(
             rootForms='1040',
