@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 import sys
 from argparse import ArgumentParser
 import opentaxforms.ut as ut
@@ -145,7 +145,7 @@ def getFileList(dirName):
                 allpdfnames = ut.uniqify(sorted(allpdfnames))
                 with open(allpdfpath, 'w') as f:
                     f.write(NL.join(allpdfnames))
-            except URLError, e:
+            except URLError as e:
                 log.error(e)
                 log.error('Apparently the IRS website changed. '
                           ' Seek: "expert interface to locating PDF documents.'
@@ -170,7 +170,7 @@ def setup(**overrideArgs):
         args = parseCmdline()
         cfg.update((args, lambda x: x.__dict__.items()))
     if cfg.version:
-        print appversion
+        print(appversion)
         sys.exit()
     for k, v in overrideArgs.items():
         cfg[k] = v

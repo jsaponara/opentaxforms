@@ -1,4 +1,10 @@
 import re
+try:
+    from urllib2 import urlopen, URLError, HTTPError
+except ImportError:
+    from urllib.request import urlopen
+    from urllib.error import URLError, HTTPError
+
 import opentaxforms.ut as ut
 from opentaxforms.ut import (log, ntuple, logg, stdout, Qnty, NL,
     pathjoin)
@@ -29,7 +35,7 @@ class Form(object):
         return '<Form %s>' % (self.name, )
 
     def getFile(self, failurls):
-        if type(self.name) == str and self.name.endswith('.pdf'):
+        if hasattr(self.name, 'endswith') and self.name.endswith('.pdf'):
             # pdf suffix means the file is local
             fname = self.name
             url = None
@@ -68,7 +74,6 @@ class Form(object):
         # download form from irs.gov into {dirName} if not already there
         formName = self.name
         year = int(year)
-        from urllib2 import urlopen, URLError, HTTPError
         formNamesToTry = irs.possibleFilePrefixes(formName)
         msgs = []
         foundfile = False
@@ -117,7 +122,7 @@ class Form(object):
                 except HTTPError:
                     msgs.append('HTTPError at ' + url)
                     failurls.add(url)
-                except URLError, e:
+                except URLError as e:
                     log.error(e)
                     raise
         if not foundfile:
@@ -216,7 +221,7 @@ class Form(object):
         self.upstreamFields.difference_update(computedFields.keys())
         delays = []
         upstreamFieldsList = list(self.upstreamFields)
-        for name, f in computedFields.iteritems():
+        for name, f in computedFields.items():
             for depfield in f['deps']:
                 if depfield['uniqname'] not in upstreamFieldsList:
                     delays.append(name)

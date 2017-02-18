@@ -1,4 +1,4 @@
-
+import six
 from itertools import chain
 import opentaxforms.ut as ut
 import opentaxforms.config as config
@@ -12,9 +12,9 @@ engine, metadata, conn = None, None, None
 
 
 def unicodify(dic):
-    for k, v in dic.iteritems():
-        if type(v) == str:
-            dic[k] = unicode(v.decode('utf-8'))
+    for k, v in dic.items():
+        if isinstance(v, six.binary_type):
+            dic[k] = six.text_type(v.decode('utf-8'))
     return dic
 
 
@@ -107,7 +107,7 @@ def firstCompleteConstraint(table, kw):
             break
     else:
         # found no such constraint, so use all kw entries
-        seekfields = [(getattr(table.c, k), v) for k, v in kw.iteritems()]
+        seekfields = [(getattr(table.c, k), v) for k, v in kw.items()]
     return seekfields
 
 
@@ -204,7 +204,7 @@ def getbycode(table, mem=mem, **kw):
             return s.strip("\" '")
         except Exception:
             return s
-    kw = dict([(k, stripifstring(v)) for k, v in kw.iteritems()])
+    kw = dict([(k, stripifstring(v)) for k, v in kw.items()])
     if kw['code'] in mem[table.name]:
         i = mem[table.name][kw['code']]
     else:
@@ -225,7 +225,7 @@ def getbyname(table, mem=mem, **kw):
             return s.strip("\" '")
         except Exception:
             return s
-    kw = dict([(k, stripifstring(v)) for k, v in kw.iteritems()])
+    kw = dict([(k, stripifstring(v)) for k, v in kw.items()])
     if kw['name'] in mem[table.name]:
         i = mem[table.name][kw['name']]
     else:

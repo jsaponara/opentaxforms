@@ -1,4 +1,5 @@
 import re
+import six
 import opentaxforms.ut as ut
 from opentaxforms.ut import log, jj, pathjoin
 from opentaxforms.config import cfg
@@ -107,10 +108,9 @@ def findRefs(form):
             if formFname in cfg.allpdfnames:
                 context['fprefix'] = formFname
                 return (form, sched), context
-        log.warn(
-            'unrecognizedRefs: not in allpdfnames:'
-            ' {} from {} originally {} eg {}'
-            .format(formFnames, formish, context, cfg.allpdfnames[:4]))
+        log.warn(u'unrecognizedRefs: not in allpdfnames:'
+                 u' %s from %s originally %s eg %s',
+                 formFnames, formish, context, cfg.allpdfnames[:4])
         return ['err']
 
     def relaxRegex(pttnstr):
@@ -275,7 +275,7 @@ def findRefs(form):
                         iFormInLine += 1
         # section for forms announced in previous layout object
         #   eg 1040/54 Other credits from Form: a 3800 b 8801 c ____
-        if unicode(rawtext).strip(u' |\xa0').endswith('Form:'):
+        if six.text_type(rawtext).strip(u' |\xa0').endswith('Form:'):
             maybeForms.ypos = el['ypos']
         elif maybeForms(el):
             for txt in rawtext.strip().split():
@@ -291,8 +291,9 @@ def findRefs(form):
                         iFormInLine += 1
         if lineHasForms:
             lines.extend(formsinline)
-    with open(pathjoin(dirName, prefix) + '-refs.txt', 'w') as f:
-        f.write('\n'.join(lines).encode('utf8'))
+    with open(pathjoin(dirName, prefix) + '-refs.txt', 'wb') as f:
+        for line in lines:
+            f.write(line.encode('utf8') + b'\n')
     formrefs = findFormRefPoz(formrefs, pageinfo)
     theform.refs = formrefs
 
