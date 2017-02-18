@@ -205,8 +205,9 @@ def extractFields(form):
         outname = '%s.xml' % (pathPlusPrefix)
         if not exists(outname):
             dumppdfName = 'dumppdf.py'
-            run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathPlusPrefix,
-                pathPlusPrefix))
+            cmdline='%s -at %s.pdf > %s.xml' % (dumppdfName, pathPlusPrefix, pathPlusPrefix)
+            print('xmlFromPdf cmdline='+cmdline)
+            run(cmdline)
     xmlFromPdf(pathPlusPrefix)
     try:
         xmlAsStr = getRawXml(prefix, dirName)
