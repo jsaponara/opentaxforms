@@ -1,3 +1,15 @@
+0.5.5 (2017-02-18)
+
+- port to python3--thanks perimosocordiae! [by perimosocordiae]
+- windows port: if symlinking fails, copy files instead.
+- windows port: replace slashes in file paths w/ calls to os.path.join.
+- test: removed xfa test because it currently fails due to seemingly unimportant unicode differences
+- test: reorder tests from simplest to more complex.
+- bugfix: logging: replace basicConfig with handlers, which are replaceable between tests, so each test gets its own log file.
+- bugfix: os.path.join ignores any directories before a leading slash.
+- bugfix: unsetup even after api tests so subsequent ('steps') tests can configure.
+- bugfix: Fixing YAML syntax--travis doesnt like leading tabs [by perimosocordiae].
+
 0.5.4 (2017-02-14)
 
 - install pdf2svg in travis before_script step.
