@@ -6,7 +6,8 @@ except ImportError:
     from urllib.error import URLError, HTTPError
 
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, ntuple, logg, stdout, Qnty, NL
+from opentaxforms.ut import (log, ntuple, logg, stdout, Qnty, NL,
+    pathjoin)
 import opentaxforms.irs as irs
 from opentaxforms.config import cfg
 
@@ -48,8 +49,9 @@ class Form(object):
         prefix = self.fname.rsplit('.', 1)[0]
         log.name = prefix
         self.prefix = prefix
-        self.fpath = cfg.dirName + '/' + prefix + '.pdf'
-        cacheprefix = cfg.dirName + '/' + prefix + '-pdfinfo'
+        pathPlusPrefix = pathjoin(cfg.dirName, prefix)
+        self.fpath = pathPlusPrefix + '.pdf'
+        cacheprefix = pathPlusPrefix + '-pdfinfo'
         infocache = None if not cfg.useCaches else ut.unpickle(cacheprefix)
         if infocache is None:
             self.docinfo, self.pageinfo = self.pdfInfo()
@@ -83,7 +85,7 @@ class Form(object):
         for formName in formNamesToTry:
             fname = fnametmpl % dict(formName=formName, year=year)
             destfname = formName + '.pdf'
-            destfpath = dirName + '/' + destfname
+            destfpath = pathjoin(dirName, destfname)
             if ut.exists(destfpath):
                 foundfile = True
                 break
@@ -91,7 +93,7 @@ class Form(object):
             for formName in formNamesToTry:
                 fname = fnametmpl % dict(formName=formName, year=year)
                 destfname = formName + '.pdf'
-                destfpath = dirName + '/' + destfname
+                destfpath = pathjoin(dirName, destfname)
                 if not cfg.okToDownload:
                     msg = 'oops no ' + destfpath + ' and not okToDownload'
                     logg(msg, [log.error, stdout])

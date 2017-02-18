@@ -1,5 +1,6 @@
 from __future__ import print_function
 import os
+from os.path import join as pathjoin
 import logging
 import six
 from collections import (
@@ -175,7 +176,9 @@ def setupLogging(loggerId, args=None):
             raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (
                 args.loglevel, allowedLogLevels))
         fname = loggerId + '.log'
-        logging.basicConfig(filename=fname, filemode='w', level=loglevel)
+        filehandler=logging.FileHandler(fname, encoding='utf-8')
+        filehandler.setLevel(loglevel)
+        log.addHandler(filehandler)
         alreadySetupLogging = True
     return fname
 
@@ -183,7 +186,7 @@ def setupLogging(loggerId, args=None):
 def unsetupLogging():
     global alreadySetupLogging
     alreadySetupLogging=False
-    logging.shutdown()
+    log.handlers = []
 
 
 defaultOutput = stdout
@@ -529,7 +532,7 @@ def exists(fname):
         False
     '''
     from os import access, F_OK
-    fname = fname.rstrip('/')
+    fname = fname.rstrip('/\\')
     return access(fname, F_OK)
 
 
@@ -549,7 +552,7 @@ def now(**kw):
 
 def readImgSize(fname, dirName):
     from PIL import Image
-    f = open(dirName + '/' + fname, 'rb')
+    f = open(pathjoin(dirName,fname), 'rb')
     img = Image.open(f)
     imgw, imgh = img.size
     f.close()

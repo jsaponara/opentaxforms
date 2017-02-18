@@ -13,7 +13,7 @@ except ImportError:
     from pickle import dump
 
 from .config import cfg
-from .ut import log, setupLogging, exists, skip, Qnty, pf, run
+from .ut import log, setupLogging, exists, skip, Qnty, pf, run, pathjoin
 from .irs import commandPtn, possibleColTypes, CrypticXml
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]', re.U)
@@ -43,28 +43,29 @@ def unescapeline(line):
 
 
 def getRawXml(prefix, path='.'):
-    xmltextfname = '%s/%s-text.xml' % (path, prefix)
+    pathPlusPrefix = pathjoin(path, prefix)
+    xmltextfname = pathPlusPrefix+'-text.xml'
     if exists(xmltextfname):
         log.debug('xml text file already exists [{}]'.format(xmltextfname))
-        return open(xmltextfname).read()
-
-    log.debug('creating xml text file [%s]', xmltextfname)
-    with open('%s/%s.xml' % (path, prefix), 'rb') as fh:
+        xmlAsStr = open(xmltextfname).read()
+    else:
+        log.debug('creating xml text file [%s]', xmltextfname)
         datanamespace = b'xfa-template'
-        fieldFrags = []
-        for line in fh:
-            if datanamespace in line:
-                # just in case there are multiple data elements with the target
-                # datanamespace--must not give multiple toplevel elements to
-                # lxml to avoid 'lxml.etree.XMLSyntaxError: Extra content at
-                # the end of the document'
-                log.debug('found datanamespace')
-                if fieldFrags:
-                    log.warn(
-                        'skipping [%d] chars of xml, already have [%d] chars',
-                        len(line), len(fieldFrags[0]))
-                else:
-                    fieldFrags.append(unescapeline(line))
+        with open(pathPlusPrefix+'.xml', 'rb') as fh:
+            fieldFrags = []
+            for line in fh:
+                if datanamespace in line:
+                    # just in case there are multiple data elements with the target
+                    # datanamespace--must not give multiple toplevel elements to
+                    # lxml to avoid 'lxml.etree.XMLSyntaxError: Extra content at
+                    # the end of the document'
+                    log.debug('found datanamespace')
+                    if fieldFrags:
+                        log.warn(
+                            'skipping [%d] chars of xml, already have [%d] chars',
+                            len(line), len(fieldFrags[0]))
+                    else:
+                        fieldFrags.append(unescapeline(line))
         xmlAsStr = '\n'.join(f for f in fieldFrags
                              if f and 'form checksum' not in f)
         if not xmlAsStr:
@@ -163,15 +164,15 @@ def indexAmongSibs(el, tag=None, namespaces=None):
     return p.xpath('%s' % (tag, ), namespaces=namespaces).index(el)
 
 
-def parseXml(xmlAsStr, pathPrefix=None):
+def parseXml(xmlAsStr, pathPlusPrefix=None):
     '''
         xmlAsStr -> etree parse tree
         optionally write pretty_print'd xml to "-fmt.xml" file
         '''
     parser = etree.XMLParser(encoding='utf-8', recover=True)
     tree = etree.parse(StringIO(xmlAsStr), parser)
-    if pathPrefix:
-        xmlfmtfname = '%s-fmt.xml' % (pathPrefix)
+    if pathPlusPrefix:
+        xmlfmtfname = '%s-fmt.xml' % (pathPlusPrefix)
         if not exists(xmlfmtfname):
             open(xmlfmtfname, 'wb').write(
                 etree.tostring(tree, pretty_print=True)
@@ -198,18 +199,18 @@ def extractFields(form):
     assert len(fields)==0
     if 'x' not in cfg.steps:
         return
-    pathprefix = '%s/%s' % (dirName, prefix)
+    pathPlusPrefix = pathjoin(dirName, prefix)
 
-    def xmlFromPdf(pathprefix):
-        outname = '%s.xml' % (pathprefix)
+    def xmlFromPdf(pathPlusPrefix):
+        outname = '%s.xml' % (pathPlusPrefix)
         if not exists(outname):
             dumppdfName = 'dumppdf.py'
-            run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathprefix,
-                pathprefix))
-    xmlFromPdf(pathprefix)
+            run('%s -at %s.pdf > %s.xml' % (dumppdfName, pathPlusPrefix,
+                pathPlusPrefix))
+    xmlFromPdf(pathPlusPrefix)
     try:
         xmlAsStr = getRawXml(prefix, dirName)
-        tree = parseXml(xmlAsStr, pathprefix)
+        tree = parseXml(xmlAsStr, pathPlusPrefix)
         namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
         tables = collectTables(tree, nsz)
         fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
@@ -513,7 +514,7 @@ def extractFields(form):
         ensurePathsAreUniq(fields)
         log.info(
             'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
-        with open(dirName + '/' + prefix + '-visiblz.txt', 'wb') as f:
+        with open(pathjoin(dirName, prefix) + '-visiblz.txt', 'wb') as f:
             f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;
         # draws are all (fillable and read-only/non-fillable) visible fields

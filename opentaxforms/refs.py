@@ -1,7 +1,7 @@
 import re
 import six
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, jj
+from opentaxforms.ut import log, jj, pathjoin
 from opentaxforms.config import cfg
 import opentaxforms.irs as irs
 
@@ -291,7 +291,7 @@ def findRefs(form):
                         iFormInLine += 1
         if lineHasForms:
             lines.extend(formsinline)
-    with open(dirName + '/' + prefix + '-refs.txt', 'wb') as f:
+    with open(pathjoin(dirName, prefix) + '-refs.txt', 'wb') as f:
         for line in lines:
             f.write(line.encode('utf8') + b'\n')
     formrefs = findFormRefPoz(formrefs, pageinfo)

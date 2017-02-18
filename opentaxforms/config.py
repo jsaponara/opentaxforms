@@ -2,7 +2,7 @@ from __future__ import print_function
 import sys
 from argparse import ArgumentParser
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, Bag, setupLogging, logg, NL
+from opentaxforms.ut import log, Bag, setupLogging, logg, NL, pathjoin
 from opentaxforms.version import appname, appversion
 
 RecurseInfinitely = -1
@@ -107,17 +107,23 @@ def parseCmdline():
 
 def getFileList(dirName):
     # todo replace this section in task formDictionary
-    allpdfpath = '{dirName}/allpdfnames.txt'.format(**vars())
+    allpdffname='allpdfnames.txt'
+    allpdfpath = pathjoin(dirName,allpdffname)
     if not ut.exists(allpdfpath):
         if 1:  # until resolve urllib2 code below
-            allpdfpath = ut.Resource(appname, 'static/allpdfnames.txt').path()
-            allpdfLink = dirName + '/allpdfnames.txt'
+            # todo either use allpdfnames file in place,
+            #      or run all symlinking as a separate pass
+            allpdfpath = ut.Resource(appname, 'static/'+allpdffname).path()
+            allpdfLink = pathjoin(dirName,allpdffname)
             try:
                 if not ut.exists(allpdfLink):
                     from os import symlink
                     symlink(allpdfpath, allpdfLink)
             except Exception as e:
-                log.warn('cannot symlink %s, %s'%(allpdfpath,allpdfLink,))
+                log.warn('cannot symlink %s to %s because %s, copying instead'%(
+                    allpdfpath, allpdfLink, e, ))
+                import shutil
+                shutil.copy(allpdfpath,allpdfLink)
         elif not cfg.okToDownload:
             msg = 'allPdfNames file [%s] not found but dontDownload' % (
                 allpdfpath)
@@ -195,7 +201,7 @@ def setup(**overrideArgs):
         if len(rootForms) > 1:
             logname += 'etc'
     elif dirName:
-        logname = dirName.replace('/', '_').strip('._')
+        logname = dirName.replace('/', '_').replace('\\', '_').strip('._')
     else:
         logname = appname
     loginfo = setupLogging(logname, cfg)
@@ -231,14 +237,23 @@ def setup(**overrideArgs):
         if not ut.exists(dirName):
             makedirs(dirName)
         staticDir = ut.Resource(appname, 'static').path()
-        staticLink = dirName + '/static'
+        staticLink = pathjoin(dirName, 'static')
         import os.path
         try:
             if not os.path.lexists(staticLink):
                 from os import symlink
                 symlink(staticDir, staticLink)
         except Exception as e:
-            log.warn('cannot symlink %s, %s'%(staticDir,staticLink,))
+            log.warn('cannot symlink %s to %s because %s, copying instead'%(
+                staticDir, staticLink, e))
+            try:
+                import shutil
+                shutil.copytree(staticDir, staticLink)
+            except Exception as e:
+                log.warn('cannot copy %s to %s because %s,'
+                    ' continuing without static files,'
+                    ' which are used only when serving html files'%(
+                    staticDir, staticLink, e))
 
         if cfg.checkFileList:
             getFileList(dirName)
@@ -249,12 +264,9 @@ def setup(**overrideArgs):
 def unsetup():
     global alreadySetup
     alreadySetup = False
-    # clear cfg but preserve logfilename
-    logfilename=cfg.logfilename
     cfg.clear()
     cfg.update(defaults)
-    cfg.logfilename=logfilename
-    #ut.unsetupLogging()  # continue using same log setup
+    ut.unsetupLogging()
 
 
 if __name__ == "__main__":

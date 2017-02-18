@@ -15,7 +15,7 @@ from os import remove as removeFile
 import traceback
 
 from . import ut, irs, link, schema, html, refs as references
-from .ut import log, jj, Bag, logg, stdout, Qnty
+from .ut import log, jj, Bag, logg, stdout, Qnty, pathjoin
 from .config import cfg, setup, RecurseInfinitely
 from .extractFillableFields import extractFields
 
@@ -24,8 +24,8 @@ def cleanup_files(form):
     '''remove intermediate files'''
     prefix = form.prefix
     if 'c' in cfg.steps:
-        rawXmlFname = '{}/{}-text.xml'.format(cfg.dirName, prefix)
-        fmtXmlFname = '{}/{}-fmt.xml'.format(cfg.dirName, prefix)
+        rawXmlFname = pathjoin(cfg.dirName, '{}-text.xml'.format(prefix))
+        fmtXmlFname = pathjoin(cfg.dirName, '{}-fmt.xml'.format(prefix))
         if ut.exists(rawXmlFname):
             removeFile(rawXmlFname)
         if ut.exists(fmtXmlFname):
