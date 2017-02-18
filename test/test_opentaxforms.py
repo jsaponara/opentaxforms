@@ -24,7 +24,7 @@ class TestApiBase(object):
 
     def teardown_method(self):
         '''post-test teardown'''
-        pass
+        config.unsetup()
 
 
 class TestApi(TestApiBase):

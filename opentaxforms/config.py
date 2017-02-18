@@ -264,12 +264,9 @@ def setup(**overrideArgs):
 def unsetup():
     global alreadySetup
     alreadySetup = False
-    # clear cfg but preserve logfilename
-    logfilename=cfg.logfilename
     cfg.clear()
     cfg.update(defaults)
-    cfg.logfilename=logfilename
-    #ut.unsetupLogging()  # continue using same log setup
+    ut.unsetupLogging()
 
 
 if __name__ == "__main__":

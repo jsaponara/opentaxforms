@@ -171,7 +171,9 @@ def setupLogging(loggerId, args=None):
             raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (
                 args.loglevel, allowedLogLevels))
         fname = loggerId + '.log'
-        logging.basicConfig(filename=fname, filemode='w', level=loglevel)
+        filehandler=logging.FileHandler(fname, encoding='utf-8')
+        filehandler.setLevel(loglevel)
+        log.addHandler(filehandler)
         alreadySetupLogging = True
     return fname
 
@@ -179,7 +181,7 @@ def setupLogging(loggerId, args=None):
 def unsetupLogging():
     global alreadySetupLogging
     alreadySetupLogging=False
-    logging.shutdown()
+    log.handlers = []
 
 
 defaultOutput = stdout

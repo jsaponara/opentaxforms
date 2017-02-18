@@ -600,7 +600,7 @@ def writeEmptyHtmlPages(form):
             if data['draw']['npage'] == npage and 'bboxz' in data
             for bbox in data['bboxz'])
         open(
-            pathjoin(dirName, '/%s-p%d.html' % (prefix, npage)), 'w')  \
+            pathjoin(dirName, '%s-p%d.html' % (prefix, npage)), 'w')  \
             .write(
                 emptyHtml.format(
                     title=title,
