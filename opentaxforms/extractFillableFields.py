@@ -78,24 +78,24 @@ def getRawXml(prefix, path='.'):
     return xmlAsStr
 
 
-def collectTables(tree, nsz):
-    tableEls = tree.xpath('//*[@layout="table"]', namespaces=nsz)
+def collectTables(tree, namespaces):
+    tableEls = tree.xpath('//*[@layout="table"]', namespaces=namespaces)
     tables = {}
     for el in tableEls:
         # tablename=el.attrib.get('name','nameless')
-        key = computePath(el, nsz)
+        key = computePath(el, namespaces)
         maxhs = []
         for iele, ele in enumerate(
-           el.xpath('.//*[@layout="row"]', namespaces=nsz)):
+           el.xpath('.//*[@layout="row"]', namespaces=namespaces)):
             # rowname=ele.attrib.get('name','nameless') todo for maxheight in
             # each row, assuming just need 'h' attrib, but f1040/line6ctable
             # also has node w/ lineHeight attrib
-            cells = ele.xpath('./*[@h or @minH]', namespaces=nsz)
+            cells = ele.xpath('./*[@h or @minH]', namespaces=namespaces)
             if iele == 0:
                 # get titles from 1st row
-                def getcoltext(elem, nsz):
+                def getcoltext(elem, namespaces):
                     txts = list(elem.xpath('.//*[@style]/text()',
-                                namespaces=nsz))
+                                namespaces=namespaces))
                     alltxt = ' '.join(txts).replace(u'\xa0', '')
                     m = re.match(commandPtn, alltxt)
                     if m:
@@ -113,7 +113,7 @@ def collectTables(tree, nsz):
                             coltype,
                             colinstruction)
                 coltitles, coltypes, colinstructions = zip(
-                    *[getcoltext(elem, nsz) for elem in cells])
+                    *[getcoltext(elem, namespaces) for elem in cells])
             try:
                 maxh = max([Qnty.fromstring(c.attrib.get('h', c.attrib.get(
                     'minH'))) for c in cells])
@@ -141,12 +141,12 @@ def collectTables(tree, nsz):
 
 
 def computePath(el, namespaces):
-    def ancestry(ele, nsz):
+    def ancestry(ele, namespacez):
         return reversed(list(
             elem.attrib.get(
                 'name', '%s#%d' % (
                     elem.tag,
-                    indexAmongSibs(elem, elem.tag, nsz)))
+                    indexAmongSibs(elem, elem.tag, namespacez)))
             for elem in chain([ele], ele.iterancestors())))
     return '.'.join(ancestry(el, namespaces))
 
@@ -184,8 +184,9 @@ def ensurePathsAreUniq(fields):
     fieldsbyid = set()
     for f in fields:
         if f['path'] in fieldsbyid:
-            log.error('dup paths [%s]' % (f['path']))
-        fieldsbyid.add(f['path'])
+            log.error('dup paths [%s]', f['path'])
+        else:
+            fieldsbyid.add(f['path'])
     assert len(fields) == len(fieldsbyid), 'dup paths?  see log'
 
 
@@ -212,9 +213,9 @@ def extractFields(form):
     try:
         xmlAsStr = getRawXml(prefix, dirName)
         tree = parseXml(xmlAsStr, pathPlusPrefix)
-        namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
-        tables = collectTables(tree, nsz)
-        fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
+        namespaces = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+        tables = collectTables(tree, namespaces)
+        fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=namespaces)
         prevTable = None
         for iel, el in enumerate(fieldEls):
             def getvar(el, varname):
@@ -234,22 +235,22 @@ def extractFields(form):
             if isfield:
                 # caption node isnt v.informative (or even common), at least for
                 # f1040schedB
-                istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=nsz))
-                ischeckbox = bool(el.xpath('t:ui/t:checkButton',namespaces=nsz))
+                istextbox = bool(el.xpath('t:ui/t:textEdit', namespaces=namespaces))
+                ischeckbox = bool(el.xpath('t:ui/t:checkButton',namespaces=namespaces))
                 isReadonly = el.attrib.get('access') == 'readOnly'
-                speakNodes = el.xpath('t:assist/t:speak', namespaces=nsz)
+                speakNodes = el.xpath('t:assist/t:speak', namespaces=namespaces)
                 if speakNodes:
                     speak = six.text_type(speakNodes[0].text).encode('utf-8')
                 else:
                     speak = ''
-                code = el.xpath('t:items/t:text', namespaces=nsz)
+                code = el.xpath('t:items/t:text', namespaces=namespaces)
                 if code:
                     code = six.text_type(code[0].text).encode('utf-8')
                 else:
                     code = None
                 captionText = el.xpath(
                     't:caption/descendant-or-self::text()',
-                    namespaces=nsz)
+                    namespaces=namespaces)
                 if captionText:
                     captionText = u'|'.join(six.text_type(t)
                                             for t in captionText)
@@ -259,7 +260,7 @@ def extractFields(form):
                 # caption
                 captionReserveNodes = el.xpath(
                     't:caption[@reserve]',
-                    namespaces=nsz)
+                    namespaces=namespaces)
                 if captionReserveNodes:
                     xCaptionReserve = yCaptionReserve = wCaptionReserve = \
                         hCaptionReserve = Qnty(0, 'inch')
@@ -285,15 +286,15 @@ def extractFields(form):
                 maxchars = None
                 if istextbox:
                     # hscrolllist=el.xpath('t:ui/t:textEdit/@hScrollPolicy',namespa
-                    # ces=nsz) hscroll=not hscrolllist or
+                    # ces=namespaces) hscroll=not hscrolllist or
                     # hscrolllist[0]!='off'
                     multilinelist = el.xpath(
                         't:ui/t:textEdit/@multiLine',
-                        namespaces=nsz)
+                        namespaces=namespaces)
                     multiline = multilinelist and multilinelist[0] == '1'
                     maxcharslist = el.xpath(
                         't:value/t:text/@maxChars',
-                        namespaces=nsz)
+                        namespaces=namespaces)
                     maxchars = maxcharslist[0] if maxcharslist else None
                 if istextbox and not ischeckbox:
                     typ = 'text'
@@ -302,7 +303,7 @@ def extractFields(form):
                 else:
                     # default to textbox but warn
                     typ = 'text'
-                    uinodes = el.xpath('t:ui', namespaces=nsz)
+                    uinodes = el.xpath('t:ui', namespaces=namespaces)
                     if uinodes:
                         uikids = uinodes[0].getchildren()
                         info = str(uikids)
@@ -316,11 +317,11 @@ def extractFields(form):
                     'expected tag.endswith "draw" instead got tag==' + el.tag
                 texts = el.xpath(
                     '*/t:exData/*/*/descendant-or-self::text()',
-                    namespaces=nsz)
+                    namespaces=namespaces)
                 if not texts:
                     texts = el.xpath(
                         't:value/t:text/descendant-or-self::text()',
-                        namespaces=nsz)
+                        namespaces=namespaces)
                 if texts:
                     text = '|'.join(texts)
                 else:
@@ -369,14 +370,14 @@ def extractFields(form):
                     layout = p.attrib.get('layout')
                     if layout == 'table':
                         # record name of table
-                        currTable = computePath(p, nsz)
+                        currTable = computePath(p, namespaces)
                     elif layout == 'row':
                         # record index of current row
                         gp = p.getparent()
                         irow = (list(gp.xpath('*[@layout="row"]')).index(p))
                         icol = list(p.xpath(
                             't:draw|t:field|t:subform',
-                            namespaces=nsz)).index(a)
+                            namespaces=namespaces)).index(a)
             path = '.'.join(p for p in reversed(path) if p)
             elname = el.attrib.get('name', path)
             coltitle = ''
@@ -438,8 +439,8 @@ def extractFields(form):
                 continue
                 # skip draw elements not assoc'd w/ a page; they are in some header
             if npage < 1:
-                log.warn('rejecting visibl [{}] on invalid page [{}]'.format(
-                    elname, npage))
+                log.warn('rejecting visibl [%s] on invalid page [%s]',
+                         elname, npage)
                 continue
             d = dict(el.attrib.items())  # todo is el.attrib needed here?
             d.update(dict(
@@ -513,8 +514,7 @@ def extractFields(form):
             else:
                 visiblz.append(d)
         ensurePathsAreUniq(fields)
-        log.info(
-            'found [{}] fields, [{}] visiblz'.format(len(fields), len(visiblz)))
+        log.info('found [%d] fields, [%d] visiblz', len(fields), len(visiblz))
         with open(pathjoin(dirName, prefix) + '-visiblz.txt', 'wb') as f:
             f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;

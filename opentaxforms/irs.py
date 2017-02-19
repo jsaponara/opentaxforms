@@ -85,7 +85,7 @@ def sortableFieldname(fieldname):
     def intify(s):
         try:
             return int(s)
-        except:
+        except ValueError:
             return s
     try:
         segs = re.findall('(\D+|\d+)', fieldname)

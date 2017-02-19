@@ -216,7 +216,7 @@ def writeFormToDb(form, year=None):
         pageht=str(page1.pageheight),
         pagewd=str(page1.pagewidth),
         )
-    for i, f in enumerate(fields):
+    for f in fields:
         db.upsert(
             dbt.slot,
             formId=formid,
