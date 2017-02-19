@@ -165,10 +165,8 @@ class TestSteps(TestBase):
         it runs for while--be patient.
         '''
 
-    def run_1040_xfa(self, **kw):
-        '''xfa-only run of form 1040
-           doesnt start with 'test_' because it currently fails 
-           for unimportant unicode differences'''
+    def test_1040_xfa(self, **kw):
+        '''xfa-only run of form 1040'''
         dir_name = pathjoin(self.testdir, 'forms_1040_xfa')
         ut.ensure_dir(dir_name)
         # use cached pdf info to speed the run
