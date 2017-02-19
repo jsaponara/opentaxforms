@@ -2,80 +2,22 @@ from __future__ import print_function, absolute_import
 import sys
 import six
 import re
+import os
 from sys import exc_info
 from itertools import chain
 from argparse import ArgumentParser
-from six import StringIO, unichr
 from lxml import etree
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdftypes import PDFStream
 try:
     from cPickle import dump
 except ImportError:
     from pickle import dump
 
 from .config import cfg
-from .ut import log, setupLogging, exists, skip, Qnty, pf, run, pathjoin
+from .ut import log, setupLogging, skip, Qnty, pf
 from .irs import commandPtn, possibleColTypes, CrypticXml
-
-ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]', re.U)
-UNESC_PAT = re.compile(r'&#(\d+);', re.U)
-
-
-def escape(s):
-    '''
-        >>> escape('<field name="blah">')
-        '&#60;field name=&#34;blah&#34;&#62;'
-        '''
-    return ESC_PAT.sub(lambda m: '&#%d;' % ord(m.group(0)), s)
-
-
-def unescape(s):
-    '''
-        >>> unescape('&#60;field name=&#34;blah&#34;&#62;')
-        '<field name="blah">'
-        '''
-    return UNESC_PAT.sub(lambda m: unichr(int(m.group(1))), s)
-
-
-def unescapeline(line):
-    if isinstance(line, six.binary_type):
-        line = line.decode('utf8')
-    return unescape(line.replace('&#10;', '').replace('&#13;', ''))
-
-
-def getRawXml(prefix, path='.'):
-    pathPlusPrefix = pathjoin(path, prefix)
-    xmltextfname = pathPlusPrefix+'-text.xml'
-    if exists(xmltextfname):
-        log.debug('xml text file already exists [{}]'.format(xmltextfname))
-        xmlAsStr = open(xmltextfname).read()
-    else:
-        log.debug('creating xml text file [%s]', xmltextfname)
-        datanamespace = b'xfa-template'
-        with open(pathPlusPrefix+'.xml', 'rb') as fh:
-            fieldFrags = []
-            for line in fh:
-                if datanamespace in line:
-                    # just in case there are multiple data elements with the target
-                    # datanamespace--must not give multiple toplevel elements to
-                    # lxml to avoid 'lxml.etree.XMLSyntaxError: Extra content at
-                    # the end of the document'
-                    log.debug('found datanamespace')
-                    if fieldFrags:
-                        log.warn(
-                            'skipping [%d] chars of xml, already have [%d] chars',
-                            len(line), len(fieldFrags[0]))
-                    else:
-                        fieldFrags.append(unescapeline(line))
-        xmlAsStr = '\n'.join(f for f in fieldFrags
-                             if f and 'form checksum' not in f)
-        if not xmlAsStr:
-            xmlAsStr = '\n'.join(f for f in fieldFrags if f)
-        if not xmlAsStr.strip():
-            msg = 'CrypticXml: cannot textify xml file for form %s' % prefix
-            log.warn(msg)
-            raise CrypticXml(msg)
-        open(xmltextfname, 'wb').write(xmlAsStr.encode('utf8'))
-    return xmlAsStr
 
 
 def collectTables(tree, namespaces):
@@ -164,22 +106,6 @@ def indexAmongSibs(el, tag=None, namespaces=None):
     return p.xpath('%s' % (tag, ), namespaces=namespaces).index(el)
 
 
-def parseXml(xmlAsStr, pathPlusPrefix=None):
-    '''
-        xmlAsStr -> etree parse tree
-        optionally write pretty_print'd xml to "-fmt.xml" file
-        '''
-    parser = etree.XMLParser(encoding='utf-8', recover=True)
-    tree = etree.parse(StringIO(xmlAsStr), parser)
-    if pathPlusPrefix:
-        xmlfmtfname = '%s-fmt.xml' % (pathPlusPrefix)
-        if not exists(xmlfmtfname):
-            open(xmlfmtfname, 'wb').write(
-                etree.tostring(tree, pretty_print=True)
-                )
-    return tree
-
-
 def ensurePathsAreUniq(fields):
     fieldsbyid = set()
     for f in fields:
@@ -190,32 +116,45 @@ def ensurePathsAreUniq(fields):
     assert len(fields) == len(fieldsbyid), 'dup paths?  see log'
 
 
+def xmlFromPdf(pdfpath, xmlpath=None):
+    with open(pdfpath, 'rb') as fp:
+        parser = PDFParser(fp)
+        doc = PDFDocument(parser)
+        all_objids = set(objid for xref in doc.xrefs
+                         for objid in xref.get_objids())
+        for objid in all_objids:
+            obj = doc.getobj(objid)
+            if not isinstance(obj, PDFStream):
+                continue
+            data = obj.get_data()
+            if b'xfa-template' in data:
+                break
+        else:
+            log.warn('CrypticXml: Cannot find form data in %s', pdfpath)
+            raise CrypticXml('Cannot find form data in %s' % pdfpath)
+    # data == <form>-text.xml
+    tree = etree.fromstring(data)
+    if xmlpath is not None:
+        with open(xmlpath, 'wb') as out:
+            out.write(etree.tostring(tree, pretty_print=True))
+    return tree
+
+
 def extractFields(form):
-    # create <form>.xml, single-line <form>-text.xml, and formatted
-    # <form>-fmt.xml
-    dirName = cfg.dirName
     prefix = form.prefix
     fields = form.fields
     visiblz = form.draws
     assert len(fields)==0
     if 'x' not in cfg.steps:
         return
-    pathPlusPrefix = pathjoin(dirName, prefix)
 
-    def xmlFromPdf(pathPlusPrefix):
-        outname = '%s.xml' % (pathPlusPrefix)
-        if not exists(outname):
-            dumppdfName = 'dumppdf.py'
-            cmdline='%s -at %s.pdf > %s.xml' % (dumppdfName, pathPlusPrefix, pathPlusPrefix)
-            print('xmlFromPdf cmdline='+cmdline)
-            run(cmdline)
-    xmlFromPdf(pathPlusPrefix)
+    pathprefix = os.path.join(cfg.dirName, prefix)
+
     try:
-        xmlAsStr = getRawXml(prefix, dirName)
-        tree = parseXml(xmlAsStr, pathPlusPrefix)
-        namespaces = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
-        tables = collectTables(tree, namespaces)
-        fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=namespaces)
+        tree = xmlFromPdf(pathprefix + '.pdf', pathprefix + '-fmt.xml')
+        namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+        tables = collectTables(tree, nsz)
+        fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
         prevTable = None
         for iel, el in enumerate(fieldEls):
             def getvar(el, varname):
@@ -515,7 +454,7 @@ def extractFields(form):
                 visiblz.append(d)
         ensurePathsAreUniq(fields)
         log.info('found [%d] fields, [%d] visiblz', len(fields), len(visiblz))
-        with open(pathjoin(dirName, prefix) + '-visiblz.txt', 'wb') as f:
+        with open(pathprefix + '-visiblz.txt', 'wb') as f:
             f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
         # fields refers to fillable fields only;
         # draws are all (fillable and read-only/non-fillable) visible fields
