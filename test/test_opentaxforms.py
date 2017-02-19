@@ -165,7 +165,7 @@ class TestSteps(TestBase):
         it runs for while--be patient.
         '''
 
-    def run_1040_xfa(self, **kw):
+    def test_run_1040_xfa(self, **kw):
         '''xfa-only run of form 1040
            doesnt start with 'test_' because it currently fails 
            for unimportant unicode differences'''
