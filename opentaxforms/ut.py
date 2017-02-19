@@ -7,7 +7,7 @@ from collections import (
     namedtuple as ntuple,
     defaultdict as ddict,
     OrderedDict as odict)
-from decimal import Decimal as dc
+from os.path import exists
 from pprint import pprint as pp, pformat as pf
 from sys import stdout, exc_info
 from pint import UnitRegistry
@@ -161,7 +161,7 @@ alreadySetupLogging = False
 
 
 def setupLogging(loggerId, args=None):
-    global log,alreadySetupLogging
+    global alreadySetupLogging
     if alreadySetupLogging:
         log.warn('ignoring extra call to setupLogging')
         fname = log.name
@@ -238,14 +238,12 @@ def run0(cmd):
     return out, err
 
 
-def run(cmd, **kw):
-    logprefix = 'run' if 'logprefix' not in kw else kw['logprefix']
-    loglevel = logging.INFO if 'loglevel' not in kw else getattr(logging, kw[
-        'loglevel'].upper(), None)
+def run(cmd, logprefix='run', loglevel='INFO'):
+    loglevel = getattr(logging, loglevel.upper(), None)
     out, err = run0(cmd)
     out, err = out.strip(), err.strip()
-    msg = logprefix + ': command [%s] returned error [%s] and output [%s]' % (
-        cmd, err, out)
+    msg = '%s: command [%s] returned error [%s] and output [%s]' % (
+        logprefix, cmd, err, out)
     if err:
         log.error(msg)
         raise Exception(msg)
@@ -496,11 +494,14 @@ def nth(n):
         '12th'
         '''
     n = str(n)
-    if n[-2:] in ('11', '12', '13'):
-        return n + 'th'
-    return (n + dict(
-        [(nth[0], nth[1:3])
-            for nth in '1st 2nd 3rd'.split()]).get(n[-1], 'th'))
+    suffix = 'th'
+    if n[-1] == '1' and n[-2:] != '11':
+        suffix = 'st'
+    elif n[-1] == '2' and n[-2:] != '12':
+        suffix = 'nd'
+    elif n[-1] == '3' and n[-2:] != '13':
+        suffix = 'rd'
+    return n + suffix
 
 
 def skip(s, substr):
@@ -524,38 +525,25 @@ def until(s, substr):
         return s
 
 
-def exists(fname):
-    '''
-        >>> exists('/usr')
-        True
-        >>> exists('/ldsj')
-        False
-    '''
-    from os import access, F_OK
-    fname = fname.rstrip('/\\')
-    return access(fname, F_OK)
-
-
 def ensure_dir(folder):
     '''ensure that directory exists'''
     if not exists(folder):
         os.makedirs(folder)
 
 
-def now(**kw):
+def now(format=None):
     from datetime import datetime
-    if 'format' in kw:
-        return datetime.now().strftime(kw['format'])
-    else:
-        return datetime.now().isoformat()
+    dt = datetime.now()
+    if format is None:
+        return dt.isoformat()
+    return dt.strftime(format)
 
 
 def readImgSize(fname, dirName):
     from PIL import Image
-    f = open(pathjoin(dirName,fname), 'rb')
-    img = Image.open(f)
-    imgw, imgh = img.size
-    f.close()
+    with open(pathjoin(dirName,fname), 'rb') as fh:
+        img = Image.open(fh)
+        imgw, imgh = img.size
     return imgw, imgh
 
 

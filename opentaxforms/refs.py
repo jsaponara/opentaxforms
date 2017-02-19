@@ -34,7 +34,7 @@ def findRefs(form):
     draws = form.draws
     theform = form
 
-    class PrintableFunc:
+    class PrintableFunc(object):
 
         # for debugging
         def __call__(self, o):
@@ -48,7 +48,7 @@ def findRefs(form):
     # maybeForms should be called formContext or expectingFormsOnThisLine
     maybeForms = PrintableFunc()
 
-    class FormRefs:
+    class FormRefs(object):
 
         # list of key,val,context tuples w/ set of keys for uniqness
         def __init__(self):
@@ -250,16 +250,14 @@ def findRefs(form):
                     lineHasForms = True
 
                     def merge(formName, sched):
-                        sched = sched.upper()
                         try:
                             # merge(('1040','A'), 'B') -> ('1040','B')
                             formName, fsched = formName
-                            formName = formName.upper()
-                        except:
+                        except ValueError:
                             # merge('1040','B') -> ('1040','B')
-                            formName = formName.upper()
+                            pass
                         formName = formName.split('-')[0]  # 1120-reit -> 1120
-                        return ','.join((formName, sched))
+                        return ','.join((formName, sched)).upper()
                     key = txt if typ == 'Form' else merge(formName, txt)
                     if iword == 0:
                         matchingtext = fulltype + ' ' + txt

@@ -235,8 +235,7 @@ class Form(object):
         # 'dep' means dependency
         from opentaxforms.cmds import (
             CommandParser, normalize, adjustNegativeField, CannotParse)
-        fields, draws = (self.fields, self.draws) if 'm' in cfg.steps else ([
-            ], [])
+        fields = self.fields if 'm' in cfg.steps else []
         for field in fields:
             math = CommandParser(field, self)
             speak = normalize(field['speak'])
@@ -338,8 +337,7 @@ class TextPoz(object):
                         bbox1 = charobjs[ichar][1]
                         bbox2 = charobjs[ichar + len(sl) - 1][1]
                         if not (bbox1.y0 == bbox2.y0 and bbox1.y1 == bbox2.y1):
-                            log.info(
-                                'bbox.y coords dont match for [{}]'.format(sl))
+                            log.info('bbox.y coords dont match for [%s]', sl)
                         bbox = ut.merge(bbox1, bbox2)
                         found.append(
                             TextPoz.FormPos(
