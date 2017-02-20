@@ -152,9 +152,10 @@ def extractFields(form):
 
     try:
         tree = xmlFromPdf(pathprefix + '.pdf', pathprefix + '-fmt.xml')
-        namespaces = nsz = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
-        tables = collectTables(tree, nsz)
-        fieldEls = tree.xpath('//t:draw[t:value]|//t:field', namespaces=nsz)
+        namespaces = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+        tables = collectTables(tree, namespaces)
+        fieldEls = tree.xpath('//t:draw[t:value]|//t:field',
+                              namespaces=namespaces)
         prevTable = None
         for iel, el in enumerate(fieldEls):
             def getvar(el, varname):
