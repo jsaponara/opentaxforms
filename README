@@ -123,6 +123,21 @@ to test (and ultimately use) at
    -  Separate dirName command line option into
       pdfInputDir,htmlOutputDir. [splitIoDirs]
 
+0.5.6 (2017-02-20)
+
+-  add py35 testenv to tox setup.
+-  Simplify form extraction from PDF [by perimosocordiae].
+-  Make sure os is imported before use [by perimosocordiae].
+-  Many minor tweaks [by perimosocordiae].
+-  Merge branch 'avoid-dumppdf' of
+   git://github.com/perimosocordiae/opentaxforms into
+   perimosocordiae-avoid-dumppdf
+-  Merge branch 'minor-tweaks' of
+   git://github.com/perimosocordiae/opentaxforms into
+   perimosocordiae-minor-tweaks
+-  README henceforth will be created .before. final commit of each
+   release.
+
 0.5.5 (2017-02-18)
 
 -  port to python3--thanks perimosocordiae! [by perimosocordiae]

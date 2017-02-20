@@ -1,4 +1,4 @@
 
 appname = 'opentaxforms'
-appversion = '0.5.5'
+appversion = '0.5.6'
 apiVersion = '1'
