@@ -1,16 +1,20 @@
 from __future__ import print_function
-import os
-from os.path import join as pathjoin
 import logging
+import os
+import pkg_resources
+import re
 import six
+import sys
 from collections import (
     namedtuple as ntuple,
     defaultdict as ddict,
     OrderedDict as odict)
-from os.path import exists
-from pprint import pprint as pp, pformat as pf
-from sys import stdout, exc_info
+from datetime import datetime
+from os.path import join as pathjoin, exists
 from pint import UnitRegistry
+from pprint import pprint as pp, pformat as pf
+from subprocess import Popen, PIPE
+from sys import stdout, exc_info
 try:
     from cPickle import dump, load
 except ImportError:
@@ -81,7 +85,6 @@ def compactify(multilineRegex):
         #print len(multilineRegex),
             '[%s%s]'%(multilineRegex[0],multilineRegex[1])
     """
-    import re
 
     def crunch(seg):
         return re.sub(' *#.*$', '', seg.lstrip())
@@ -227,7 +230,6 @@ def jdb(*args, **kw):
 
 
 def run0(cmd):
-    from subprocess import Popen, PIPE
     try:
         # shell is handy for executable path, etc
         proc = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
@@ -258,11 +260,9 @@ class Resource(object):
         self.fpath = fpath
 
     def path(self):
-        import pkg_resources
         return pkg_resources.resource_filename(self.pkgname, self.fpath)
 
     def content(self):
-        import pkg_resources
         return pkg_resources.resource_string(self.pkgname, self.fpath)
 
 
@@ -438,7 +438,6 @@ class Qnty(qq):
             >>> Qnty.fromstring('25.4mm')
             <Quantity(25.4, 'millimeter')>
             '''
-        import re
         if ' ' in s:
             qnty, unit = s.split()
         else:
@@ -532,23 +531,13 @@ def ensure_dir(folder):
 
 
 def now(format=None):
-    from datetime import datetime
     dt = datetime.now()
     if format is None:
         return dt.isoformat()
     return dt.strftime(format)
 
 
-def readImgSize(fname, dirName):
-    from PIL import Image
-    with open(pathjoin(dirName,fname), 'rb') as fh:
-        img = Image.open(fh)
-        imgw, imgh = img.size
-    return imgw, imgh
-
-
 if __name__ == "__main__":
-    import sys
     args = sys.argv[1:]
     if any('T' in arg for arg in args):
         verbose = any('v' in arg for arg in args)

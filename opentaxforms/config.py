@@ -1,11 +1,17 @@
-from __future__ import print_function
-import sys
+from __future__ import print_function, absolute_import
 import os
 import os.path
+import re
+import shutil
+import sys
 from argparse import ArgumentParser
-import opentaxforms.ut as ut
-from opentaxforms.ut import log, Bag, setupLogging, logg, NL, pathjoin
-from opentaxforms.version import appname, appversion
+from os.path import isfile, join as joinpath
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.error import URLError
+
+from . import ut
+from .ut import log, Bag, setupLogging, logg, NL, pathjoin
+from .version import appname, appversion
 
 RecurseInfinitely = -1
 RecursionRootLevel = 0
@@ -123,7 +129,6 @@ def getFileList(dirName):
             except Exception as e:
                 log.warn('cannot symlink %s to %s because %s, copying instead'%(
                     allpdfpath, allpdfLink, e, ))
-                import shutil
                 shutil.copy(allpdfpath,allpdfLink)
         elif not cfg.okToDownload:
             msg = 'allPdfNames file [%s] not found but dontDownload' % (
@@ -131,7 +136,6 @@ def getFileList(dirName):
             raise Exception(msg)
         else:
             # todo why did this stop working?  my own env?
-            from urllib2 import urlopen, URLError
             try:
                 # could use https://www.irs.gov/pub/irs-pdf/pdfnames.txt but
                 # this way we avoid errors in that file
@@ -141,7 +145,6 @@ def getFileList(dirName):
                         fin.getcode(), ))
                 allpdffiles_html = fin.read()
                 fin.close()
-                import re
                 allpdfnames = re.findall(r'f[\w\d-]+\.pdf', allpdffiles_html)
                 allpdfnames = ut.uniqify(sorted(allpdfnames))
                 with open(allpdfpath, 'w') as f:
@@ -212,12 +215,12 @@ def setup(**overrideArgs):
         log.warn('commandline: %s at %s', ' '.join(sys.argv), ut.now())
 
     if dirName is not None:
-        from opentaxforms.Form import Form
+        # deferred import to avoid circular reference
+        from .Form import Form
         if rootForms:
             cfg.formsRequested = [
                 Form(rootForm, RecursionRootLevel) for rootForm in rootForms]
         else:
-            from os.path import isfile, join as joinpath
             cfg.formsRequested = [
                 Form(f, RecursionRootLevel)
                 for f in os.listdir(dirName)
@@ -235,7 +238,6 @@ def setup(**overrideArgs):
         ut.ensure_dir(dirName)
         staticDir = ut.Resource(appname, 'static').path()
         staticLink = pathjoin(dirName, 'static')
-        import os.path
         try:
             if not os.path.lexists(staticLink):
                 os.symlink(staticDir, staticLink)
@@ -243,7 +245,6 @@ def setup(**overrideArgs):
             log.warn('cannot symlink %s to %s because %s, copying instead'%(
                 staticDir, staticLink, e))
             try:
-                import shutil
                 shutil.copytree(staticDir, staticLink)
             except Exception as e:
                 log.warn('cannot copy %s to %s because %s,'

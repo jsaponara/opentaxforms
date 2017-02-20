@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import re
 import six
-import opentaxforms.ut as ut
-from opentaxforms.ut import log, jj, pathjoin
-from opentaxforms.config import cfg
-import opentaxforms.irs as irs
+
+from . import ut, irs
+from .ut import log, jj, pathjoin
+from .config import cfg
 
 # nonforms are numbers that dont represent forms
 nonforms = [str(yr) for yr in range(2000, 2050)]

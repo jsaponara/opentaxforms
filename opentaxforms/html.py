@@ -1,11 +1,14 @@
-from __future__ import print_function
-from os import remove as removeFile
+from __future__ import print_function, absolute_import
+import os.path
 import re
+import traceback
+from os import remove as removeFile
 from itertools import chain
-from opentaxforms.config import cfg,setup
-from opentaxforms.irs import computeTitle, computeFormId, sortableFieldname
-import opentaxforms.ut as ut
-from opentaxforms.ut import log, jdb, Qnty, NL, pathjoin
+
+from . import ut
+from .config import cfg, setup
+from .irs import computeTitle, computeFormId, sortableFieldname
+from .ut import log, jdb, Qnty, NL, pathjoin
 
 
 def computeFormFilename(form):
@@ -44,7 +47,6 @@ def computePageTitle(titlebase, npage, npages):
 
 def createSvgFile(dirName, prefix, npage):
     ipage = npage - 1
-    import os.path
     infpath = os.path.join(dirName,'{}.pdf'.format(prefix))
     print('infpath', infpath)
     outfpath = os.path.join(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
@@ -75,6 +77,15 @@ def createSvgFile(dirName, prefix, npage):
     removeFile(outfpath)
 
 
+def readImgSize(fname, dirName):
+    # deferred import: PIL/Pillow isn't a hard dependency
+    from PIL import Image
+    with open(pathjoin(dirName,fname), 'rb') as fh:
+        img = Image.open(fh)
+    # (width, height) in pixels
+    return img.size
+
+
 def createGifFile(dirName, prefix, npage):
     ipage = npage - 1
     imgfname = prefix + '.gif'
@@ -92,7 +103,7 @@ def createGifFile(dirName, prefix, npage):
     try:
         imgw, imgh = ut.readImgSize(imgfname, dirName)
     except:
-        log.error('err re file ' + imgfname + ' in dir ' + dirName)
+        log.error('err re file %s in dir %s', imgfname, dirName)
         raise
     return imgw, imgh
 
@@ -260,7 +271,6 @@ def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
                     shorten(f.xpos),
                     shorten(f.ypos)) if tooltip else '')
         except Exception:
-            import traceback
             log.warn(ut.jj('caughtError:', traceback.format_exc()))
             return ''
 

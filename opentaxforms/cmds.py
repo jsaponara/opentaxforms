@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 import re
 import six
-import opentaxforms.ut as ut
-from opentaxforms.ut import log, jj, numerify
-import opentaxforms.irs as irs
+
+from . import ut, irs
+from .ut import log, jj, numerify
 
 
 def normalize(s):
