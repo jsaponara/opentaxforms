@@ -177,7 +177,12 @@ class Parser(object):
             self.cmd, self.sentence = m.groups()
             return self.cmd, self.sentence
         else:
-            raise NoCommand('no command found in [%s]' % (self.sentence, ))
+            m=re.match(r'^\$?(\d+)(?:,?(\d+))?$',self.sentence)
+            if m:
+                self.cmd='enter'
+                return self.cmd, self.sentence
+            else:
+                raise NoCommand('no command found in [%s]' % (self.sentence, ))
 
 
 class CannotParse(BaseException):
@@ -293,16 +298,29 @@ class CommandParser(object):
         self.terms = terms
 
     def parseEnter(self, s, cond):
-        # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line
-        # 41. If line 42 is more than line 41, enter zero. Dollars.
-        # [[topmostSubform[0].Page2[0].p2-t10[0]]] eg 4684/line4 : If line 3 is
-        # more than line 2, enter the difference here and skip lines 5 through
-        # 9 for that column. eg 1040ez/line43: Line 6. ... If line 5 is larger
-        # than line 4, enter -0-.
+        # 1040/line43
+        #     Line 43. Taxable income.  Subtract line 42 from line 41.
+        #     If line 42 is more than line 41, enter zero. Dollars.
+        #     [[topmostSubform[0].Page2[0].p2-t10[0]]] 
+        # 4684/line4
+        #     If line 3 is # more than line 2, enter the difference
+        #     here and skip lines 5 through 9 for that column.
+        # 1040ez/line43
+        #     Line 6. ... If line 5 is larger than line 4, enter -0-.
+        # constants [see parseCommand]
+        #     f8814/line5  Base amount. $2,100.
+        #     f8814/line13 Amount not taxed. $1,050.
+        # many places
+        #     Enter the result here and on Form...
         op, terms = self.op, self.terms
         cmd = 'enter'
+        seekConstant=re.match(r'^\$?(\d+)(?:,?(\d+))?$',s)
         if s == 'zero':
             s = '-0-'
+        elif seekConstant:
+            constant=''.join((string or '') for string in seekConstant.groups())
+            self.op = '='
+            self.terms = [constant]
         elif cond and s.startswith('the difference here'):
             op = '-'
             m1 = re.match(

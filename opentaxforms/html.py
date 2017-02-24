@@ -159,10 +159,11 @@ def jsterm(field, key='uniqname', display=False):
             return field['val']
         else:
             return '{}00'.format(field['val'])
-    tmpl = 's.{name}{coltitle}'
+    tmpl = '{factor}s.{name}{coltitle}'
     expr = tmpl.format(
         name=jsvar(field[key]),
         coltitle=field.get('coltitle', '') if key != 'uniqname' else '',
+        factor='.01*' if field.get('realunit')=='ratio' else '',
         )
     if field.get('coltitle'):
         ut.jdb('jsterm coltitle', expr)

@@ -163,18 +163,27 @@ def linkfields(form):
             # and dollars.xpos+dollars.wdim==cents.xpos
             cc, dd = f, fprev
             if dd['unit'] != 'dollars':
-                # occasionally dollars fields are not so labeled, eg
-                # 2015/f1040sse/line7 and 2015/f8814/line5 [hmm, both are pre-
-                # filled fields...; speak has the amt but not always with a
-                # "$"]
-                log.warn('expectedDollars: expected field [%s]'
+                # occasionally dollars fields are not so labeled
+                # eg 2015/f1040sse/line7 and 2015/f8814/line5
+                # speak has the amt but not always with a "$"
+                # todo always true for pre-filled fields?
+                msgtmpl=('expectedDollars: expected field [%s]'
                          ' to have unit==dollars, instead got [%s]'
-                         ' from previous speak: [%s]',
-                         dd['uniqname'], dd['unit'], dd['speak'])
-                #log.warn('UnicodeError:'+(msgtmpl % (dd['uniqname'], dd['unit'], dd['speak'])).encode('utf-8'))
+                         ' from previous speak: [%r]')
+                log.warn(msgtmpl, dd['uniqname'], dd['unit'], dd['speak'])
                 dd['unit'] = 'dollars'
+                dd['expectedDollars'] = 1  # just in case it's useful later
             dd['centfield'] = cc
             cc['dollarfieldname'] = dd['uniqname']
+        elif 'Numbers after the decimal.' in f['speak']:
+            cc, dd = f, fprev
+            assert 'Numbers before the decimal.' in dd['speak']
+            assert dd['unit'] is None
+            dd['centfield'] = cc
+            cc['dollarfieldname'] = dd['uniqname']
+            dd['unit'] = 'dollars'
+            cc['unit'] = 'cents'
+            dd['realunit'] = 'ratio'
         fieldsByRow[(pg, str(f['ypos']))].append(f)
         fprev = f
     unifyTableRows(fieldsByRow)
