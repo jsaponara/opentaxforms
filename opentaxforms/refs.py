@@ -1,7 +1,7 @@
 import re
 import six
 import opentaxforms.ut as ut
-from opentaxforms.ut import log, jj, pathjoin
+from opentaxforms.ut import log, jj, pathjoin, asciiOnly
 from opentaxforms.config import cfg
 import opentaxforms.irs as irs
 
@@ -19,9 +19,10 @@ nonforms = [str(yr) for yr in range(2000, 2050)]
         from the RIC or REIT.
     3903: This amount should be shown in box 12 of your Form W-2 with code P
     2015/f1040sd: Box A
+    8814/p4/line10 instructions: unrecaptured section 1250 gain, section 1202 gain, ...
     '''
 nonformcontexts = (
-    'box line lines through pub part parts to the copy copies code'.split())
+    'box line lines through pub part parts section to the copy copies code'.split())
 
 
 def findRefs(form):
@@ -64,6 +65,8 @@ def findRefs(form):
                 log.info('FormRefs: ignoring excludedform')
                 return False
             (key, val), context = info
+            key=asciiOnly(key)
+            val=asciiOnly(val)
             self.set.add((key, val))
             self.list.append(((key, val), context))
             return True
@@ -127,6 +130,9 @@ def findRefs(form):
     formrefs = FormRefs()
     lines = []
     maybeForms.ypos = -99
+    # when we see 'Schedule D (Form 1040)' we record '1040' as
+    #   scheduleContext['d'] for later solo mentions of 'Schedule D'
+    scheduleContext={}
     for idraw, el in enumerate(draws):
         rawtext = el['text']  # el.text for draws or el.speak for fields
         if not rawtext.strip():
@@ -171,6 +177,48 @@ def findRefs(form):
                 lineHasForms = True
                 d = dict(zip(matchfields, m))
                 match = d['match']
+                formvalues=[val.lower() for key,val in d.items() if key.startswith('form')]
+                schedvalues=[val.lower() for key,val in d.items() if key.startswith('sched')
+                    and val]
+                def inSameFamily(*formnames):
+                    '''
+                        >>> inSameFamily(['1040','1040A','1040EZ'])
+                        True
+                        >>> inSameFamily(['1040','1120'])
+                        False
+                        >>> inSameFamily(['1040'])
+                        True
+                        '''
+                    for f in formnames:
+                        for g in formnames[1:]:
+                            if f.lower() not in g.lower() and \
+                               g.lower() not in f.lower():
+                                # neither is a substring of the other
+                                return False
+                    return True
+                if len(schedvalues)==1:
+                    sched=schedvalues[0].lower()
+                    if len(formvalues)==1:
+                        scheduleContext[sched]=formvalues[0].lower()
+                    else:
+                        # len(formvalues)==1
+                        thisform,thissched=theform.nameAsTuple
+                        if thisform.lower() in formvalues and thissched.lower() in schedvalues:
+                            # ignore self-mentions and assume forms use the same schedule
+                            # eg ignore "Schedule B (Form 1040 or 1040A)" in f1040sb
+                            #    because we are in Schedule B already,
+                            #    and we assume that 1040A uses 1040's sched B.
+                            txt = txt.replace(match, '')
+                            continue
+                        elif inSameFamily(*formvalues):
+                            # in 'schedX(form1 or form2) assume both forms use the same schedX
+                            #   if both forms are in the same form family [eg 1040 and 1040A]
+                            #   and separate schedX's dont occur in allpdfnames.
+                            formvaluesToRemove=[f.lower() for f in formvalues
+                                if ('f%ss%s'%(f,sched)).lower() not in cfg.allpdfnames]
+                            formfields=[k for k,v in d.items() if k.startswith('form') and v.lower() not in formvaluesToRemove]
+                            if len(formfields)==1:
+                                scheduleContext[sched]=d[formfields[0]].lower()
                 for formfield in formfields:
                     form = d[formfield].upper()
                     if fieldIsOptional(formfield) and not form:
@@ -258,7 +306,11 @@ def findRefs(form):
                             pass
                         formName = formName.split('-')[0]  # 1120-reit -> 1120
                         return ','.join((formName, sched)).upper()
-                    key = txt if typ == 'Form' else merge(formName, txt)
+                    if typ=='Schedule':
+                        formcontext=scheduleContext.get(txt.lower(),formName)
+                    else:
+                        formcontext=formName
+                    key = txt if typ == 'Form' else merge(formcontext, txt)
                     if iword == 0:
                         matchingtext = fulltype + ' ' + txt
                     else:

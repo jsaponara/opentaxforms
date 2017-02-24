@@ -547,6 +547,12 @@ def readImgSize(fname, dirName):
     return imgw, imgh
 
 
+def asciiOnly(s):
+    if s:
+        s=''.join(c for c in s if ord(c)<127)
+    return s
+
+
 if __name__ == "__main__":
     import sys
     args = sys.argv[1:]
