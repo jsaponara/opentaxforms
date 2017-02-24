@@ -160,6 +160,20 @@ def getFileList(dirName):
 alreadySetup = False
 
 
+def setLogname(rootForms,cfg):
+    if cfg.logPrefix:
+        logname = cfg.logPrefix
+    elif rootForms:
+        logname = rootForms[0]
+    elif dirName:
+        logname = dirName.replace('/', '_').replace('\\', '_').strip('._')
+    else:
+        logname = appname
+    if len(rootForms) > 1 or cfg.recurse:
+        logname += 'etc'
+    return logname
+
+
 def setup(**overrideArgs):
     # note formyear will default to latestTaxYear even if dirName=='2014'
     global alreadySetup
@@ -193,17 +207,8 @@ def setup(**overrideArgs):
     if cfg.rootForms:
         rootForms = [f.strip() for f in cfg.rootForms.split(',')]
     else:
-        rootForms = ['']
-    if cfg.logPrefix:
-        logname = cfg.logPrefix
-    elif rootForms:
-        logname = rootForms[0]
-        if len(rootForms) > 1:
-            logname += 'etc'
-    elif dirName:
-        logname = dirName.replace('/', '_').replace('\\', '_').strip('._')
-    else:
-        logname = appname
+        rootForms = []
+    logname = setLogname(rootForms, cfg)
     loginfo = setupLogging(logname, cfg)
     cfg.logfilename = loginfo
     cfg.log = log
@@ -233,23 +238,31 @@ def setup(**overrideArgs):
         logg('config:' + str(cfg), [log.warn])
 
         ut.ensure_dir(dirName)
-        staticDir = ut.Resource(appname, 'static').path()
-        staticLink = pathjoin(dirName, 'static')
-        import os.path
-        try:
-            if not os.path.lexists(staticLink):
-                os.symlink(staticDir, staticLink)
-        except Exception as e:
-            log.warn('cannot symlink %s to %s because %s, copying instead'%(
-                staticDir, staticLink, e))
+        def linkStaticDir(appname, dirName):
+            # symlink-else-copy the folder of static files
+            staticDir = ut.Resource(appname, 'static').path()
+            staticLink = pathjoin(dirName, 'static')
+            import os.path
             try:
-                import shutil
-                shutil.copytree(staticDir, staticLink)
+                if not os.path.lexists(staticLink):
+                    os.symlink(staticDir, staticLink)
             except Exception as e:
-                log.warn('cannot copy %s to %s because %s,'
-                    ' continuing without static files,'
-                    ' which are used only when serving html files'%(
+                log.warn('cannot symlink %s to %s because %s, copying instead'%(
                     staticDir, staticLink, e))
+                try:
+                    import shutil
+                    shutil.copytree(staticDir, staticLink)
+                except Exception as e:
+                    log.warn('cannot copy %s to %s because %s,'
+                        ' continuing without static files,'
+                        ' which are used only when serving html files'%(
+                        staticDir, staticLink, e))
+            try:
+                os.makedirs(pathjoin(staticLink,'svg'))
+            except Exception as e:
+                if 'File exists' not in e:
+                    log.warn('cannot create svg dir [%s]',e)
+        linkStaticDir(appname,dirName)
 
         if cfg.checkFileList:
             getFileList(dirName)
