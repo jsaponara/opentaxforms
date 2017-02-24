@@ -66,6 +66,7 @@ var opentaxforms=(function() {
 				if (op=='+' || (op=='-' && i!=1)) { result+=n; }
 					else if (op=='-') {result-=n;}
 					else if (op=='*') {result*=n;}
+					else if (op=='/') {result/=n;}
 					else if (op=='?') {result='?';}
 					else alert('unknown operator ['+op+']');
 			}

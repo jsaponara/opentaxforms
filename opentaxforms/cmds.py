@@ -249,17 +249,23 @@ class CommandParser(object):
         self.op = op
         self.terms = terms
 
-    def parseSubOrMult(self, cmd, s):
-        # eg 1040/line43 Subtract line 42 from line 41 eg 1040/line42 Multiply
-        # $3,800 by the number on line 6d todo eg Subtract column (e) from
-        # column (d) and combine the result with column (g). * recognize this
-        # as columnMath, assoc w/ currTable, find cells via coltitle and setup
-        # terms; continue to apply columnMath throughout currTable
-        # 1065b/p4/bottomSection/line1  In column (b), add lines 1c through 4b,
-        # 7, and 8. From the result, subtract line 14g
+    def parseSubMultDiv(self, cmd, s):
+        # eg 1040/line43 Subtract line 42 from line 41
+        # eg 1040/line42 Multiply $3,800 by the number on line 6d
+        # eg 8814/line8  Divide line 3 by line 4
+        # todo
+        # eg Subtract column (e) from
+        # column (d) and combine the result with column (g).
+        # * recognize this as columnMath, assoc w/ currTable,
+        #   find cells via coltitle and setup terms;
+        #   continue to apply columnMath throughout currTable
+        # 1065b/p4/bottomSection/line1
+        #   In column (b), add lines 1c through 4b,
+        #   7, and 8. From the result, subtract line 14g
         delim, op = dict(
             subtract=(' from ', '-'),
             multiply=(' by (?:the number on )?', '*'),
+            divide=(' by ', '/'),
             )[cmd]
         terms = re.split(delim, s, re.I)
         if len(terms) != 2:
@@ -394,10 +400,10 @@ class CommandParser(object):
                     cond))
                 self.zcond = flipcondition(condparse)
 
-    def getFieldFromTerm(self, term, parentline, pgnum, fieldsByLine):
-        # find fields that correspond to the term; parentline is lhs typically
-        # returns the dollar and cent fields corresponding to a term such as
-        # 'line7'
+    def getFieldsFromTerm(self, term, parentline, pgnum, fieldsByLine):
+        # find fields that correspond to the term; parentline is lhs
+        # typically returns the dollar and cent fields
+        #   corresponding to a term such as 'line7'
         if term.isdigit():
             return [dict(
                 typ='constant',
@@ -436,6 +442,7 @@ class CommandParser(object):
         return found
 
     def assembleFields(self):
+        # todo rename to assembleInputs?
         op = self.op
         terms = self.terms
         self.text = ''
@@ -447,23 +454,29 @@ class CommandParser(object):
             # eg 1040/line42 our dep fields are unitless cuz our constant is in
             # dollars
             myFieldUnit = None
-        upfields = [self.getFieldFromTerm(term, ll, pg, fieldsByLine)
+        upfields = [self.getFieldsFromTerm(term, ll, pg, fieldsByLine)
                     for term in terms]
         upfields = [upf for upfs in upfields for upf in upfs
+                    # a field cannot be its own input
                     if upf[self.namek] != myFieldName
-                    and upf[self.unitk] == myFieldUnit]
+                    # a field's inputs should have compatible units
+                    # todo this should depend on op: eg for '/' op,
+                    # it's the operands whose units should match.
+                    and (upf[self.unitk] == 'cents') == (myFieldUnit == 'cents')]
         if op == '*':
             # todo revisit: here we assume that 1. we want to multiply only two
             # fields, and specifically 2. we want the first and the last [and
-            # thus most derived/computed] field for 1040/line42, this gives a
-            # constant and the [computed] line6d
+            # thus most derived/computed] field.
+            # in 1040/line42, where 'line6d' can refer to multiple fields,
+            # this gives a constant and the [final, computed] line6d field.
             if len(upfields) > 1:
                 upfields = [upfields[0], upfields[-1]]
         self.form.upstreamFields.update(
             [upf['uniqname'] for upf in upfields
              if upf.get('typ') != 'constant'])
-        # self.form.upstreamFields.remove(myFieldName)  # do this later in case
-        # fields are not in dependency order [see laterIsHere]
+        # do this later in case fields are not in dependency order
+        # [see Form.orderDependencies]
+        # self.form.upstreamFields.remove(myFieldName)
         self.form.computedFields[myFieldName] = self.field
         self.field['deps'] = upfields
         self.field['op'] = op
@@ -487,8 +500,8 @@ class CommandParser(object):
             cmd, cond, pred = self.parseSentence(sentence, field)
             if cmd in ('add', 'combine', 'howmany', 'total', 'amount'):
                 self.parseAdd(cmd, pred)
-            elif cmd in ('subtract', 'multiply'):
-                self.parseSubOrMult(cmd, pred)
+            elif cmd in ('subtract', 'multiply', 'divide'):
+                self.parseSubMultDiv(cmd, pred)
             elif cmd in ('enter', ):
                 pred = self.parseEnter(pred, cond)
             else:
