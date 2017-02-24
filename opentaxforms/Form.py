@@ -259,10 +259,19 @@ class Form(object):
             for s in sentences:
                 try:
                     math.parseInstruction(s, field)
-                except CannotParse:
-                    continue
+                    log.debug('found [%s] in sentence [%s] in field %s',math,unicode(s),field['uniqname'])
+                except CannotParse as e:
+                    log.debug('%s',unicode(e))
             if math and math.terms:
-                math.assembleFields()
+                # todo checkbox instructions refer to the named textbox
+                # eg 2016/8814/line15
+                #    p1-cb2    Line 15. Tax. Is the amount on line 14 less than $1,050? No. Enter $105 here and see the Note below. Note. If you checked the box on line C above, see the instructions. Otherwise, include the amount from line 15 in the tax you enter on Form 1040, line 44, or Form 1040N R, line 42. Be sure to check box a on Form 1040, line 44, or Form 1040N R, line 42.
+                #    p1-cb2L1T Line 15. Yes. Multiply line 14 by 10 percent (.10). Enter the result here and see the Note below. Note: If you checked the box on line C above, see the instructions. Otherwise, include the amount from line 15 in the tax you enter on Form 1040, line 44, or Form 1040N R, line 42. Be sure to check box a on Form 1040, line 44, or Form 1040N R, line 42.
+                #    p1-t37    Line 15. Tax. Dollars.
+                #    p1-t38    Line 15. Cents.
+                # for now we just suppress the math here
+                if field['typ']!='checkbox':
+                    math.assembleFields()
             field['math'] = math
         self.orderDependencies()
         self.bfields = [ut.Bag(f) for f in fields]
