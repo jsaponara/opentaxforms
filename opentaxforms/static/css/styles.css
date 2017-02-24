@@ -1,13 +1,7 @@
-/*body {
-	background-repeat: no-repeat;
-	background-size: 1224px 1584px;
-}*/
-.tff img {
+img.tff {
 	position:absolute;
-	top:0;
-	left:0;
 }
-.tff a, .tff input, .tff textarea {
+.tff a, .tff input, .tff textarea, .tff label {
 	position: absolute;
 	background-color: transparent;
 }

@@ -202,9 +202,10 @@ def checkbox(f, form, pageinfo, imgw, imgh, tooltip=0):
     # checkboxes: <input type='checkbox' id='c1_01'><label for='c1_01'
     # style='top:358px; left:1022px; width:31px; height:24px; text-
     # align:center' ></label>
+        #" style='top:{top:.0f}px; left:{left:.0f}px; width:{width:.0f}px; position: absolute;"
     return (
         "<input type='checkbox' id='{name}' {etc}>"
-        "<label for='{name}' title='{val}'"
+        "<label for='{name}' title='{val}' class='tff'"
         " style='top:{top:.0f}px; left:{left:.0f}px; width:{width:.0f}px;"
         " height:{height:.0f}px; text-align:center'"
         " ></label>".format(
