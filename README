@@ -123,6 +123,33 @@ to test (and ultimately use) at
    -  Separate dirName command line option into
       pdfInputDir,htmlOutputDir. [splitIoDirs]
 
+0.5.7 (2017-02-24)
+
+-  Simplify form extraction from PDF [by perimosocordiae].
+-  cmds: add a 'divide' command.
+-  cmds: treat constant as 'enter' command on field with 'realunit' of
+   'ratio'.
+-  cmds: temporary: treat ratio field pair [integer and decimal fields]
+   as dollars and cents fields.
+-  form: temporary: suppress the math for checkbox fields.
+-  Form: bugfix: fix 'multiple repeats' regex error via ut.compactify.
+-  improve Form naming, including bugfix in main.indicateProgress.
+-  bugfixes for py3 compatibility:
+-  Form: remove unicode calls.
+-  config: exception not iterable.
+-  link: seek bytes, not string.
+-  linting: remove re-import.
+-  ut: set log level of root logger.
+-  bugfix: constant [pre-filled] field converted to cents.
+-  bugfix: restored absolute positioning in transition from background
+   image to img element.
+-  refs: add 'section' to nonformcontexts.
+-  refs: add schedulecontext for more accurate refs to schedules.
+-  refs: add inSameFamily rule for assigning schedules to forms.
+-  refs: suppress unicode punctuation characters in variables later used
+   for filename.
+-  Re-enable test\_1040\_xfa
+
 0.5.6 (2017-02-20)
 
 -  add py35 testenv to tox setup.
