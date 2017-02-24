@@ -183,13 +183,13 @@ class Form(object):
                 if m:
                     taxyr, form1, form2, sched = m.groups()
                 else:
-                    titlePttn2 = re.compile(
+                    titlePttn2 = re.compile(ut.compactify(
                         r'''(?:(\d\d\d\d) )?   # 2016
-                        Schedule ([-\w]+)[ ]   # Schedule B
+                        Schedule ([\w-]+)[ ]   # Schedule B
                         \(Form ([\w-]+)        # (Form 1040
                         (?: or ([\w-]+))? ?\)  # or 1040A)
                         (?: \((?:Rev|'''+anyMonth+''').+?\))?\s*$''',
-                        re.VERBOSE)
+                        ))
                     # eg 2015 Schedule M-3 (Form 1065)
                     # eg 2015 Schedule O (Form 990 or 990-EZ)
                     # eg Schedule O (Form 1120) (Rev. December 2012)
