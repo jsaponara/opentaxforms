@@ -176,8 +176,9 @@ def setupLogging(loggerId, args=None):
             raise ValueError('Invalid log level: %s, allowedLogLevels are %s' % (
                 args.loglevel, allowedLogLevels))
         fname = loggerId + '.log'
-        filehandler=logging.FileHandler(fname, encoding='utf-8')
+        filehandler=logging.FileHandler(fname, mode='w', encoding='utf-8')
         filehandler.setLevel(loglevel)
+        log.setLevel(loglevel)
         log.addHandler(filehandler)
         alreadySetupLogging = True
     return fname
@@ -545,6 +546,12 @@ def readImgSize(fname, dirName):
         img = Image.open(fh)
         imgw, imgh = img.size
     return imgw, imgh
+
+
+def asciiOnly(s):
+    if s:
+        s=''.join(c for c in s if ord(c)<127)
+    return s
 
 
 if __name__ == "__main__":

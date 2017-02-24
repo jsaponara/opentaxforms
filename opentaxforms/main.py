@@ -39,11 +39,12 @@ def addFormsTodo(form, formsdone, formstodo, formsfail):
     if cfg.recurse and (cfg.maxrecurselevel == RecurseInfinitely or
                         recurselevel < cfg.maxrecurselevel):
         newforms = set(refs.keys()) \
-            .difference(formsdone) \
-            .difference(set(form for form, reclevel in formstodo)) \
-            .difference(set(formsfail))
+            .difference(f.nameAsTuple for f in formsdone) \
+            .difference(f.nameAsTuple for f in formstodo) \
+            .difference(f.nameAsTuple for f in formsfail)
         formstodo.extend(Form(f, 1 + recurselevel) for f in newforms)
-        if ut.hasdups(formstodo, lambda form: form.name):
+        if ut.hasdups(formstodo):
+            log.warn('dups: %s',[f for i,f in enumerate(formstodo) if f in formstodo[1+i:]])
             raise Exception('formstodo hasdups')
     return formstodo
 
@@ -109,10 +110,12 @@ def logFormStatus(form):
     z.rgood, z.rerrs = form.refs.status() if form.refs else (0, 0)
     z.mgood, z.merrs = mathStatus(form.computedFields)
 
-    def neg2unkn(lst):
-        return [l if l > 0 else '?' for l in lst]
+    def neg2unkn(lst,nfieldsfound):
+        def baseline(l):
+            return l if nfieldsfound else '?'
+        return [baseline(l) if l >= 0 else '?' for l in lst]
     statusmsg = 'form {} status: '.format(form.name) + statusmsgtmpl.format(
-        *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')))
+        *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')),z.lgood)
         )
     logg(statusmsg, [log.warn, stdout])
     return z.__dict__
@@ -127,10 +130,10 @@ def logRunStatus(formsdone, formsfail, status):
         logg(msg, [log.warn, stdout])
     if formsfail:
         msg = 'failed to process %d forms: %s' % (
-              len(formsfail), [irs.computeFormId(f) for f in formsfail])
+              len(formsfail), [irs.computeFormId(f.nameAsTuple) for f in formsfail])
         logg(msg, [log.error, stdout])
     import json
-    status.update({'f' + irs.computeFormId(f).lower(): None
+    status.update({'f' + irs.computeFormId(f.nameAsTuple).lower(): None
                   for f in formsfail})
     statusStr = json.dumps(status.__dict__)
     # status is partial because missing,spurious values are unknown and thus
@@ -140,13 +143,11 @@ def logRunStatus(formsdone, formsfail, status):
 
 def indicateProgress(form):
     def guessFormPrefix(form):
-        sched = ''
         try:
             f, sched = form.name
         except ValueError:
-            f = form.name
-        if sched:
-            sched = 's' + sched.lower()
+            f, sched = form.name, None
+        sched = 's' + sched.lower() if sched else ''
         return 'f' + f + sched
     log.name = guessFormPrefix(form)
     if cfg.indicateProgress:
@@ -180,13 +181,14 @@ def opentaxforms(**args):
             html.writeEmptyHtmlPages(form)
         except irs.CrypticXml as e:
             # eg 1040 older than 2012 fails here
+            form.isCryptic=True
             log.error(jj('EEEError', e.__class__.__name__, str(e)))
-            formsfail.append(form.name)
+            formsfail.append(form)
         except Exception as e:
             log.error(jj('EEEError', traceback.format_exc()))
             if cfg.debug:
                 raise
-            formsfail.append(form.name)
+            formsfail.append(form)
         else:
             formsdone.append(form)
             formstodo = addFormsTodo(form, formsdone, formstodo, formsfail)

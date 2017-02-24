@@ -27,6 +27,19 @@ class Form(object):
         self.computedFields = ut.odict()
         self.upstreamFields = set()
         self.isCryptic = False
+        try:
+            form,sched = name
+            self.nameAsTuple = name
+        except ValueError:
+            try:
+                form,sched = name.split('s',1)
+                assert form and sched
+                self.nameAsTuple = form,sched
+            except (ValueError,AttributeError):
+                self.nameAsTuple = name, None
+
+    def __eq__(self,o):
+        return self.nameAsTuple==o.nameAsTuple
 
     def __str__(self):
         return self.__repr__()
@@ -170,13 +183,13 @@ class Form(object):
                 if m:
                     taxyr, form1, form2, sched = m.groups()
                 else:
-                    titlePttn2 = re.compile(
+                    titlePttn2 = re.compile(ut.compactify(
                         r'''(?:(\d\d\d\d) )?   # 2016
-                        Schedule ([-\w]+)[ ]   # Schedule B
+                        Schedule ([\w-]+)[ ]   # Schedule B
                         \(Form ([\w-]+)        # (Form 1040
                         (?: or ([\w-]+))? ?\)  # or 1040A)
                         (?: \((?:Rev|'''+anyMonth+''').+?\))?\s*$''',
-                        re.VERBOSE)
+                        ))
                     # eg 2015 Schedule M-3 (Form 1065)
                     # eg 2015 Schedule O (Form 990 or 990-EZ)
                     # eg Schedule O (Form 1120) (Rev. December 2012)
@@ -246,10 +259,19 @@ class Form(object):
             for s in sentences:
                 try:
                     math.parseInstruction(s, field)
-                except CannotParse:
-                    continue
+                    log.debug('found [%s] in sentence [%s] in field %s',math,s,field['uniqname'])
+                except CannotParse as e:
+                    log.debug('%s',e)
             if math and math.terms:
-                math.assembleFields()
+                # todo checkbox instructions refer to the named textbox
+                # eg 2016/8814/line15
+                #    p1-cb2    Line 15. Tax. Is the amount on line 14 less than $1,050? No. Enter $105 here and see the Note below. Note. If you checked the box on line C above, see the instructions. Otherwise, include the amount from line 15 in the tax you enter on Form 1040, line 44, or Form 1040N R, line 42. Be sure to check box a on Form 1040, line 44, or Form 1040N R, line 42.
+                #    p1-cb2L1T Line 15. Yes. Multiply line 14 by 10 percent (.10). Enter the result here and see the Note below. Note: If you checked the box on line C above, see the instructions. Otherwise, include the amount from line 15 in the tax you enter on Form 1040, line 44, or Form 1040N R, line 42. Be sure to check box a on Form 1040, line 44, or Form 1040N R, line 42.
+                #    p1-t37    Line 15. Tax. Dollars.
+                #    p1-t38    Line 15. Cents.
+                # for now we just suppress the math here
+                if field['typ']!='checkbox':
+                    math.assembleFields()
             field['math'] = math
         self.orderDependencies()
         self.bfields = [ut.Bag(f) for f in fields]
@@ -360,7 +382,7 @@ class TextPoz(object):
         if len(found) > 1:
             msgtmpl = 'textRepeats: found too many (returning all of them),' \
                 ' seeking %s in %s ... [run in debug mode for fulltext]: %s'
-            log.warn(
+            log.info(
                 msgtmpl, s, self.alltext().replace(NL, '  ')[:60], str(found))
             log.debug(' fulltext: seeking %s in %s',
                       s, self.alltext().replace(NL, '  '))

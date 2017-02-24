@@ -116,13 +116,20 @@ class Parser(object):
                 'sentence.contains "total number of exemptions claimed": [%s]'
                 % (self.sentence, ))
         # could be elim'd by allowing multi-word cmds
-        elif ('amount' in self.sentence
-              and 'amount from line ' not in self.sentence):
-            # eg 2015/f5329/line3 Amount subject to additional tax. Subtract
-            # line 2 from line 1
-            raise NoCommand(
-                'sentence.contains "amount" but not "amount from line": [%s]'
-                % (self.sentence, ))
+        elif 'amount' in self.sentence:
+            # we seek:
+            # 2016/f1040sb/line6 Add the amounts on line 5. Enter the total ...
+            # but not:
+            # 2015/f5329/line3 Amount subject to additional tax. Subtract...
+            m=re.search(irs.fromLinePttn,self.sentence)
+            if not m:
+                raise NoCommand(
+                    'sentence contains "amount" but not ~"from line": [%s]'
+                    % (self.sentence, ))
+            # however, 'amount' may signal constants:
+            #   f8814/line5  Base amount. $2,100.
+            #   f8814/line13 Amount not taxed. $1,050.
+            # but for now we'll try to deduce constants from number-as-sentence
 
     def editCommand(self, field):
         ll = field['linenum']
@@ -170,7 +177,12 @@ class Parser(object):
             self.cmd, self.sentence = m.groups()
             return self.cmd, self.sentence
         else:
-            raise NoCommand('no command found in [%s]' % (self.sentence, ))
+            m=re.match(r'^\$?(\d+)(?:,?(\d+))?$',self.sentence)
+            if m:
+                self.cmd='enter'
+                return self.cmd, self.sentence
+            else:
+                raise NoCommand('no command found in [%s]' % (self.sentence, ))
 
 
 class CannotParse(BaseException):
@@ -198,6 +210,16 @@ class CommandParser(object):
         self.text = None
         self.field = field
         self.form = form
+
+    def __str__(self):
+        return str(dict(
+            op=self.op,
+            terms=self.terms,
+            constantUnit=self.constantUnit,
+            cond=self.cond,
+            zcond=self.zcond,
+            text=self.text,
+            ))
 
     def parseAdd(self, cmd, s):
         fieldsByLine = self.form.fieldsByLine
@@ -237,17 +259,23 @@ class CommandParser(object):
         self.op = op
         self.terms = terms
 
-    def parseSubOrMult(self, cmd, s):
-        # eg 1040/line43 Subtract line 42 from line 41 eg 1040/line42 Multiply
-        # $3,800 by the number on line 6d todo eg Subtract column (e) from
-        # column (d) and combine the result with column (g). * recognize this
-        # as columnMath, assoc w/ currTable, find cells via coltitle and setup
-        # terms; continue to apply columnMath throughout currTable
-        # 1065b/p4/bottomSection/line1  In column (b), add lines 1c through 4b,
-        # 7, and 8. From the result, subtract line 14g
+    def parseSubMultDiv(self, cmd, s):
+        # eg 1040/line43 Subtract line 42 from line 41
+        # eg 1040/line42 Multiply $3,800 by the number on line 6d
+        # eg 8814/line8  Divide line 3 by line 4
+        # todo
+        # eg Subtract column (e) from
+        # column (d) and combine the result with column (g).
+        # * recognize this as columnMath, assoc w/ currTable,
+        #   find cells via coltitle and setup terms;
+        #   continue to apply columnMath throughout currTable
+        # 1065b/p4/bottomSection/line1
+        #   In column (b), add lines 1c through 4b,
+        #   7, and 8. From the result, subtract line 14g
         delim, op = dict(
             subtract=(' from ', '-'),
             multiply=(' by (?:the number on )?', '*'),
+            divide=(' by ', '/'),
             )[cmd]
         terms = re.split(delim, s, re.I)
         if len(terms) != 2:
@@ -264,7 +292,6 @@ class CommandParser(object):
                 terms[1] = terms[1][:m.start()]
                 # NOTE this means op=='-' is really a-b+c+d+....
                 terms.append(m.group(1))
-
                 def linecolterm(term):
                     if 'column' in term:
                         lin, col = term.split('column')
@@ -286,16 +313,29 @@ class CommandParser(object):
         self.terms = terms
 
     def parseEnter(self, s, cond):
-        # eg 1040/line43: Line 43. Taxable income.  Subtract line 42 from line
-        # 41. If line 42 is more than line 41, enter zero. Dollars.
-        # [[topmostSubform[0].Page2[0].p2-t10[0]]] eg 4684/line4 : If line 3 is
-        # more than line 2, enter the difference here and skip lines 5 through
-        # 9 for that column. eg 1040ez/line43: Line 6. ... If line 5 is larger
-        # than line 4, enter -0-.
+        # 1040/line43
+        #     Line 43. Taxable income.  Subtract line 42 from line 41.
+        #     If line 42 is more than line 41, enter zero. Dollars.
+        #     [[topmostSubform[0].Page2[0].p2-t10[0]]] 
+        # 4684/line4
+        #     If line 3 is # more than line 2, enter the difference
+        #     here and skip lines 5 through 9 for that column.
+        # 1040ez/line43
+        #     Line 6. ... If line 5 is larger than line 4, enter -0-.
+        # constants [see parseCommand]
+        #     f8814/line5  Base amount. $2,100.
+        #     f8814/line13 Amount not taxed. $1,050.
+        # many places
+        #     Enter the result here and on Form...
         op, terms = self.op, self.terms
         cmd = 'enter'
+        seekConstant=re.match(r'^\$?(\d+)(?:,?(\d+))?$',s)
         if s == 'zero':
             s = '-0-'
+        elif seekConstant:
+            constant=''.join((string or '') for string in seekConstant.groups())
+            self.op = '='
+            self.terms = [constant]
         elif cond and s.startswith('the difference here'):
             op = '-'
             m1 = re.match(
@@ -350,7 +390,7 @@ class CommandParser(object):
                 amt.replace('$', '').replace(',', ''),
                 )
         else:
-            log.warn(jj('cannotParseCond: cannot parse condition', cond))
+            log.debug(jj('cannotParseCond: cannot parse condition', cond))
         if condparse is not None:
             def flipcondition(cond):
                 cmpOp, x, y = cond
@@ -369,10 +409,10 @@ class CommandParser(object):
                     cond))
                 self.zcond = flipcondition(condparse)
 
-    def getFieldFromTerm(self, term, parentline, pgnum, fieldsByLine):
-        # find fields that correspond to the term; parentline is lhs typically
-        # returns the dollar and cent fields corresponding to a term such as
-        # 'line7'
+    def getFieldsFromTerm(self, term, parentline, pgnum, fieldsByLine):
+        # find fields that correspond to the term; parentline is lhs
+        # typically returns the dollar and cent fields
+        #   corresponding to a term such as 'line7'
         if term.isdigit():
             return [dict(
                 typ='constant',
@@ -411,6 +451,7 @@ class CommandParser(object):
         return found
 
     def assembleFields(self):
+        # todo rename to assembleInputs?
         op = self.op
         terms = self.terms
         self.text = ''
@@ -422,23 +463,29 @@ class CommandParser(object):
             # eg 1040/line42 our dep fields are unitless cuz our constant is in
             # dollars
             myFieldUnit = None
-        upfields = [self.getFieldFromTerm(term, ll, pg, fieldsByLine)
+        upfields = [self.getFieldsFromTerm(term, ll, pg, fieldsByLine)
                     for term in terms]
         upfields = [upf for upfs in upfields for upf in upfs
+                    # a field cannot be its own input
                     if upf[self.namek] != myFieldName
-                    and upf[self.unitk] == myFieldUnit]
+                    # a field's inputs should have compatible units
+                    # todo this should depend on op: eg for '/' op,
+                    # it's the operands whose units should match.
+                    and (upf[self.unitk] == 'cents') == (myFieldUnit == 'cents')]
         if op == '*':
             # todo revisit: here we assume that 1. we want to multiply only two
             # fields, and specifically 2. we want the first and the last [and
-            # thus most derived/computed] field for 1040/line42, this gives a
-            # constant and the [computed] line6d
+            # thus most derived/computed] field.
+            # in 1040/line42, where 'line6d' can refer to multiple fields,
+            # this gives a constant and the [final, computed] line6d field.
             if len(upfields) > 1:
                 upfields = [upfields[0], upfields[-1]]
         self.form.upstreamFields.update(
             [upf['uniqname'] for upf in upfields
              if upf.get('typ') != 'constant'])
-        # self.form.upstreamFields.remove(myFieldName)  # do this later in case
-        # fields are not in dependency order [see laterIsHere]
+        # do this later in case fields are not in dependency order
+        # [see Form.orderDependencies]
+        # self.form.upstreamFields.remove(myFieldName)
         self.form.computedFields[myFieldName] = self.field
         self.field['deps'] = upfields
         self.field['op'] = op
@@ -462,8 +509,8 @@ class CommandParser(object):
             cmd, cond, pred = self.parseSentence(sentence, field)
             if cmd in ('add', 'combine', 'howmany', 'total', 'amount'):
                 self.parseAdd(cmd, pred)
-            elif cmd in ('subtract', 'multiply'):
-                self.parseSubOrMult(cmd, pred)
+            elif cmd in ('subtract', 'multiply', 'divide'):
+                self.parseSubMultDiv(cmd, pred)
             elif cmd in ('enter', ):
                 pred = self.parseEnter(pred, cond)
             else:

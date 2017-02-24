@@ -9,10 +9,11 @@ excludedformsPttn = re.compile(r'109\d.*|w.*', re.I)
 # commands that are common in tax instructions
 verbs = [
     v.replace('_', ' ') for v in
-    'add amount combine total howmany subtract multiply enter include check'.
+    'add amount combine total howmany subtract multiply divide enter include check'.
     lower().split()]
 verbPtn = '|'.join(verbs)
 commandPtn = re.compile('.*?(' + verbPtn + r') (.+)', re.I)
+fromLinePttn = re.compile(r'amounts? (?:on|from) lines? ', re.I)
 
 possibleColTypes = 'proceeds cost adjustment gain loss'.lower().split()
 
