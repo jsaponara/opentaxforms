@@ -116,13 +116,20 @@ class Parser(object):
                 'sentence.contains "total number of exemptions claimed": [%s]'
                 % (self.sentence, ))
         # could be elim'd by allowing multi-word cmds
-        elif ('amount' in self.sentence
-              and 'amount from line ' not in self.sentence):
-            # eg 2015/f5329/line3 Amount subject to additional tax. Subtract
-            # line 2 from line 1
-            raise NoCommand(
-                'sentence.contains "amount" but not "amount from line": [%s]'
-                % (self.sentence, ))
+        elif 'amount' in self.sentence:
+            # we seek:
+            # 2016/f1040sb/line6 Add the amounts on line 5. Enter the total ...
+            # but not:
+            # 2015/f5329/line3 Amount subject to additional tax. Subtract...
+            m=re.search(irs.fromLinePttn,self.sentence)
+            if not m:
+                raise NoCommand(
+                    'sentence contains "amount" but not ~"from line": [%s]'
+                    % (self.sentence, ))
+            # however, 'amount' may signal constants:
+            #   f8814/line5  Base amount. $2,100.
+            #   f8814/line13 Amount not taxed. $1,050.
+            # but for now we'll try to deduce constants from number-as-sentence
 
     def editCommand(self, field):
         ll = field['linenum']
