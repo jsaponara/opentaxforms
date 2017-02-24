@@ -312,6 +312,8 @@ def computeSteps(cfield):
                 jsterm(dep, 'uniqlinenum')
                 + ('()' if dep.get('typ') != 'constant' else '')
                 for dep in cfield['deps'])))
+    elif len(cfield.get('math').terms)==1:
+        steps.append('var result=%s;' % (cfield['math'].terms[0]+'00',))
     if cfield['math'].zcond:
         def termify(linenum):
             if linenum.startswith('line'):
