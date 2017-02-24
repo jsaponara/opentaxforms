@@ -239,16 +239,16 @@ def findRefs(form):
                                 jj(
                                     idraw, summa, jj(form, sched, delim=','),
                                     match, txt, delim='|'))
-                        # remove the matching text to avoid matching a subset
-                        # of it in subsequent searches
-                        txt = txt.replace(match, '')
-                        iFormInLine += 1
-        # 'to' or 'if' as delimiters prevent (Schedule,1099) in 1040-cez: See
-        # the instructions for line I in the instructions for Schedule C to
-        # help determine if you are required to file any Forms 1099. 8824: If
-        # more than zero, enter here and on Schedule D or Form 4797 (see
-        # instructions)  -> (8824,4797) wh is wrong, but may be tricky to get
-        # right
+                            iFormInLine += 1
+                # remove the matching text to avoid matching a subset
+                # of it in subsequent searches
+                txt = txt.replace(match, '')
+        # 'to' or 'if' as delimiters prevent (Schedule,1099) in
+        # 1040-cez: See the instructions for line I in the instructions
+        #           for Schedule C to help determine if you are required
+        #           to file any Forms 1099.
+        # 8824: If more than zero, enter here and on Schedule D or Form 4797 
+        #       -> (8824,4797) wh is wrong, but may be tricky to get right
         nicetext = re.sub(u'[\s\xa0|]+', ' ', txt)
         p = '(((Form|Schedule)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)'
         matches = re.findall(p, nicetext)

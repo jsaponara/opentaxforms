@@ -211,6 +211,16 @@ class CommandParser(object):
         self.field = field
         self.form = form
 
+    def __str__(self):
+        return str(dict(
+            op=self.op,
+            terms=self.terms,
+            constantUnit=self.constantUnit,
+            cond=self.cond,
+            zcond=self.zcond,
+            text=self.text,
+            ))
+
     def parseAdd(self, cmd, s):
         fieldsByLine = self.form.fieldsByLine
         ll, pg = [self.field[key] for key in ('linenum', 'npage')]
@@ -282,7 +292,6 @@ class CommandParser(object):
                 terms[1] = terms[1][:m.start()]
                 # NOTE this means op=='-' is really a-b+c+d+....
                 terms.append(m.group(1))
-
                 def linecolterm(term):
                     if 'column' in term:
                         lin, col = term.split('column')
@@ -381,7 +390,7 @@ class CommandParser(object):
                 amt.replace('$', '').replace(',', ''),
                 )
         else:
-            log.warn(jj('cannotParseCond: cannot parse condition', cond))
+            log.debug(jj('cannotParseCond: cannot parse condition', cond))
         if condparse is not None:
             def flipcondition(cond):
                 cmpOp, x, y = cond

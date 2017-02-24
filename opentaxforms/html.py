@@ -44,11 +44,9 @@ def computePageTitle(titlebase, npage, npages):
 
 def createSvgFile(dirName, prefix, npage):
     ipage = npage - 1
-    import os.path
-    infpath = os.path.join(dirName,'{}.pdf'.format(prefix))
-    print('infpath', infpath)
-    outfpath = os.path.join(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
-    outfpathFinal = os.path.join(dirName,'{}-p{}.svg'.format(prefix, npage))
+    infpath = pathjoin(dirName,'{}.pdf'.format(prefix))
+    outfpath = pathjoin(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
+    outfpathFinal = pathjoin(dirName,'static','svg','{}-p{}.svg'.format(prefix, npage))
     cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
     out, err = ut.run(cmd)
     if err:
@@ -513,7 +511,10 @@ def writeEmptyHtmlPages(form):
         # [not dollars or cents] boxes such as counting chkboxes example
         # output: s.f1_30=koc(pp("+",[s.c1_04,s.c1_05]));//line6d=line6a+line6b
         inputdepsSingle = [
-            's.%(lhsname)s=koc(pp("%(op)s",[%(terms)s]%(signs)s));%(math)s' %
+            # todo
+            # todo fill in remaining params w/ undefined
+            # todo
+            's.%(lhsname)s=koc(pp("%(lhsname)s","%(op)s",[%(terms)s]%(signs)s));%(math)s' %
             dict(
                 lhsname=jsvar(cfield['uniqname']),
                 op=cfield['op'],
@@ -556,7 +557,8 @@ def writeEmptyHtmlPages(form):
                     if depfield['unit'] != 'cents'
                     and depfield.get('typ') != 'constant'
                     and depfield['uniqlinenum'] not in alreadyDefined),
-                steps=computeSteps(cfield), dname=jsvar(cfield['uniqname']),
+                steps=computeSteps(cfield),
+                dname=jsvar(cfield['uniqname']),
                 centfieldOptional='s.%(cname)s=koc(zz(cc(s.%(line)s)));' %
                 dict(
                     cname=jsvar(cfield['centfield']['uniqname']),

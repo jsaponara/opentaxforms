@@ -77,7 +77,7 @@ def parseCmdline():
     addarg('-d', '--directory', dest='dirName', default=defaults.
            dirName, nargs='?', help='directory of form files to parse')
     addarg('-l', '--loglevel', help='set loglevel',
-           default=defaults.loglevel, dest='LOG_LEVEL')
+           default=defaults.loglevel, dest='loglevel')
     addarg('-T', '--doctests', help='run doctests',
            action="store_true")
     addarg('-v', '--verbose',

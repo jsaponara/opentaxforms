@@ -130,8 +130,8 @@ def xmlFromPdf(pdfpath, xmlpath=None):
             if b'xfa-template' in data:
                 break
         else:
-            log.warn('CrypticXml: Cannot find form data in %s', pdfpath)
-            raise CrypticXml('Cannot find form data in %s' % pdfpath)
+            msg='Cannot find form data in %s' % pdfpath
+            raise CrypticXml(msg)
     # data == <form>-text.xml
     tree = etree.fromstring(data)
     if xmlpath is not None:

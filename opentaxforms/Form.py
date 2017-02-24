@@ -382,7 +382,7 @@ class TextPoz(object):
         if len(found) > 1:
             msgtmpl = 'textRepeats: found too many (returning all of them),' \
                 ' seeking %s in %s ... [run in debug mode for fulltext]: %s'
-            log.warn(
+            log.info(
                 msgtmpl, s, self.alltext().replace(NL, '  ')[:60], str(found))
             log.debug(' fulltext: seeking %s in %s',
                       s, self.alltext().replace(NL, '  '))

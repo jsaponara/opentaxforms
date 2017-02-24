@@ -110,10 +110,12 @@ def logFormStatus(form):
     z.rgood, z.rerrs = form.refs.status() if form.refs else (0, 0)
     z.mgood, z.merrs = mathStatus(form.computedFields)
 
-    def neg2unkn(lst):
-        return [l if l > 0 else '?' for l in lst]
+    def neg2unkn(lst,nfieldsfound):
+        def baseline(l):
+            return l if nfieldsfound else '?'
+        return [baseline(l) if l >= 0 else '?' for l in lst]
     statusmsg = 'form {} status: '.format(form.name) + statusmsgtmpl.format(
-        *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')))
+        *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')),z.lgood)
         )
     logg(statusmsg, [log.warn, stdout])
     return z.__dict__

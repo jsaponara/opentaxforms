@@ -45,7 +45,7 @@ var opentaxforms=(function() {
 		}
 		if(cc)return factor*(dd.slice(ddstart,ddend)+(+cc.slice(ccstart,ccend))); else return factor*dd;
 	}}
-	me.pp=function(op,xs,signs,ys,zcond){
+	me.pp=function(fieldid,op,xs,signs,ys,zcond){
 		// xs are dollars or dimless, ys are cents; '(x)' -> -x else x
 		var doop=function(op,xs,start) {  // as in do-op-on-array-of-xs-accum-from-start
 			var nz=false,n,result=0;
