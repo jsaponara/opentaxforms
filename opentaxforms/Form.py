@@ -27,6 +27,19 @@ class Form(object):
         self.computedFields = ut.odict()
         self.upstreamFields = set()
         self.isCryptic = False
+        try:
+            form,sched = name
+            self.nameAsTuple = name
+        except ValueError:
+            try:
+                form,sched = name.split('s',1)
+                assert form and sched
+                self.nameAsTuple = form,sched
+            except (ValueError,AttributeError):
+                self.nameAsTuple = name, None
+
+    def __eq__(self,o):
+        return self.nameAsTuple==o.nameAsTuple
 
     def __str__(self):
         return self.__repr__()

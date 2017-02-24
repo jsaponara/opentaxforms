@@ -25,10 +25,10 @@ nonformcontexts = (
 
 
 def findRefs(form):
-    dirName = cfg.dirName
     if 'r' not in cfg.steps:
         return
-    formName = form.formName
+    dirName = cfg.dirName
+    formName,schedName = form.nameAsTuple
     prefix = form.prefix
     pageinfo = form.pageinfo
     draws = form.draws
