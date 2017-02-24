@@ -165,8 +165,8 @@ def setLogname(rootForms,cfg):
         logname = cfg.logPrefix
     elif rootForms:
         logname = rootForms[0]
-    elif dirName:
-        logname = dirName.replace('/', '_').replace('\\', '_').strip('._')
+    elif cfg.dirName:
+        logname = cfg.dirName.replace('/', '_').replace('\\', '_').strip('._')
     else:
         logname = appname
     if len(rootForms) > 1 or cfg.recurse:
@@ -242,7 +242,6 @@ def setup(**overrideArgs):
             # symlink-else-copy the folder of static files
             staticDir = ut.Resource(appname, 'static').path()
             staticLink = pathjoin(dirName, 'static')
-            import os.path
             try:
                 if not os.path.lexists(staticLink):
                     os.symlink(staticDir, staticLink)
@@ -260,7 +259,7 @@ def setup(**overrideArgs):
             try:
                 os.makedirs(pathjoin(staticLink,'svg'))
             except Exception as e:
-                if 'File exists' not in e:
+                if 'File exists' not in str(e):
                     log.warn('cannot create svg dir [%s]',e)
         linkStaticDir(appname,dirName)
 

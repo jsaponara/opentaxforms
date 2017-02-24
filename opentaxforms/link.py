@@ -175,7 +175,7 @@ def linkfields(form):
                 dd['expectedDollars'] = 1  # just in case it's useful later
             dd['centfield'] = cc
             cc['dollarfieldname'] = dd['uniqname']
-        elif 'Numbers after the decimal.' in f['speak']:
+        elif b'Numbers after the decimal.' in f['speak']:
             cc, dd = f, fprev
             assert 'Numbers before the decimal.' in dd['speak']
             assert dd['unit'] is None

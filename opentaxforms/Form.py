@@ -259,9 +259,9 @@ class Form(object):
             for s in sentences:
                 try:
                     math.parseInstruction(s, field)
-                    log.debug('found [%s] in sentence [%s] in field %s',math,unicode(s),field['uniqname'])
+                    log.debug('found [%s] in sentence [%s] in field %s',math,s,field['uniqname'])
                 except CannotParse as e:
-                    log.debug('%s',unicode(e))
+                    log.debug('%s',e)
             if math and math.terms:
                 # todo checkbox instructions refer to the named textbox
                 # eg 2016/8814/line15
