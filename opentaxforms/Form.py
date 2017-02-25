@@ -1,15 +1,23 @@
+from __future__ import absolute_import
 import re
-try:
-    from urllib2 import urlopen, URLError, HTTPError
-except ImportError:
-    from urllib.request import urlopen
-    from urllib.error import URLError, HTTPError
+from pdfminer.converter import PDFPageAggregator
+from pdfminer.layout import (
+    LTTextBox, LTTextLine, LTTextBoxHorizontal, LAParams, LTChar,
+    LTTextLineHorizontal
+)
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdftypes import resolve1
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.error import URLError, HTTPError
 
-import opentaxforms.ut as ut
-from opentaxforms.ut import (log, ntuple, logg, stdout, Qnty, NL,
-    pathjoin)
-import opentaxforms.irs as irs
-from opentaxforms.config import cfg
+from . import ut, irs
+from .ut import log, ntuple, logg, stdout, Qnty, NL, pathjoin
+from .config import cfg
+from .xmp import xmp_to_dict
+from .cmds import CommandParser, normalize, adjustNegativeField, CannotParse
 
 # global so that theyre pickle-able
 PageInfo = ntuple('PageInfo', 'pagenum pagewidth pageheight textpoz')
@@ -146,16 +154,11 @@ class Form(object):
 
     def pdfInfo(self):
         # collect metadata from pdf file at document and page levels
-        from pdfminer.pdfparser import PDFParser
-        from pdfminer.pdfdocument import PDFDocument
-        from pdfminer.pdfpage import PDFPage
         with open(self.fpath, 'rb') as fp:
             parser = PDFParser(fp)
             doc = PDFDocument(parser)
             docinfo = {}
             if 'Metadata' in doc.catalog:
-                from pdfminer.pdftypes import resolve1
-                from opentaxforms.xmp import xmp_to_dict
                 metadata = resolve1(doc.catalog['Metadata']).get_data()
                 xmpdict = xmp_to_dict(metadata)
                 docinfo['titl'] = xmpdict['dc']['title']['x-default']
@@ -246,8 +249,6 @@ class Form(object):
     def computeMath(self):
         # determines which fields are computed from others
         # 'dep' means dependency
-        from opentaxforms.cmds import (
-            CommandParser, normalize, adjustNegativeField, CannotParse)
         fields = self.fields if 'm' in cfg.steps else []
         for field in fields:
             math = CommandParser(field, self)
@@ -280,9 +281,6 @@ class Form(object):
 
 class Renderer(object):
     def __init__(self):
-        from pdfminer.layout import LAParams
-        from pdfminer.converter import PDFPageAggregator
-        from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
         # Create a PDF resource manager object that stores shared resources.
         rsrcmgr = PDFResourceManager()
         # la=layout analysis
@@ -292,21 +290,19 @@ class Renderer(object):
         self.textPoz = None
 
     def renderPage(self, page):
-        from pdfminer.layout import LTTextBox, LTTextLine, LTTextBoxHorizontal
         self.interpreter.process_page(page)
         layout = self.device.get_result()
         # http://denis.papathanasiou.org/2010/08/04/extracting-text-images-
         # from-pdf-files/
         textPoz = TextPoz()
         for lt in layout:
-            if lt.__class__ in (LTTextBoxHorizontal, LTTextBox, LTTextLine):
+            if isinstance(lt, (LTTextBoxHorizontal, LTTextBox, LTTextLine)):
                 textPoz.add(lt)
         return textPoz
 
 
 class TextPoz(object):
     # text positions
-    from pdfminer.layout import LTChar, LTTextLineHorizontal
     FormPos = ntuple('FormPos', 'itxt ichar chrz bbox')
 
     def __init__(self):
@@ -318,13 +314,13 @@ class TextPoz(object):
 
         def accum(ltobj, ltchars, chars):
             for lto in ltobj:
-                if isinstance(lto, self.LTChar):
+                if isinstance(lto, LTChar):
                     ltchartext = lto.get_text()
                     ltchars.append(
                         (ltchartext,
                          ut.Bbox(*quantify(lto.bbox, 'printers_point'))))
                     chars.append(ltchartext)
-                elif isinstance(lto, self.LTTextLineHorizontal):
+                elif isinstance(lto, LTTextLineHorizontal):
                     accum(lto, ltchars, chars)
         ltchars = []
         chars = []
