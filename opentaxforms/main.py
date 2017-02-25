@@ -164,7 +164,7 @@ def opentaxforms(**args):
     formstodo, formsdone, formsfail = [], [], []
     formstodo.extend(cfg.formsRequested)
     status = Bag()
-    failurls = ut.unpickle('failurls', set())
+    failurls = ut.unpickle('failurls', set()) if cfg.useCaches else set()
 
     while formstodo:
         form = formstodo.pop(0)

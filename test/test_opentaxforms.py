@@ -193,7 +193,6 @@ class TestSteps(TestBase):
             rootForms='1040',
             filesToCheck=['f1040-p1.html'],
             dirName=dir_name,
-            ignoreCaches=True,
             **kw
             )
 
