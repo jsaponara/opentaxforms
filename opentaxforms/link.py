@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 import six
 import re
-from opentaxforms.ut import log, jj, ddict
-import opentaxforms.irs as irs
+
+from . import irs
+from .ut import log, jj, ddict
 
 
 def findLineAndUnit(speak):

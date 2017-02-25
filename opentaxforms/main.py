@@ -10,14 +10,16 @@
     pos,poz=position,positions
 '''
 from __future__ import print_function, absolute_import
+import json
 import sys
-from os import remove as removeFile
 import traceback
+from os import remove as removeFile
 
 from . import ut, irs, link, schema, html, refs as references
 from .ut import log, jj, Bag, logg, stdout, Qnty, pathjoin
 from .config import cfg, setup, RecurseInfinitely
 from .extractFillableFields import extractFields
+from .Form import Form
 
 
 def cleanup_files(form):
@@ -33,7 +35,6 @@ def cleanup_files(form):
 
 
 def addFormsTodo(form, formsdone, formstodo, formsfail):
-    from opentaxforms.Form import Form
     recurselevel = form.recurselevel
     refs = form.refs
     if cfg.recurse and (cfg.maxrecurselevel == RecurseInfinitely or
@@ -132,7 +133,6 @@ def logRunStatus(formsdone, formsfail, status):
         msg = 'failed to process %d forms: %s' % (
               len(formsfail), [irs.computeFormId(f.nameAsTuple) for f in formsfail])
         logg(msg, [log.error, stdout])
-    import json
     status.update({'f' + irs.computeFormId(f.nameAsTuple).lower(): None
                   for f in formsfail})
     statusStr = json.dumps(status.__dict__)
