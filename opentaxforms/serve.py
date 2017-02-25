@@ -1,15 +1,18 @@
 #!/usr/bin/env python
-from __future__ import print_function
-from opentaxforms.version import appname, apiVersion
+from __future__ import print_function, absolute_import
+import flask_restless
+from argparse import ArgumentParser
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from .db import connect
+from .version import appname, apiVersion
+from .ut import Bag
 
 
 def createApi(app,**kw):
-    import flask_restless
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.orm import scoped_session, sessionmaker
-    from opentaxforms.db import connect
-    from flask_sqlalchemy import SQLAlchemy
     db = SQLAlchemy(app)
     conn, engine, metadata, md = connect(appname, **kw)
     Base = declarative_base()
@@ -60,7 +63,6 @@ def createApi(app,**kw):
 
 def parseCmdline():
     '''Load command line arguments'''
-    from argparse import ArgumentParser
     parser = ArgumentParser(
         description='Automates tax forms'
                     ' and provides an API for new tax form interfaces'
@@ -72,7 +74,6 @@ def parseCmdline():
 
 
 def createApp(**kw):
-    from opentaxforms.ut import Bag
     cmdline = kw.get('cmdline')
     verbose = kw.get('verbose')
     if 'cmdline' in kw:

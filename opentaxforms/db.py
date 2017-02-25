@@ -1,12 +1,15 @@
+from __future__ import absolute_import
+import os
 import six
+import sys
 from itertools import chain
-import opentaxforms.ut as ut
-import opentaxforms.config as config
-from opentaxforms.ut import log
-from opentaxforms.config import cfg
-from sqlalchemy import MetaData, create_engine, select
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import (
+    MetaData, create_engine, select, UniqueConstraint)
 # from sqlalchemy.exc import ProgrammingError
+
+from . import ut, config
+from .ut import log
+from .config import cfg
 
 engine, metadata, conn = None, None, None
 
@@ -23,7 +26,6 @@ def connect(appname, **kw):
     user = pw = 'user'
     dbname = appname.lower()
     # optionally override defaults
-    import os
     user = os.environ.get(appname.upper() + '_DBUSER', user)
     pw = os.environ.get(appname.upper() + '_DBPASS', pw)
     dbname = os.environ.get(appname.upper() + '_DBNAME', dbname)
@@ -240,7 +242,6 @@ def getbyname(table, mem=mem, **kw):
 
 
 if __name__ == "__main__":
-    import sys
     args = sys.argv
     if any([arg in args for arg in '-t --testing'.split()]):
         import doctest
