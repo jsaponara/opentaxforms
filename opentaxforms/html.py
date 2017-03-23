@@ -50,7 +50,7 @@ def createSvgFile(dirName, prefix, npage):
     infpath = pathjoin(dirName,'{}.pdf'.format(prefix))
     outfpath = pathjoin(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
     outfpathFinal = pathjoin(dirName,'static','svg','{}-p{}.svg'.format(prefix, npage))
-    cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
+    cmd = 'pdf2svg "{}" "{}" {}'.format(infpath, outfpath, npage)
     out, err = ut.run(cmd)
     if err:
         msg = (
