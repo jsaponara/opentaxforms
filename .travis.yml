@@ -1,12 +1,14 @@
 # are these available with language:python? > no!  see v0.4.15
 #- phantomjs --version
 #- casperjs --version
-env:
-- TOXENV=py27
+language: python
 install:
     - sudo apt-get -qq update
     - sudo apt-get install -y pdf2svg
     - pip install -U tox
-language: python
-python: 2.7
+- python: 2.7
+  env: TOXENV=py27
+- python: 3.5
+  env: TOXENV=py35
+- env: TOXENV=linting
 script: tox -e ${TOXENV}
