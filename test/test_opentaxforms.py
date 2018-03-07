@@ -29,7 +29,7 @@ class TestOtfBase(object):
         theForm = 'f1040.pdf'
         dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
         if not osp.exists(dirName):
-            os.makedir(dirName)
+            os.makedirs(dirName)
         formpath = osp.join(dirName, theForm)
         if not osp.exists(formpath):
             formResourcePath = ut.Resource('test', osp.join('forms-common', theForm)).path()
