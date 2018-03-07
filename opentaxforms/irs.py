@@ -22,7 +22,7 @@ possibleColTypes = 'proceeds cost adjustment gain loss'.lower().split()
 # prevurltmpl='http://www.irs.gov/pub/irs-pdf/%s'%(fname,)
 # currurltmpl='http://www.irs.gov/file_source/pub/irs-pdf/%s'%(fname,) 2015
 prevurltmpl = 'http://www.irs.gov/pub/irs-prior/%s'
-currurltmpl = 'http://www.irs.gov/pub/irs-pdf/%s'
+currurltmpl = 'https://www.irs.gov/pub/irs-pdf/%s'
 
 
 # xml that we cannot currently parse, eg 1040 older than 2012
