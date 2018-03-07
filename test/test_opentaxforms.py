@@ -1,246 +1,174 @@
 #! /usr/bin/env python
-'''
-    The tests.
-'''
+
+# 'Otf' below [eg TestOtfSteps]  is 'OpenTaxForms'
+
 from __future__ import print_function
-from os.path import basename
-from shutil import copy
-from opentaxforms.ut import pathjoin
+import os
+import os.path as osp
+import shutil
+from subprocess import check_output
 from opentaxforms import ut
-from opentaxforms import config
 
+def checkDependencies():
+    # todo read dependencies from a central location
+    dependencies = ['pdf2svg']
+    missingDeps = []
+    for dep in dependencies:
+        try:
+            check_output(dep)
+        except OSError:
+            missingDeps.append(dep)
+        except:
+            pass
+    if missingDeps:
+        raise Exception('missing dependencies: ' + str(missingDeps) + '; see README.')
 
-class TestApiBase(object):
-    '''setup/teardown'''
-    def setup_method(self):
-        '''pre-test setup'''
-        from opentaxforms.serve import createApp
-        # we just read from this db
-        dbpath = 'sqlite:///' + ut.Resource(
-            'test', 'forms-common/f1040.sqlite3').path()
-        # dirName=None means dont look for a forms/ directory
-        self.app = createApp(dbpath=dbpath, dirName=None)
-        self.client = self.app.test_client()
-
-    def teardown_method(self):
-        '''post-test teardown'''
-        config.unsetup()
-
-
-class TestApi(TestApiBase):
-    '''test the api'''
-    def test_api_orgn(self):
-        '''get list of organizations (currently just IRS)'''
-        request = '/api/v1/orgn'
-        response = self.client.get(request)
-        print(request, '->', response.data)
-        assert b'"code": "us_irs"' in response.data
-        assert response.status_code == 200
-
-    def test_api_f1040(self):
-        '''get form 1040'''
-        request = (
-            '/api/v1/form?q='
-            '{"filters":[{"name":"code","op":"eq","val":"1040"}]}')
-        response = self.client.get(request)
-        print(request, '->', response.data)
-        assert b'"title": "Form 1040"' in response.data
-        assert response.status_code == 200
-
-    def test_api_noresults(self):
-        '''request a nonexistent form'''
-        request = (
-            '/api/v1/form?q='
-            '{"filters":[{"name":"code","op":"eq","val":"0000"}]}')
-        response = self.client.get(request)
-        print(request, '->', response.data)
-        assert b'"num_results": 0' in response.data
-        assert response.status_code == 200
-
-    def test_api_filterslots(self):
-        '''demo of how to filter
-            get all checkbox fields on page 1 of form 1040
-        '''
-        import json
-        url = '/api/v1/slot?q=%s'
-        filters = [
-            dict(name='inptyp', op='eq', val='k'),  # k=checkbox [vs x=textbox]
-            dict(name='page', op='eq', val=1),  # on page 1
-            dict(name='form', op='has',
-                 val=dict(name='code', op='eq', val='1040')),  # of form 1040
-            ]
-        paramstring = json.dumps(dict(filters=filters))
-        request = url % (paramstring, )
-        response = self.client.get(request)
-        print(request, '->', response.data)
-        assert response.status_code == 200
-        assert b'"num_results": 15' in response.data
-
-
-class TestBase(object):
-    '''setup/teardown'''
-    def setup_method(self):
-        '''setup'''
-        self.testdir = ut.Resource('test', '').path()
-        dbpath = 'sqlite:///' + self.testdir + '/opentaxforms.sqlite3'
-        self.default_args = dict(
+class TestOtfBase(object):
+    def setup_method(self, _):
+        dirName = 'forms'
+        theForm = 'f1040.pdf'
+        dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
+        if not osp.exists(dirName):
+            os.makedir(dirName)
+        formpath = osp.join(dirName, theForm)
+        if not osp.exists(formpath):
+            formResourcePath = ut.Resource('test', osp.join('forms-common', theForm)).path()
+            shutil.copy(formResourcePath, formpath)
+        filesToCleanup = 'failurls.pickl'.split()
+        for f in filesToCleanup:
+            if osp.exists(f):
+                os.remove(f)
+        self.defaultArgs=dict(
             # skip cleanupFiles to allow comparison with target output
-            # skip=['c'],
+            #skip=['c'],
+            dirName = dirName,
             # todo change dbpath to dburl
             dbpath=dbpath,
             )
-
-    def teardown_method(self):
-        '''post-tests teardown'''
-        config.unsetup()
-
-    def run(self, **kw):
-        '''
-        run test in child class
-
-        note debug=True in kw will cause output mismatch
-             because html pages get debug output
-        '''
-        kw.update(self.default_args)
-        self.dir_name = kw['dirName']
-        inputpdf = pathjoin(self.testdir, 'forms-common', 'f1040.pdf')
-        self.outdir = pathjoin(self.testdir, self.dir_name, '')
-        ut.ensure_dir(self.outdir)
-        copy(inputpdf, self.outdir)
-        logPrefix=basename(self.dir_name)
-        from opentaxforms import main as otfmain
-        returnval = otfmain.opentaxforms(
+    def teardown_method(self, _):
+        pass
+    def run(self,**kw):
+        checkDependencies()
+        #rootForms=kw.get('rootForms') or ['1040']
+        rootForms=kw.get('rootForms') or '1040'
+        filesToCheck=kw.get('filesToCheck') or ['f%s-p1.html'%(form,) for form in rootForms]
+        kw.update(self.defaultArgs)
+        from opentaxforms import main as otf
+        returnval=otf.opentaxforms(
             okToDownload=False,
-            logPrefix=logPrefix,
             **kw)
-        if returnval != 0:
-            logfname=logPrefix+'.log'
-            try:
-                logerrors=open(logfname).read()
-                try:
-                    # filter out the oft-voluminous warnings
-                    logerrors='\n'.join(line
-                        for line in open(logfname).read().split('\n')
-                        if 'WARNING:' not in line)
-                except Exception as e:
-                    logerrors="oops, couldn't process log file [%s], error was [%s]"%(logfname,e,)
-            except IOError:
-                logerrors="oops, couldn't read log file [%s]"%(logfname,)
-            raise Exception('run failed, no output to compare against target--check log file.\nlog errors:\n'+logerrors)
-        self.check_output(**kw)
-
-    def check_output(self, **kw):
-        '''compare run output to target output'''
-        root_forms = kw.get('rootForms') or '1040'
-        shallow = False
-        targetdir = pathjoin(self.testdir, 'forms-targetOutput', '')
-        files_to_check = kw.get('filesToCheck') or \
-            ['f%s-p1.html' % (form, ) for form in root_forms]
-
-        def fmtmsg(result, verb, file_to_check, outdir, targetdir):
-            '''format message'''
-            return '{}: output file "{}" in "{}" {} target in "{}"'.format(
-                result, file_to_check, outdir, verb, targetdir)
+        if returnval!=0:
+            raise Exception('run failed, no output to compare against target')
         import filecmp
-        for file_to_check in files_to_check:
-            files_match = filecmp.cmp(
-                pathjoin(self.outdir, file_to_check),
-                pathjoin(targetdir, file_to_check),
+        shallow=False
+        outdir = 'forms'
+        targetdir= ut.Resource('test', 'forms-targetOutput').path()
+        def fmtmsg(result,verb):
+            return '{}: output file "{}" in "{}" {} target in "{}"'.format(
+                result,fileToCheck,outdir,verb,targetdir)
+        for fileToCheck in filesToCheck:
+            filesMatch=filecmp.cmp(
+                osp.join(outdir, fileToCheck),
+                osp.join(targetdir, fileToCheck),
                 shallow)
-            if files_match:
-                result, verb = 'PASS', 'matches'
-                print(fmtmsg(result, verb, file_to_check,
-                             self.outdir, targetdir))
+            if filesMatch:
+                result,verb='PASS','matches'
+                print(fmtmsg(result,verb))
             else:
-                result, verb = 'FAIL', 'does NOT match'
-                raise Exception(
-                    fmtmsg(result, verb, file_to_check,
-                           self.outdir, targetdir))
-
-
-class TestSteps(TestBase):
+                result,verb='FAIL','does NOT match'
+                raise Exception(fmtmsg(result,verb))
+class TestOtfSteps(TestOtfBase):
     '''
         These 'steps' tests actually run the script.
-        test_run_1040_full runs 'all steps' and thus 
-        it runs for while--be patient.
+        run_1040_full runs 'all steps' and thus doesnt
+        start with 'test_' because it runs for several seconds
         '''
-
-    def test_run_1040_xfa(self, **kw):
-        '''xfa-only run of form 1040'''
-        dir_name = pathjoin(self.testdir, 'forms_1040_xfa')
-        ut.ensure_dir(dir_name)
-        # use cached pdf info to speed the run
-        pdfinfo = pathjoin(self.testdir, 'forms-common', 'f1040-pdfinfo.pickl')
-        copy(pdfinfo, dir_name)
-        self.run(
-            rootForms='1040',
-            filesToCheck=['f1040-fmt.xml'],
-            dirName=dir_name,
-            steps=['x'],
-            computeOverlap=False,  # speeds testing
-            **kw
-            )
-
-    # todo add tests of further steps,
-    #      made fast via pickled results of previous step
-
     # todo use a less complex form than 1040 to speed testing
-    #      yet maintain 75% coverage
-    def test_run_1040_full(self, **kw):
-        '''full run of form 1040'''
-        dir_name = pathjoin(self.testdir, 'forms_1040_full')
+    def run_1040_full(self):
         self.run(
+            #rootForms=['1040'],
             rootForms='1040',
             filesToCheck=['f1040-p1.html'],
-            dirName=dir_name,
-            ignoreCaches=True,
-            **kw
             )
+    def test_run_1040_xfa(self):
+        self.run(
+            #rootForms=['1040'],
+            rootForms='1040',
+            filesToCheck=['f1040-fmt.xml'],
+            steps=['x'],
+            # speeds testing
+            computeOverlap=False,
+            )
+    # todo add tests of further steps,
+    # todo   made fast via pickled results of previous step
 
+class TestOtfApiBase(object):
+    def setup_method(self, _):
+        from opentaxforms.serve import createApp
+        dbResourcePath = ut.Resource('test',
+            osp.join('forms-common', 'f1040.sqlite3')).path()
+        dbFilePath = osp.join('test', 'opentaxforms.sqlite3')
+        shutil.copy(dbResourcePath, dbFilePath)
+        dbpath='sqlite:///' + dbFilePath
+        self.app=createApp(dbpath=dbpath)
+        self.client=self.app.test_client()
+    def teardown_method(self, _):
+        pass
+class TestOtfApi(TestOtfApiBase):
+    def test_api_orgn(self):
+        # get list of organizations (currently just IRS)
+        response=self.client.get('/api/v1/orgn')
+        assert response.status_code == 200
+        assert b'"code": "us_irs"' in response.data
+    def test_api_f1040(self):
+        # get form 1040
+        response=self.client.get('/api/v1/form?q={"filters":[{"name":"code","op":"eq","val":"1040"}]}')
+        assert response.status_code == 200
+        assert b'"title": "Form 1040"' in response.data
+    def test_api_noresults(self):
+        # request a nonexistent form
+        response=self.client.get('/api/v1/form?q={"filters":[{"name":"code","op":"eq","val":"0000"}]}')
+        assert response.status_code == 200
+        assert b'"num_results": 0' in response.data
+    def test_api_filterslots(self):
+        # get all checkbox fields on page 1 of form 1040
+        import json
+        url = '/api/v1/slot?q=%s'
+        filters = [
+            dict(name='inptyp', op='eq', val='k'),  # inputtype is k for checkbox [vs x for textbox]
+            dict(name='page'  , op='eq', val=1),    # on page 1
+            dict(name='form', op='has', val=dict(name='code',op='eq',val='1040')),    # of form 1040
+            ]
+        paramstring = json.dumps(dict(filters=filters))
+        response = self.client.get(url%(paramstring,))
+        assert response.status_code == 200
+        assert b'"num_results": 15' in response.data
 
 def main(args):
-    ''' for commandline invocation '''
     def usage():
-        ''' print usage note '''
-        print('usage: "%s [-q|-s|-f|-x|-a]"\n'
-              '-q=quick script tests\n'
-              '-s=slow script tests\n'
-              '-f=full 1040\n'
-              '-x=xfa-only 1040\n'
-              '-a=api tests' % (args[0], ))
-    if len(args) >= 2:
-        if any(arg in args for arg in ('-q', '-s', '-f', '-x', '-sf')):
-            step_test_runner = TestSteps()
-            step_test_runner.setup_method()
-            if '-q' in args:
-                step_test_runner.test_run_1040_xfa()
-            elif '-sf' in args:
-                step_test_runner.test_run_1040_full()
-                step_test_runner.teardown_method()
-                step_test_runner.setup_method()
-                step_test_runner.test_run_1040_xfa()
-            elif '-s' in args:
-                step_test_runner.run_1040_full()
-            elif '-x' in args:
-                step_test_runner.test_run_1040_xfa()
-            elif '-f' in args:
-                step_test_runner.run_1040_full()
-        elif '-a' in args:  # run api tests
-            api_test_runner = TestApi()
-            api_test_runner.setup_method()
+        print('usage: "%s -f" for fasttests or "%s -s" for slow tests'%(args[0],args[0]))
+    if len(args)==2:
+        if args[1]=='-f':
+            testRunner=TestOtfApi()
+            testRunner.setup_method(0)
 
-            api_test_runner.test_api_orgn()
-            api_test_runner.test_api_f1040()
-            api_test_runner.test_api_noresults()
-            api_test_runner.test_api_filterslots()
+            testRunner.test_api_orgn()
+            testRunner.test_api_f1040()
+            testRunner.test_api_noresults()
+            testRunner.test_api_filterslots()
 
+        elif args[1]=='-s': # run slow tests
+            testRunner=TestOtfSteps()
+            testRunner.setup_method(0)
+
+            testRunner.run_1040_full()
         else:
             usage()
 
     else:
         usage()
 
-
-if __name__ == '__main__':
+if __name__=='__main__':
     import sys
     sys.exit(main(sys.argv))
+

@@ -33,7 +33,7 @@
             <textEdit/>
           </ui>
           <value>
-            <text>Version B, Cycle 5</text>
+            <text>Version A, Cycle 15</text>
           </value>
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
           <margin topInset="0.5mm" bottomInset="0.5mm" leftInset="0.5mm" rightInset="0.5mm"/>
@@ -51,7 +51,7 @@
               <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
                 <p style="letter-spacing:0in">Internal Use Only</p>
                 <p style="letter-spacing:0in">DRAFT AS OF</p>
-                <p style="letter-spacing:0in">December 23, 2015</p>
+                <p style="letter-spacing:0in">February 15, 2018</p>
               </body>
             </exData>
           </value>
@@ -109,7 +109,7 @@
             <textEdit/>
           </ui>
           <value>
-            <text>Version B, Cycle 5</text>
+            <text>Version A, Cycle 15</text>
           </value>
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
           <margin topInset="0.5mm" bottomInset="0.5mm" leftInset="0.5mm" rightInset="0.5mm"/>
@@ -118,7 +118,7 @@
             <traverse ref="DraftAsOf[0]"/>
           </traversal>
         </draw>
-        <draw name="DraftAsOf" y="63.5mm" w="185.42mm" h="58.861mm" x="12.7mm" locale="en_US" presence="hidden">
+        <draw name="DraftAsOf" y="63.5mm" w="172.72mm" h="58.861mm" x="12.7mm" locale="en_US" presence="hidden">
           <ui>
             <textEdit/>
           </ui>
@@ -127,7 +127,7 @@
               <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
                 <p style="text-decoration:none;letter-spacing:0in">Internal Use Only</p>
                 <p style="text-decoration:none;letter-spacing:0in">DRAFT AS OF</p>
-                <p style="text-decoration:none;letter-spacing:0in">December 23, 2015</p>
+                <p style="letter-spacing:0in">February 15, 2018</p>
               </body>
             </exData>
           </value>
@@ -162,11 +162,28 @@
       <?templateDesigner expand 0?>
     </pageSet>
     <desc>
-      <text name="title">2015 Form 1040</text>
+      <text name="title">2017 Form 1040</text>
       <text name="creator">SE:W:CAR:MP</text>
       <text name="description">U.S. Individual Income Tax Return</text>
     </desc>
     <subform name="Page1" w="612pt" h="792pt" locale="en_US">
+      <draw name="RO1" w="33.02mm" h="143.932mm" x="170.18mm" y="122.767mm">
+        <ui>
+          <textEdit/>
+        </ui>
+        <font size="8pt" typeface="HelveticaNeueLT Std" baselineShift="0pt"/>
+        <margin topInset="0.5mm" bottomInset="0.5mm" leftInset="0.5mm" rightInset="0.5mm"/>
+        <para spaceAbove="0pt" spaceBelow="0pt" textIndent="0pt" marginLeft="0pt" marginRight="0pt"/>
+        <border>
+          <edge presence="hidden"/>
+          <corner/>
+          <fill/>
+          <corner/>
+          <corner/>
+          <corner presence="hidden"/>
+        </border>
+        <?renderCache.bounds 90766 405162 0 0 1417 1417 0 0?>
+      </draw>
       <draw name="spacer" y="198.967mm" x="129.54mm" w="33.02mm" h="59.267mm" locale="en_US">
         <para hAlign="center" vAlign="bottom"/>
         <font typeface="HelveticaNeueLT Std" size="8pt"/>
@@ -305,11 +322,11 @@
           <?renderCache.bounds 201600 12002 0 0 0 0 0 0?>
           <?renderCache.textRun 34 U.S. Individual Income Tax Return  0 8000 8232 0 0 0 "ITC Franklin Gothic Std Book" 1 0 12000 ISO-8859-1?>
         </draw>
-        <draw name="RevDate" w="20.193mm" h="8.467mm" x="93.98mm" locale="en_US">
+        <draw name="RevDate" w="20.32mm" h="8.467mm" x="93.98mm" locale="en_US">
           <value>
             <exData contentType="text/html">
               <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-                <p style="font-family:'HelveticaNeueLT Std Bold Outln';font-weight:normal;text-decoration:none;letter-spacing:0in">20<span style="font-family:'HelveticaNeueLT Std Blk'">15</span></p>
+                <p style="font-family:'HelveticaNeueLT Std Bold Outln';font-weight:normal;text-decoration:none;letter-spacing:0in">20<span style="font-family:'HelveticaNeueLT Std Blk'">17</span></p>
               </body>
             </exData>
           </value>
@@ -331,7 +348,7 @@
             <corner/>
           </border>
           <assist>
-            <speak disable="1">2015. Catalog Number 11320B. </speak>
+            <speak disable="1">2017. Catalog Number 11320B. </speak>
           </assist>
           <traversal>
             <traverse ref="USIndividualIncomeTax[0]"/>
@@ -397,11 +414,11 @@
             </fill>
           </font>
           <assist>
-            <speak disable="1">Page 1. For the year January 1 through December 31, 2015, or other tax year beginning (enter date), 2015, ending (date), 20(2-digit year). </speak>
+            <speak disable="1">Page 1. For the year January 1 through December 31, 2017, or other tax year beginning (enter date), 2017, ending (date), 20(2-digit year). </speak>
           </assist>
           <caption reserve="66.9172mm">
             <value>
-              <text>For the year Jan. 1&#8211;Dec. 31, 2015, or other tax year beginning </text>
+              <text>For the year Jan. 1&#8211;Dec. 31, 2017, or other tax year beginning </text>
             </value>
             <font size="7pt" typeface="HelveticaNeueLT Std" fontHorizontalScale="88%" baselineShift="0pt"/>
             <para vAlign="middle" lineHeight="7pt" marginLeft="4pt" spaceAbove="0pt" spaceBelow="0pt" textIndent="0pt" marginRight="0pt"/>
@@ -424,18 +441,18 @@
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" hAlign="center" spaceBelow="1pt"/>
+          <para vAlign="bottom" spaceBelow="1pt"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
             </fill>
           </font>
           <assist>
-            <speak disable="1">For the year January 1 through December 31, 2015, or other tax year beginning (date), 2015, ending (enter date), 20(2-digit year). </speak>
+            <speak disable="1">For the year January 1 through December 31, 2017, or other tax year beginning (date), 2017, ending (enter date), 20(2-digit year). </speak>
           </assist>
           <caption reserve="15.032mm">
             <value>
-              <text>, 2015, ending </text>
+              <text>, 2017, ending </text>
             </value>
             <font size="7pt" typeface="HelveticaNeueLT Std" fontHorizontalScale="88%" baselineShift="0pt"/>
             <para vAlign="middle" lineHeight="7pt" spaceAbove="0pt" spaceBelow="0pt" textIndent="0pt" marginLeft="1pt" marginRight="0pt"/>
@@ -465,7 +482,7 @@
             </fill>
           </font>
           <assist>
-            <speak disable="1">For the year January 1 through December 31, 2015, or other tax year beginning (date), 2015, ending (date), 20(enter 2-digit year). </speak>
+            <speak disable="1">For the year January 1 through December 31, 2017, or other tax year beginning (date), 2017, ending (date), 20(enter 2-digit year). </speak>
           </assist>
           <caption reserve="5.08mm">
             <value>
@@ -526,7 +543,7 @@
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginLeft="2pt"/>
+        <para vAlign="bottom" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -553,6 +570,7 @@
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.3528mm"/>
       </field>
       <field name="f1_05" x="76.2mm" y="25.4mm" w="88.9mm" h="8.467mm" locale="en_US">
         <ui>
@@ -560,7 +578,7 @@
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginLeft="2pt"/>
+        <para vAlign="bottom" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -574,7 +592,7 @@
             <text>Last name </text>
           </value>
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
-          <para vAlign="middle" marginLeft="4pt"/>
+          <para vAlign="middle" marginLeft="3pt"/>
         </caption>
         <border>
           <edge thickness="0.1764mm"/>
@@ -584,6 +602,7 @@
           <corner/>
           <fill/>
         </border>
+        <margin leftInset="0.3528mm"/>
       </field>
       <field name="f1_06" x="165.1mm" y="25.4mm" w="38.1mm" h="8.467mm" locale="en_US">
         <ui>
@@ -624,14 +643,14 @@
           <fill/>
         </border>
       </field>
-      <draw name="dottedline_SSN_1" y="29.633mm" x="177.02mm" w="0in" h="3.528mm">
+      <draw name="dottedline_SSN_1" y="29.633mm" x="176.5mm" w="0in" h="3.528mm">
         <value>
           <line>
             <edge stroke="dotted"/>
           </line>
         </value>
       </draw>
-      <draw name="dottedline_SSN_2" y="29.633mm" x="184.64mm" w="0in" h="3.528mm">
+      <draw name="dottedline_SSN_2" y="29.633mm" x="184.12mm" w="0in" h="3.528mm">
         <value>
           <line>
             <edge stroke="dotted"/>
@@ -644,7 +663,7 @@
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginLeft="2pt"/>
+        <para vAlign="bottom" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -668,6 +687,7 @@
           <corner/>
           <fill/>
         </border>
+        <margin leftInset="0mm" rightInset="0.3528mm"/>
       </field>
       <field name="f1_08" x="76.2mm" y="33.866mm" w="88.9mm" h="8.467mm" locale="en_US">
         <ui>
@@ -675,7 +695,7 @@
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginLeft="2pt"/>
+        <para vAlign="bottom" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -689,7 +709,7 @@
             <text>Last name </text>
           </value>
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
-          <para vAlign="middle" marginLeft="4pt"/>
+          <para vAlign="middle" marginLeft="3pt"/>
         </caption>
         <border>
           <edge/>
@@ -699,6 +719,7 @@
           <corner/>
           <fill/>
         </border>
+        <margin leftInset="0.3528mm"/>
       </field>
       <subform x="165.1mm" y="33.866mm" w="38.1mm" minH="16.934mm" name="SpouseSSN" locale="en_US">
         <field name="f1_09" y="0mm" w="38.1mm" h="8.467mm" locale="en_US">
@@ -737,14 +758,14 @@
             <fill/>
           </border>
         </field>
-        <draw name="dottedline_SpouseSSN_1" y="4.234mm" x="11.92mm" w="0in" h="3.528mm">
+        <draw name="dottedline_SpouseSSN_1" y="4.234mm" x="11.4mm" w="0in" h="3.528mm">
           <value>
             <line>
               <edge stroke="dotted"/>
             </line>
           </value>
         </draw>
-        <draw name="dottedline_SpouseSSN_2" y="4.234mm" x="19.54mm" w="0in" h="3.528mm">
+        <draw name="dottedline_SpouseSSN_2" y="4.234mm" x="19.02mm" w="0in" h="3.528mm">
           <value>
             <line>
               <edge stroke="dotted"/>
@@ -803,7 +824,7 @@
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" marginLeft="2pt"/>
+          <para vAlign="bottom" marginLeft="0pt"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
@@ -812,7 +833,7 @@
           <assist>
             <speak disable="1">Home address (number and street). If you have a Post Office Box, see instructions. </speak>
           </assist>
-          <caption placement="top" reserve="0.137431in">
+          <caption placement="top" reserve="3.5278mm">
             <value>
               <text>Home address (number and street). If you have a P.O. box, see instructions. </text>
             </value>
@@ -830,6 +851,7 @@
           <traversal>
             <traverse ref="f1-11[0]"/>
           </traversal>
+          <margin rightInset="0.3528mm"/>
         </field>
         <field name="f1-11" x="134.62mm" w="17.78mm" h="8.467mm" locale="en_US">
           <ui>
@@ -837,7 +859,7 @@
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" hAlign="center" marginLeft="2pt"/>
+          <para vAlign="bottom" hAlign="center" marginLeft="0pt"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
@@ -846,7 +868,7 @@
           <assist>
             <speak disable="1">Apartment number. </speak>
           </assist>
-          <caption placement="top" reserve="3.4364mm">
+          <caption placement="top" reserve="3.5278mm">
             <value>
               <text>Apt. no. </text>
             </value>
@@ -868,7 +890,7 @@
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" marginLeft="2pt"/>
+          <para vAlign="bottom" marginLeft="0pt"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
@@ -877,7 +899,7 @@
           <assist>
             <speak disable="1">City, town or post office, state, and ZIP code. If you have a foreign address, also complete spaces below (see instructions). </speak>
           </assist>
-          <caption placement="top" reserve="0.133181in">
+          <caption placement="top" reserve="3.5278mm">
             <value>
               <text>City, town or post office, state, and ZIP code. If you have a foreign address, also complete spaces below (see instructions). </text>
             </value>
@@ -892,14 +914,15 @@
             <corner/>
             <fill/>
           </border>
+          <margin rightInset="0.3528mm"/>
         </field>
-        <field name="f1_13" y="16.934mm" w="78.74mm" h="8.466mm" locale="en_US">
+        <field name="f1_13" y="16.934mm" w="78.74mm" h="8.467mm" locale="en_US">
           <ui>
             <textEdit hScrollPolicy="off">
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" marginLeft="2pt"/>
+          <para vAlign="bottom" marginLeft="0pt"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
@@ -908,7 +931,7 @@
           <assist>
             <speak disable="1">Foreign country name. </speak>
           </assist>
-          <caption placement="top" reserve="3.8597mm">
+          <caption placement="top" reserve="3.5278mm">
             <value>
               <text>Foreign country name                                        </text>
             </value>
@@ -923,14 +946,15 @@
             <corner/>
             <fill/>
           </border>
+          <margin rightInset="0.3528mm"/>
         </field>
-        <field name="f1_14" x="78.74mm" y="16.934mm" w="50.8mm" h="8.466mm" locale="en_US">
+        <field name="f1_14" x="78.74mm" y="16.934mm" w="50.8mm" h="8.467mm" locale="en_US">
           <ui>
             <textEdit hScrollPolicy="off">
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" marginLeft="2pt"/>
+          <para vAlign="bottom" marginLeft="0pt"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
@@ -939,26 +963,27 @@
           <assist>
             <speak disable="1">Foreign province / state / county. </speak>
           </assist>
-          <caption placement="top" reserve="3.8597mm">
+          <caption placement="top" reserve="3.5278mm">
             <value>
               <text>Foreign province/state/county                                       </text>
             </value>
             <font size="7pt" typeface="HelveticaNeueLT Std"/>
-            <para vAlign="middle" marginLeft="4pt"/>
+            <para vAlign="middle" marginLeft="3pt"/>
           </caption>
           <border>
             <edge/>
             <corner/>
             <fill/>
           </border>
+          <margin leftInset="0.3528mm"/>
         </field>
-        <field name="f1_15" x="129.54mm" y="16.934mm" w="22.86mm" h="8.466mm" locale="en_US">
+        <field name="f1_15" x="129.54mm" y="16.934mm" w="22.86mm" h="8.467mm" locale="en_US">
           <ui>
             <textEdit hScrollPolicy="off">
               <margin/>
             </textEdit>
           </ui>
-          <para vAlign="bottom" marginLeft="2pt"/>
+          <para vAlign="bottom" marginLeft="0pt" hAlign="center"/>
           <font weight="bold" size="8pt" typeface="Helvetica LT Std">
             <fill>
               <color value="0,0,128"/>
@@ -967,18 +992,19 @@
           <assist>
             <speak disable="1">Foreign postal code. </speak>
           </assist>
-          <caption placement="top" reserve="3.8597mm">
+          <caption placement="top" reserve="3.5278mm">
             <value>
               <text>Foreign postal code                                       </text>
             </value>
             <font size="7pt" typeface="HelveticaNeueLT Std" fontHorizontalScale="90%" baselineShift="0pt"/>
-            <para vAlign="middle" marginLeft="4pt" spaceAbove="0pt" spaceBelow="0pt" textIndent="0pt" marginRight="0pt"/>
+            <para vAlign="middle" marginLeft="3pt" spaceAbove="0pt" spaceBelow="0pt" textIndent="0pt" marginRight="0pt"/>
           </caption>
           <border>
             <edge/>
             <corner/>
             <fill/>
           </border>
+          <margin leftInset="0.3528mm"/>
         </field>
         <traversal>
           <traverse operation="first" ref="f1-10[0]"/>
@@ -1196,8 +1222,8 @@ MainCalculation();
             </checkButton>
           </ui>
           <items>
-            <text>S</text>
-            <text/>
+            <text>1</text>
+            <text>0</text>
           </items>
           <para vAlign="middle"/>
           <event activity="mouseUp" name="event__mouseUp">
@@ -1251,8 +1277,8 @@ MainCalculation();
             </checkButton>
           </ui>
           <items>
-            <text>MJ</text>
-            <text/>
+            <text>2</text>
+            <text>0</text>
           </items>
           <para vAlign="middle"/>
           <event activity="mouseUp" name="event__mouseUp">
@@ -1306,8 +1332,8 @@ MainCalculation();
             </checkButton>
           </ui>
           <items>
-            <text>MS</text>
-            <text/>
+            <text>3</text>
+            <text>0</text>
           </items>
           <para vAlign="middle"/>
           <event activity="mouseUp" name="event__mouseUp">
@@ -1395,8 +1421,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>HoH</text>
-          <text/>
+          <text>4</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -1421,7 +1447,7 @@ MainCalculation();
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-              <p style="text-decoration:none;letter-spacing:0in">Head of household (with qualifying person). (See instructions.) If the qualifying person is a child but not your dependent, enter this child&#8217;s name here.<span style="xfa-spacerun:yes">&#160; </span><span style="vertical-align:1pt;font-family:'Universal Std News w Comm Pi';font-size:6pt">&#9654;</span></p>
+              <p style="xfa-font-horizontal-scale:99%;text-decoration:none;letter-spacing:0in">Head of household (with qualifying person). (See instructions.)<br/>If the qualifying person is a child but not your dependent, enter this child&#8217;s name here.<span style="xfa-font-horizontal-scale:100%"><span style="xfa-spacerun:yes">&#160; </span></span><span style="vertical-align:1pt;font-family:'Universal Std News w Comm Pi';font-size:6pt;xfa-font-horizontal-scale:100%">&#9654;</span></p>
             </body>
           </exData>
         </value>
@@ -1480,8 +1506,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>QW</text>
-          <text/>
+          <text>5</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -1498,13 +1524,13 @@ MainCalculation();
         </event>
         <margin leftInset="0.7056mm" topInset="0.7056mm" rightInset="0.7056mm" bottomInset="0.7056mm"/>
         <assist>
-          <speak disable="1">Line 5. Qualifying widow (or widower) with dependent child. </speak>
+          <speak disable="1">Line 5. Qualifying widow (or widower) (see instructions). </speak>
         </assist>
         <bind match="global"/>
       </field>
       <draw name="QualifyingWidow" w="71.12mm" x="132.08mm" y="80.433mm" h="4.233mm" locale="en_US">
         <value>
-          <text>Qualifying widow(er) with dependent child </text>
+          <text>Qualifying widow(er) (see instructions)</text>
         </value>
         <ui>
           <textEdit/>
@@ -1513,7 +1539,7 @@ MainCalculation();
         <font size="7.5pt" typeface="HelveticaNeueLT Std"/>
         <margin bottomInset="0.7056mm"/>
         <?renderCache.bounds 201600 9999 0 0 0 0 0 0?>
-        <?renderCache.textRun 42 Qualifying widow(er) with dependent child  0 0 7854 0 0 0 "HelveticaNeueLT Std" 0 0 7500 ISO-8859-1?>
+        <?renderCache.textRun 39 Qualifying widow(er) (see instructions) 0 0 7854 0 0 0 "HelveticaNeueLT Std" 0 0 7500 ISO-8859-1?>
       </draw>
       <draw name="L139" y="84.666mm" w="190.5mm" h="0mm" x="12.7mm">
         <value>
@@ -2057,7 +2083,7 @@ MainCalculation();
           </subform>
           <subform layout="row" locale="en_US">
             <bind match="none"/>
-            <field name="f1_24" h="4.233mm" locale="en_US">
+            <field name="f1_24" locale="en_US" h="4.233mm">
               <ui>
                 <textEdit hScrollPolicy="off">
                   <margin/>
@@ -2336,8 +2362,8 @@ MainCalculation();
             </checkButton>
           </ui>
           <items>
-            <text>Yes</text>
-            <text/>
+            <text>1</text>
+            <text>0</text>
           </items>
           <para vAlign="middle"/>
           <event activity="mouseUp" name="event__mouseUp">
@@ -2779,7 +2805,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -2794,8 +2820,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_36" x="195.58mm" y="122.766mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -2821,7 +2847,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line8" w="5.08mm" minH="4.233mm" x="38.1mm" y="127mm" locale="en_US">
@@ -2884,7 +2909,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -2894,13 +2919,16 @@ MainCalculation();
           <speak disable="1">Line 8a. Taxable interest. Attach Schedule B if required. Dollars. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
+          <corner presence="hidden"/>
           <corner/>
-          <fill/>
+          <corner/>
+          <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_38" x="195.58mm" y="127mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -2921,12 +2949,14 @@ MainCalculation();
           <speak disable="1">Line 8a. Cents. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
+          <corner presence="hidden"/>
           <corner/>
-          <fill/>
+          <corner/>
+          <corner/>
         </border>
       </field>
       <draw name="Line8b" w="2.54mm" minH="4.233mm" x="43.18mm" y="131.233mm" locale="en_US">
@@ -2979,7 +3009,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -2996,6 +3026,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_40" x="154.94mm" y="131.233mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3006,7 +3037,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginRight="2pt" marginLeft="0pt" hAlign="right"/>
+        <para vAlign="bottom" marginRight="0pt" marginLeft="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3023,6 +3054,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="shade" y="131.233mm" x="162.56mm" w="7.62mm" h="4.233mm" locale="en_US">
         <para hAlign="center" vAlign="bottom"/>
@@ -3047,7 +3079,6 @@ MainCalculation();
         <font typeface="HelveticaNeueLT Std" size="8pt"/>
         <border>
           <edge/>
-          <fill/>
           <corner/>
           <edge/>
           <edge presence="hidden"/>
@@ -3063,7 +3094,6 @@ MainCalculation();
         <font typeface="HelveticaNeueLT Std" size="8pt"/>
         <border>
           <edge/>
-          <fill/>
           <corner/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
@@ -3134,7 +3164,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3149,8 +3179,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner presence="hidden"/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_42" x="195.58mm" y="135.466mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3176,7 +3206,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner presence="hidden"/>
-          <fill/>
         </border>
       </field>
       <draw name="Line9b" w="2.54mm" minH="4.233mm" x="43.18mm" y="139.7mm" locale="en_US">
@@ -3229,7 +3258,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3246,6 +3275,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_44" x="154.94mm" y="139.7mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3256,7 +3286,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginRight="2pt" marginLeft="0pt" hAlign="right"/>
+        <para vAlign="bottom" marginRight="0pt" marginLeft="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3273,6 +3303,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="shade" y="139.7mm" x="162.56mm" w="7.62mm" h="4.233mm" locale="en_US">
         <para hAlign="center" vAlign="bottom"/>
@@ -3297,7 +3328,6 @@ MainCalculation();
         <font typeface="HelveticaNeueLT Std" size="8pt"/>
         <border>
           <edge/>
-          <fill/>
           <corner/>
           <edge/>
           <edge presence="hidden"/>
@@ -3313,7 +3343,6 @@ MainCalculation();
         <font typeface="HelveticaNeueLT Std" size="8pt"/>
         <border>
           <edge/>
-          <fill/>
           <corner/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
@@ -3374,7 +3403,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3389,11 +3418,11 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner presence="hidden"/>
-          <fill/>
           <corner/>
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_46" x="195.58mm" y="143.933mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3419,7 +3448,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner presence="hidden"/>
-          <fill/>
           <corner/>
           <corner/>
           <corner/>
@@ -3475,7 +3503,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3490,8 +3518,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_48" x="195.58mm" y="148.166mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3517,7 +3545,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line12" w="5.08mm" minH="4.233mm" x="38.1mm" y="152.4mm" locale="en_US">
@@ -3570,7 +3597,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3580,13 +3607,16 @@ MainCalculation();
           <speak disable="1">Line 12. Business income or (loss). Attach Schedule C or C-E Z. Dollars. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
+          <corner presence="hidden"/>
           <corner/>
-          <fill/>
+          <corner/>
+          <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_50" x="195.58mm" y="152.4mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3607,12 +3637,14 @@ MainCalculation();
           <speak disable="1">Line 12. Cents. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
+          <corner presence="hidden"/>
           <corner/>
-          <fill/>
+          <corner/>
+          <corner/>
         </border>
       </field>
       <draw name="Line13" w="5.08mm" minH="4.233mm" x="38.1mm" y="156.633mm" locale="en_US">
@@ -3700,7 +3732,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3715,8 +3747,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_52" x="195.58mm" y="156.633mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3742,7 +3774,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line14" w="5.08mm" minH="4.233mm" x="38.1mm" y="160.866mm" locale="en_US">
@@ -3795,7 +3826,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3810,8 +3841,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_54" x="195.58mm" y="160.866mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3837,7 +3868,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line15" w="5.08mm" minH="4.233mm" x="38.1mm" y="165.1mm" locale="en_US">
@@ -3900,7 +3930,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3917,6 +3947,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_56" x="111.76mm" y="165.1mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -3927,7 +3958,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginRight="2pt" marginLeft="0pt" hAlign="right"/>
+        <para vAlign="bottom" marginRight="0pt" marginLeft="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -3944,6 +3975,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line15bTaxable" x="121.92mm" y="165.1mm" w="38.1mm" h="4.233mm" locale="en_US">
         <value>
@@ -3985,7 +4017,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4000,8 +4032,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_58" x="195.58mm" y="165.1mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4027,7 +4059,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line16" w="5.08mm" minH="4.233mm" x="38.1mm" y="169.333mm" locale="en_US">
@@ -4090,7 +4121,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4107,6 +4138,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_60" x="111.76mm" y="169.333mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4117,7 +4149,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginRight="2pt" marginLeft="0pt" hAlign="right"/>
+        <para vAlign="bottom" marginRight="0pt" marginLeft="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4131,6 +4163,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line16bTaxable" x="121.92mm" y="169.333mm" w="38.1mm" h="4.233mm" locale="en_US">
         <value>
@@ -4172,7 +4205,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4187,8 +4220,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_62" x="195.58mm" y="169.333mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4214,7 +4247,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line17" w="5.08mm" minH="4.233mm" x="38.1mm" y="173.566mm" locale="en_US">
@@ -4271,7 +4303,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4286,8 +4318,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_64" x="195.58mm" y="173.566mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4313,7 +4345,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line18" w="5.08mm" minH="4.233mm" x="38.1mm" y="177.8mm" locale="en_US">
@@ -4366,7 +4397,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4376,13 +4407,16 @@ MainCalculation();
           <speak disable="1">Line 18. Farm income or (loss). Attach Schedule F. Dollars. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
+          <corner presence="hidden"/>
           <corner/>
-          <fill/>
+          <corner/>
+          <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_66" x="195.58mm" y="177.8mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4403,12 +4437,14 @@ MainCalculation();
           <speak disable="1">Line 18. Cents. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
+          <corner presence="hidden"/>
           <corner/>
-          <fill/>
+          <corner/>
+          <corner/>
         </border>
       </field>
       <draw name="Line19" w="5.08mm" minH="4.233mm" x="38.1mm" y="182.033mm" locale="en_US">
@@ -4461,7 +4497,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4476,8 +4512,8 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_68" x="195.58mm" y="182.033mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4503,7 +4539,6 @@ MainCalculation();
           <edge/>
           <edge/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line20" w="5.08mm" minH="4.233mm" x="38.1mm" y="186.266mm" locale="en_US">
@@ -4566,7 +4601,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4583,6 +4618,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_70" x="111.76mm" y="186.266mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4593,7 +4629,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginRight="2pt" marginLeft="0pt" hAlign="right"/>
+        <para vAlign="bottom" marginRight="0pt" marginLeft="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4610,6 +4646,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line20bTaxable" x="121.92mm" y="186.266mm" w="38.1mm" h="4.233mm" locale="en_US">
         <value>
@@ -4654,7 +4691,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4664,19 +4701,19 @@ MainCalculation();
           <speak disable="1">Line 20b. Taxable amount. Dollars. </speak>
         </assist>
         <border>
-          <edge/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
-          <corner/>
-          <fill/>
-          <corner/>
+          <edge/>
           <corner presence="hidden"/>
+          <corner/>
+          <corner/>
           <corner/>
         </border>
         <traversal>
           <traverse ref="f1_72[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_72" x="195.58mm" y="186.266mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4697,14 +4734,13 @@ MainCalculation();
           <speak disable="1">Line 20b. Cents. </speak>
         </assist>
         <border>
-          <edge/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
-          <corner/>
-          <fill/>
-          <corner/>
+          <edge/>
           <corner presence="hidden"/>
+          <corner/>
+          <corner/>
           <corner/>
         </border>
       </field>
@@ -4795,7 +4831,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4805,16 +4841,16 @@ MainCalculation();
           <speak disable="1">Line 21. Other income. Amount. Dollars. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge thickness="0.1764mm"/>
           <edge/>
-          <corner/>
+          <corner presence="hidden"/>
           <corner/>
           <corner thickness="0.176mm"/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_75" x="195.58mm" y="190.5mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4835,15 +4871,14 @@ MainCalculation();
           <speak disable="1">Line 21. Cents. </speak>
         </assist>
         <border>
-          <edge/>
+          <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge thickness="0.1764mm"/>
           <edge/>
-          <corner/>
+          <corner presence="hidden"/>
           <corner/>
           <corner thickness="0.176mm"/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="Line22" w="5.08mm" minH="4.233mm" x="38.1mm" y="194.733mm" locale="en_US">
@@ -4901,7 +4936,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -4919,8 +4954,8 @@ MainCalculation();
           <corner/>
           <corner presence="hidden"/>
           <corner/>
-          <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_77" x="195.58mm" y="194.733mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -4949,7 +4984,6 @@ MainCalculation();
           <corner/>
           <corner presence="hidden"/>
           <corner/>
-          <fill/>
         </border>
       </field>
       <draw name="L77" y="198.966mm" w="190.5mm" h="0mm" x="12.7mm">
@@ -5026,7 +5060,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5039,6 +5073,7 @@ MainCalculation();
           <edge/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_79" x="154.94mm" y="198.966mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5049,7 +5084,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5065,6 +5100,7 @@ MainCalculation();
         <traversal>
           <traverse ref="shade[2]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="shade" y="198.966mm" x="162.56mm" w="7.62mm" h="59.267mm" locale="en_US">
         <font typeface="HelveticaNeueLT Std"/>
@@ -5214,7 +5250,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5233,6 +5269,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_81" x="154.94mm" y="207.433mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5243,7 +5280,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5262,6 +5299,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line25" w="5.08mm" minH="4.233mm" x="38.1mm" y="211.666mm" locale="en_US">
         <value>
@@ -5313,7 +5351,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5332,6 +5370,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_83" x="154.94mm" y="211.666mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5342,7 +5381,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5361,6 +5400,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line26" w="5.08mm" minH="4.233mm" x="38.1mm" y="215.9mm" locale="en_US">
         <value>
@@ -5412,7 +5452,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5431,6 +5471,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_85" x="154.94mm" y="215.9mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5441,7 +5482,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5460,6 +5501,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line27" w="5.08mm" minH="4.233mm" x="38.1mm" y="220.133mm" locale="en_US">
         <value>
@@ -5513,7 +5555,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5532,6 +5574,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_87" x="154.94mm" y="220.133mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5542,7 +5585,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5561,6 +5604,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line28" w="5.08mm" minH="4.233mm" x="38.1mm" y="224.366mm" locale="en_US">
         <value>
@@ -5612,7 +5656,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5631,6 +5675,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_89" x="154.94mm" y="224.366mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5641,7 +5686,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5660,6 +5705,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line29" w="5.08mm" minH="4.233mm" x="38.1mm" y="228.6mm" locale="en_US">
         <value>
@@ -5711,7 +5757,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5730,6 +5776,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_91" x="154.94mm" y="228.6mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5740,7 +5787,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5759,6 +5806,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line30" w="5.08mm" minH="4.233mm" x="38.1mm" y="232.833mm" locale="en_US">
         <value>
@@ -5810,7 +5858,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5829,6 +5877,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_93" x="154.94mm" y="232.833mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -5839,7 +5888,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5858,6 +5907,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line31" w="5.08mm" minH="4.233mm" x="38.1mm" y="237.066mm" locale="en_US">
         <value>
@@ -5976,7 +6026,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -5995,6 +6045,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_96" x="154.94mm" y="237.066mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6005,7 +6056,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6024,6 +6075,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line32" w="5.08mm" minH="4.233mm" x="38.1mm" y="241.3mm" locale="en_US">
         <value>
@@ -6075,7 +6127,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6094,6 +6146,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_98" x="154.94mm" y="241.3mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6104,7 +6157,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6123,6 +6176,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line33" w="5.08mm" minH="4.233mm" x="38.1mm" y="245.533mm" locale="en_US">
         <value>
@@ -6174,7 +6228,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6193,6 +6247,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_100" x="154.94mm" y="245.533mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6203,7 +6258,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6222,6 +6277,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line34" w="5.08mm" minH="4.233mm" x="38.1mm" y="249.766mm" locale="en_US">
         <value>
@@ -6233,11 +6289,11 @@ MainCalculation();
         <para vAlign="bottom" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="HelveticaNeueLT Std"/>
       </draw>
-      <draw name="TuitionFees" w="71.247mm" minH="4.233mm" x="48.26mm" y="249.766mm" locale="en_US">
+      <draw name="TuitionFees" w="71.12mm" minH="4.233mm" x="48.26mm" y="249.766mm" locale="en_US">
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-              <p style="tab-interval:0.5in;xfa-tab-stops:left leader (dots page 12pt) 2.805in;letter-spacing:0in">Tuition and fees. Attach Form 8917<span style="xfa-tab-count:1">&#160; &#160; &#160; &#160; &#160;</span></p>
+              <p style="tab-interval:0.5in;xfa-tab-stops:left leader (dots page 12pt) 2.805in;letter-spacing:0in">Tuition and fees. Attach Form 8917 <span style="xfa-tab-count:1">&#160; &#160; &#160; &#160; &#160;</span></p>
             </body>
           </exData>
         </value>
@@ -6273,7 +6329,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6292,6 +6348,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_102" x="154.94mm" y="249.766mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6302,7 +6359,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6321,6 +6378,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line35" w="5.08mm" minH="4.233mm" x="38.1mm" y="254mm" locale="en_US">
         <value>
@@ -6372,7 +6430,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6391,6 +6449,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_104" x="154.94mm" y="254mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6401,7 +6460,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" marginLeft="0pt" marginRight="2pt" hAlign="right"/>
+        <para vAlign="bottom" marginLeft="0pt" marginRight="0pt" hAlign="right"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6420,6 +6479,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line36" w="5.08mm" minH="4.233mm" x="38.1mm" y="258.233mm" locale="en_US">
         <value>
@@ -6474,7 +6534,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6494,6 +6554,7 @@ MainCalculation();
           <corner thickness="0.265mm"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_106" x="195.58mm" y="258.233mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6580,7 +6641,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6600,6 +6661,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f1_108" x="195.58mm" y="262.466mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6685,7 +6747,7 @@ MainCalculation();
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-              <p style="text-decoration:none;letter-spacing:0in">Form<span style="xfa-spacerun:yes">&#160; </span><span style="font-size:10pt;font-weight:bold">1040<span style="xfa-spacerun:yes">&#160;</span></span> (2015)<span style="xfa-spacerun:yes">&#160;</span></p>
+              <p style="letter-spacing:0in">Form<span style="xfa-spacerun:yes">&#160;</span><span style="font-size:10pt;font-weight:bold">1040<span style="xfa-spacerun:yes">&#160;</span></span>(2017)<span style="xfa-spacerun:yes">&#160;</span></p>
             </body>
           </exData>
         </value>
@@ -6720,7 +6782,7 @@ MainCalculation();
     <subform name="Page2" w="612pt" h="792pt" locale="en_US">
       <draw name="Form1040" w="177.8mm" minH="4.233mm" x="12.7mm" y="8.467mm" locale="en_US">
         <value>
-          <text>Form 1040 (2015) </text>
+          <text>Form 1040 (2017) </text>
         </value>
         <ui>
           <textEdit/>
@@ -6830,7 +6892,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -6849,6 +6911,7 @@ MainCalculation();
           <edge thickness="0.1764mm"/>
           <edge thickness="0.1764mm"/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_02" x="195.58mm" y="12.7mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -6944,8 +7007,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -6965,7 +7028,7 @@ MainCalculation();
           <value>
             <exData contentType="text/html">
               <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-                <p style="font-weight:bold;letter-spacing:0in">You<span style="font-weight:normal"> were born before January 2, 1951,<span style="xfa-spacerun:yes">&#160;</span></span></p>
+                <p style="font-weight:bold;letter-spacing:0in">You<span style="font-weight:normal"> were born before January 2, 1953,<span style="xfa-spacerun:yes">&#160;</span></span></p>
               </body>
             </exData>
           </value>
@@ -6973,7 +7036,7 @@ MainCalculation();
           <para vAlign="bottom"/>
         </caption>
         <assist>
-          <speak disable="1">Line 39a. Check if: You were born before January 2, 1951. </speak>
+          <speak disable="1">Line 39a. Check if: You were born before January 2, 1953. </speak>
         </assist>
         <border>
           <edge presence="hidden"/>
@@ -7000,8 +7063,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -7045,8 +7108,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -7066,7 +7129,7 @@ MainCalculation();
           <value>
             <exData contentType="text/html">
               <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-                <p style="font-weight:bold;letter-spacing:0in">Spouse<span style="font-weight:normal"> was born before January 2, 1951,<span style="xfa-spacerun:yes">&#160;</span></span></p>
+                <p style="font-weight:bold;letter-spacing:0in">Spouse<span style="font-weight:normal"> was born before January 2, 1953,<span style="xfa-spacerun:yes">&#160;</span></span></p>
               </body>
             </exData>
           </value>
@@ -7074,7 +7137,7 @@ MainCalculation();
           <para vAlign="bottom"/>
         </caption>
         <assist>
-          <speak disable="1">Line 39a. Check if: Spouse was born before January 2, 1951. </speak>
+          <speak disable="1">Line 39a. Check if: Spouse was born before January 2, 1953. </speak>
         </assist>
         <traversal>
           <traverse ref="c2_04[0]"/>
@@ -7094,8 +7157,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -7287,8 +7350,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -7336,9 +7399,9 @@ MainCalculation();
               <p style="letter-spacing:0in">Standard<span style="xfa-spacerun:yes">&#160; </span>Deduction<span style="xfa-spacerun:yes">&#160; </span>for&#8212;</p>
               <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">&#8226; People who<span style="xfa-spacerun:yes">&#160; </span>check any<span style="xfa-spacerun:yes">&#160; </span>box on line<span style="xfa-spacerun:yes">&#160; </span>39a or 39b<span style="xfa-spacerun:yes">&#160;</span><span style="font-weight:bold">or<span style="xfa-spacerun:yes">&#160;</span></span>who can be claimed as a<span style="xfa-spacerun:yes">&#160; </span>dependent,<span style="xfa-spacerun:yes">&#160; </span>see instructions.</p>
               <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">&#8226; All others:</p>
-              <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">Single or<span style="xfa-spacerun:yes">&#160; </span>Married filing<span style="xfa-spacerun:yes">&#160; </span>separately,<span style="xfa-spacerun:yes">&#160; </span>$6,300</p>
-              <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">Married filing<span style="xfa-spacerun:yes">&#160; </span>jointly or<span style="xfa-spacerun:yes">&#160; </span>Qualifying<span style="xfa-spacerun:yes">&#160; </span>widow(er),<span style="xfa-spacerun:yes">&#160; </span>$12,600<span style="xfa-spacerun:yes">&#160;</span></p>
-              <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">Head of<span style="xfa-spacerun:yes">&#160; </span>household,<span style="xfa-spacerun:yes">&#160; </span>$9,250<span style="xfa-spacerun:yes">&#160;</span></p>
+              <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">Single or<span style="xfa-spacerun:yes">&#160; </span>Married filing<span style="xfa-spacerun:yes">&#160; </span>separately,<span style="xfa-spacerun:yes">&#160; </span>$6,350</p>
+              <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">Married filing<span style="xfa-spacerun:yes">&#160; </span>jointly or<span style="xfa-spacerun:yes">&#160; </span>Qualifying<span style="xfa-spacerun:yes">&#160; </span>widow(er),<span style="xfa-spacerun:yes">&#160; </span>$12,700<span style="xfa-spacerun:yes">&#160;</span></p>
+              <p style="margin-top:3pt;font-weight:normal;letter-spacing:0in">Head of<span style="xfa-spacerun:yes">&#160; </span>household,<span style="xfa-spacerun:yes">&#160; </span>$9,350<span style="xfa-spacerun:yes">&#160;</span></p>
             </body>
           </exData>
         </value>
@@ -7439,14 +7502,14 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
           </fill>
         </font>
         <assist>
-          <speak disable="1">Line 40. Itemized deductions (from Schedule A) or your standard deduction (see left margin). Standard Deduction for, People who check any box on line 39a or 39b or who can be claimed as a dependent, see instructions. All others, Single or Married filing separately, $6,300. Married filing jointly or Qualifying widow (or widower), $12,600. Head of household, $9,250. Dollars. </speak>
+          <speak disable="1">Line 40. Itemized deductions (from Schedule A) or your standard deduction (see left margin). Standard Deduction for, People who check any box on line 39a or 39b or who can be claimed as a dependent, see instructions. All others, Single or Married filing separately, $6,350. Married filing jointly or Qualifying widow (or widower), $12,700. Head of household, $9,350. Dollars. </speak>
         </assist>
         <border>
           <edge presence="hidden"/>
@@ -7459,6 +7522,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_05" x="195.58mm" y="29.634mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -7548,7 +7612,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -7562,6 +7626,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_07" x="195.58mm" y="33.868mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -7613,7 +7678,7 @@ MainCalculation();
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-              <p style="tab-interval:0.5in;xfa-tab-stops:left leader (dots page 12pt) 4.696in;font-weight:bold;letter-spacing:0in">Exemptions.<span style="font-weight:normal"><span style="xfa-spacerun:yes">&#160;</span></span><span style="xfa-font-horizontal-scale:82%;font-weight:normal">If line 38 is $154,950 or less, multiply $4,000 by the number on line 6d. Otherwise, see instructions</span></p>
+              <p style="tab-interval:0.5in;xfa-tab-stops:left leader (dots page 12pt) 4.696in;font-weight:bold;letter-spacing:0in">Exemptions.<span style="font-weight:normal"><span style="xfa-spacerun:yes">&#160;</span></span><span style="xfa-font-horizontal-scale:82%;font-weight:normal">If line 38 is $156,900 or less, multiply $4,050 by the number on line 6d. Otherwise, see instructions</span></p>
             </body>
           </exData>
         </value>
@@ -7658,14 +7723,14 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
           </fill>
         </font>
         <assist>
-          <speak disable="1">Line 42. Exemptions. If line 38 is $154,950 or less, multiply $4,000 by the number on line 6d Otherwise, see the instructions. Dollars. </speak>
+          <speak disable="1">Line 42. Exemptions. If line 38 is $156,900 or less, multiply $4,050 by the number on line 6d Otherwise, see the instructions. Dollars. </speak>
         </assist>
         <border>
           <edge/>
@@ -7678,6 +7743,7 @@ MainCalculation();
           <corner thickness="0.265mm"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_09" x="195.58mm" y="38.1mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -7769,7 +7835,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -7788,6 +7854,7 @@ MainCalculation();
           <edge thickness="0.1764mm"/>
           <edge thickness="0.1764mm"/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_11" x="195.58mm" y="42.334mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -7938,8 +8005,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -7996,8 +8063,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -8085,7 +8152,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8102,6 +8169,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_14[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_14" x="195.58mm" y="46.568mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8195,7 +8263,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8212,6 +8280,7 @@ MainCalculation();
           <corner thickness="0.176mm"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_16" x="195.58mm" y="50.801mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8302,7 +8371,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8322,6 +8391,7 @@ MainCalculation();
           <edge thickness="0.1764mm" presence="hidden"/>
           <edge thickness="0.1764mm"/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_18" x="195.58mm" y="55.034mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8415,7 +8485,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8432,6 +8502,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_20" x="195.58mm" y="59.267mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8580,7 +8651,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8597,6 +8668,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_22" x="154.94mm" y="63.501mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8610,7 +8682,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8624,6 +8696,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line49" x="30.48mm" y="67.735mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -8683,7 +8756,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8703,6 +8776,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_24[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_24" x="154.94mm" y="67.735mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8716,7 +8790,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8730,6 +8804,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line50" x="30.48mm" y="71.968mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -8784,7 +8859,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8801,6 +8876,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_26" x="154.94mm" y="71.968mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8814,7 +8890,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8828,6 +8904,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line51" x="30.48mm" y="76.201mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -8882,7 +8959,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8899,6 +8976,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_28" x="154.94mm" y="76.201mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -8912,7 +8990,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -8929,6 +9007,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line52[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line52" x="30.48mm" y="80.435mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -8986,7 +9065,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9003,6 +9082,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="F2_30" x="154.94mm" y="80.435mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -9016,7 +9096,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9033,6 +9113,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line53[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line53" x="30.48mm" y="84.668mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -9093,7 +9174,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9113,6 +9194,7 @@ MainCalculation();
           <corner presence="hidden"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_32" x="154.94mm" y="84.668mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -9126,7 +9208,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9145,6 +9227,7 @@ MainCalculation();
           <corner/>
           <edge presence="hidden"/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line54" x="30.48mm" y="88.901mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -9193,8 +9276,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -9244,8 +9327,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -9295,8 +9378,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <margin leftInset="0.7056mm" topInset="0.7056mm" rightInset="0.7056mm" bottomInset="0.7056mm"/>
@@ -9368,7 +9451,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9391,6 +9474,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_35[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_35" x="154.94mm" y="88.901mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -9404,7 +9488,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" spaceAbove="0pt" marginRight="2pt"/>
+        <para vAlign="bottom" hAlign="right" spaceAbove="0pt" marginRight="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9424,6 +9508,7 @@ MainCalculation();
           <corner thickness="0.265mm"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line55" x="30.48mm" y="93.134mm" w="5.08mm" minH="4.233mm" locale="en_US">
         <value>
@@ -9481,7 +9566,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9491,16 +9576,17 @@ MainCalculation();
           <speak disable="1">Line 55. Add lines 48 through 54. These are your total credits. Dollars. </speak>
         </assist>
         <border>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.2646mm" presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.265mm" presence="hidden"/>
           <fill/>
           <corner/>
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_37" x="195.58mm" y="93.135mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -9524,11 +9610,11 @@ MainCalculation();
           <speak disable="1">Line 55. Cents. </speak>
         </assist>
         <border>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.2646mm" presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.265mm" presence="hidden"/>
           <fill/>
           <corner/>
           <corner/>
@@ -9589,7 +9675,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9606,6 +9692,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_39" x="195.58mm" y="97.368mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -9728,7 +9815,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9748,6 +9835,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_41[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_41" x="195.58mm" y="101.6mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -9943,7 +10031,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -9960,6 +10048,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_43" x="195.58mm" y="105.834mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -10044,7 +10133,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -10061,6 +10150,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_45" x="195.58mm" y="110.067mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -10163,7 +10253,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -10183,6 +10273,7 @@ MainCalculation();
           <corner thickness="0.176mm"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_47" x="195.58mm" y="114.3mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -10258,11 +10349,11 @@ MainCalculation();
         <border>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.1764mm"/>
           <edge/>
           <corner/>
           <corner/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.176mm"/>
           <corner/>
         </border>
         <assist>
@@ -10278,7 +10369,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -10290,14 +10381,15 @@ MainCalculation();
         <border>
           <edge/>
           <edge presence="hidden"/>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.1764mm"/>
           <edge/>
           <corner/>
           <fill/>
           <corner/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.176mm"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_49" x="195.58mm" y="118.533mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -10323,12 +10415,12 @@ MainCalculation();
         <border>
           <edge/>
           <edge presence="hidden"/>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.1764mm"/>
           <edge/>
           <corner/>
           <fill/>
           <corner/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.176mm"/>
           <corner/>
         </border>
       </field>
@@ -10369,8 +10461,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -10416,7 +10508,7 @@ MainCalculation();
           <speak disable="1">     </speak>
         </assist>
       </draw>
-      <draw name="Ln61" x="162.56mm" y="122.768mm" w="7.62mm" minH="4.233mm" locale="en_US">
+      <draw name="Ln61" x="162.56mm" y="122.767mm" w="7.62mm" minH="4.233mm" locale="en_US">
         <value>
           <text>61</text>
         </value>
@@ -10439,7 +10531,7 @@ MainCalculation();
           <speak disable="1">     </speak>
         </assist>
       </draw>
-      <field name="f2_50" x="170.18mm" y="122.768mm" w="25.4mm" h="4.233mm" locale="en_US">
+      <field name="f2_50" x="170.18mm" y="122.767mm" w="25.4mm" h="4.233mm" locale="en_US">
         <ui>
           <textEdit hScrollPolicy="off">
             <margin/>
@@ -10448,7 +10540,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -10458,18 +10550,19 @@ MainCalculation();
           <speak disable="1">Line 61. Health care: individual responsibility (see instructions). Dollars. </speak>
         </assist>
         <border>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.1764mm"/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.176mm"/>
           <corner/>
           <corner presence="hidden"/>
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
-      <field name="f2_51" x="195.58mm" y="122.768mm" w="7.62mm" h="4.233mm" locale="en_US">
+      <field name="f2_51" x="195.58mm" y="122.767mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
           <textEdit>
             <margin/>
@@ -10491,11 +10584,11 @@ MainCalculation();
           <speak disable="1">Line 61. Cents. </speak>
         </assist>
         <border>
-          <edge thickness="0.2646mm"/>
+          <edge thickness="0.1764mm"/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
           <edge/>
-          <corner thickness="0.265mm"/>
+          <corner thickness="0.176mm"/>
           <corner/>
           <corner presence="hidden"/>
           <corner/>
@@ -10561,8 +10654,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -10618,8 +10711,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -10675,8 +10768,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -10792,7 +10885,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -10802,11 +10895,11 @@ MainCalculation();
           <speak disable="1">Line 62. Dollars. </speak>
         </assist>
         <border>
-          <edge thickness="0.0176mm"/>
+          <edge thickness="0.1764mm"/>
           <edge presence="hidden"/>
           <edge/>
           <edge/>
-          <corner thickness="0.018mm"/>
+          <corner thickness="0.176mm"/>
           <corner/>
           <corner/>
           <corner/>
@@ -10815,6 +10908,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_54[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_54" x="195.58mm" y="127mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -10917,7 +11011,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -10940,6 +11034,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_56[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_56" x="195.58mm" y="131.233mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11052,7 +11147,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11069,6 +11164,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_58" x="154.94mm" y="135.467mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11082,7 +11178,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11096,6 +11192,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="shade" y="135.467mm" x="162.56mm" w="7.62mm" h="46.566mm" locale="en_US">
         <font typeface="HelveticaNeueLT Std"/>
@@ -11155,7 +11252,7 @@ MainCalculation();
       </draw>
       <draw name="EstimatedTaxPayments" x="40.64mm" y="139.7mm" w="78.742mm" h="4.233mm" locale="en_US">
         <value>
-          <text>2015 estimated tax payments and amount applied from 2014 return </text>
+          <text>2017 estimated tax payments and amount applied from 2016 return </text>
         </value>
         <ui>
           <textEdit/>
@@ -11192,14 +11289,14 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
           </fill>
         </font>
         <assist>
-          <speak disable="1">Line 65. 2015 estimated tax payments and amount applied from 2014 return. Dollars. </speak>
+          <speak disable="1">Line 65. 2017 estimated tax payments and amount applied from 2016 return. Dollars. </speak>
         </assist>
         <border>
           <edge/>
@@ -11209,6 +11306,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_60" x="154.94mm" y="139.7mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11222,7 +11320,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11237,6 +11335,7 @@ MainCalculation();
           <fill/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Blowout1" y="141.593mm" w="20.32mm" h="16.934mm" x="10.16mm">
         <value>
@@ -11363,7 +11462,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11380,6 +11479,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_62" x="154.94mm" y="143.933mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11393,7 +11493,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11410,6 +11510,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line66b[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line66b" x="35.56mm" y="148.167mm" w="2.54mm" minH="4.233mm" locale="en_US">
         <value>
@@ -11473,7 +11574,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11493,6 +11594,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_64[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_64" x="114.3mm" y="148.167mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11506,7 +11608,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11526,6 +11628,7 @@ MainCalculation();
         <traversal>
           <traverse ref="shade[3]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="shade" y="148.167mm" x="121.92mm" w="7.62mm" h="4.233mm" locale="en_US">
         <font typeface="HelveticaNeueLT Std"/>
@@ -11535,11 +11638,6 @@ MainCalculation();
             <color value="192,192,192"/>
           </fill>
           <corner/>
-          <corner/>
-          <corner/>
-          <edge/>
-          <edge presence="hidden"/>
-          <edge/>
         </border>
         <traversal>
           <traverse ref="spacerLn66b1[0]"/>
@@ -11574,10 +11672,10 @@ MainCalculation();
             <color value="192,192,192"/>
           </fill>
           <corner/>
+          <edge/>
           <edge presence="hidden"/>
           <edge presence="hidden"/>
-          <edge presence="hidden"/>
-          <corner presence="hidden"/>
+          <corner/>
           <corner presence="hidden"/>
           <corner presence="hidden"/>
         </border>
@@ -11650,7 +11748,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11667,6 +11765,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_66[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_66" x="154.94mm" y="152.4mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11680,7 +11779,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11697,6 +11796,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line68[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line68" x="30.48mm" y="156.655mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -11757,7 +11857,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11771,6 +11871,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_68" x="154.94mm" y="156.655mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11784,7 +11885,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11801,6 +11902,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line69[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line69" x="30.48mm" y="160.888mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -11858,7 +11960,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11872,6 +11974,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_70" x="154.94mm" y="160.888mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11885,7 +11988,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11902,6 +12005,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line70[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line70" x="30.48mm" y="165.101mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -11963,7 +12067,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginRight="2pt" marginLeft="0pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginRight="0pt" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -11980,6 +12084,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_72[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_72" x="154.94mm" y="165.121mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -11993,7 +12098,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12007,6 +12112,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line71" x="30.48mm" y="169.334mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -12061,7 +12167,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12075,6 +12181,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_74" x="154.94mm" y="169.354mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -12088,7 +12195,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12102,6 +12209,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line72" x="30.48mm" y="173.567mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -12157,7 +12265,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12171,6 +12279,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_76" x="154.94mm" y="173.567mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -12184,7 +12293,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12198,6 +12307,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line73" x="30.48mm" y="177.8mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -12392,8 +12502,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -12472,7 +12582,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12492,6 +12602,7 @@ MainCalculation();
           <edge thickness="0.2646mm"/>
           <edge thickness="0.1764mm"/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_79" x="154.94mm" y="177.8mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -12505,7 +12616,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12527,6 +12638,7 @@ MainCalculation();
         <traversal>
           <traverse ref="Line74[0]"/>
         </traversal>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="Line74" x="30.48mm" y="182.034mm" w="5.08mm" minH="4.234mm" locale="en_US">
         <value>
@@ -12585,7 +12697,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12605,6 +12717,7 @@ MainCalculation();
           <corner/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_81" x="195.58mm" y="182.033mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -12734,7 +12847,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12748,6 +12861,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_83" x="195.58mm" y="186.267mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -12878,7 +12992,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -12892,6 +13006,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_85" x="195.58mm" y="190.502mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -12975,7 +13090,7 @@ MainCalculation();
         <?renderCache.textRun 15 Routing number  0 0 9711 0 0 0 "HelveticaNeueLT Std" 0 0 8000 ISO-8859-1?>
       </draw>
       <subform x="66.04mm" y="194.734mm" w="45.72mm" h="4.233mm" name="RoutingNoRules" locale="en_US">
-        <field name="f1_86" w="45.668mm" h="4.233mm">
+        <field name="f1_86" w="45.668mm" h="4.233mm" locale="en_US">
           <ui>
             <textEdit hScrollPolicy="off">
               <margin/>
@@ -13113,7 +13228,7 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Checking</text>
+          <text>1</text>
           <text>0</text>
         </items>
         <para vAlign="middle"/>
@@ -13159,7 +13274,7 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Savings</text>
+          <text>2</text>
           <text>0</text>
         </items>
         <para vAlign="middle"/>
@@ -13455,7 +13570,7 @@ MainCalculation();
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-              <p style="xfa-font-horizontal-scale:94%;letter-spacing:0in">Amount of line 75 you want<span style="xfa-spacerun:yes">&#160;</span><span style="font-weight:bold">applied to your 2016 estimated tax</span><span style="xfa-font-horizontal-scale:100%"><span style="xfa-spacerun:yes">&#160;</span></span><span style="vertical-align:1.5pt;font-family:'Universal Std News w Comm Pi';font-size:6pt;xfa-font-horizontal-scale:100%">&#9654;</span></p>
+              <p style="xfa-font-horizontal-scale:94%;letter-spacing:0in">Amount of line 75 you want<span style="xfa-spacerun:yes">&#160;</span><span style="font-weight:bold">applied to your 2018 estimated tax</span><span style="xfa-font-horizontal-scale:100%"><span style="xfa-spacerun:yes">&#160;</span></span><span style="vertical-align:1.5pt;font-family:'Universal Std News w Comm Pi';font-size:6pt;xfa-font-horizontal-scale:100%">&#9654;</span></p>
             </body>
           </exData>
         </value>
@@ -13499,14 +13614,14 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
           </fill>
         </font>
         <assist>
-          <speak disable="1">Line 77. Amount of line 75 you want applied to your 2016 estimated tax. Dollars. </speak>
+          <speak disable="1">Line 77. Amount of line 75 you want applied to your 2018 estimated tax. Dollars. </speak>
         </assist>
         <border>
           <edge presence="hidden"/>
@@ -13519,6 +13634,7 @@ MainCalculation();
           <corner presence="hidden"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_89" x="154.94mm" y="203.72mm" w="7.62mm" h="3.528mm" locale="en_US">
         <ui>
@@ -13532,7 +13648,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -13552,6 +13668,7 @@ MainCalculation();
           <corner presence="hidden"/>
           <corner/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="L91" x="12.7mm" y="207.434mm" w="149.86mm" h="0in">
         <value>
@@ -13631,7 +13748,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -13648,6 +13765,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_91" x="195.58mm" y="207.434mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -13733,7 +13851,7 @@ MainCalculation();
             </border>
           </textEdit>
         </ui>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -13750,6 +13868,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <field name="f2_93" x="154.94mm" y="211.667mm" w="7.62mm" h="4.233mm" locale="en_US">
         <ui>
@@ -13763,7 +13882,7 @@ MainCalculation();
         <value>
           <text maxChars="3"/>
         </value>
-        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" hAlign="right" marginLeft="0pt" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -13780,6 +13899,7 @@ MainCalculation();
           <corner/>
           <fill/>
         </border>
+        <margin rightInset="0.2646mm"/>
       </field>
       <draw name="shade" y="211.667mm" x="162.56mm" w="40.64mm" h="4.234mm" locale="en_US">
         <font typeface="HelveticaNeueLT Std"/>
@@ -13841,8 +13961,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -13887,8 +14007,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>No</text>
-          <text/>
+          <text>2</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -14089,21 +14209,18 @@ MainCalculation();
           <traverse ref="Dingbat_36pt[0]"/>
         </traversal>
       </draw>
-      <draw name="UnderPenalties" x="35.56mm" y="226.483mm" w="167.64mm" h="6.35mm" locale="en_US">
+      <draw name="UnderPenalties" x="30.48mm" y="226.483mm" w="172.72mm" h="6.35mm" locale="en_US">
         <value>
-          <text>Under penalties of perjury, I declare that I have examined this return and accompanying schedules and statements, and to the best of my knowledge and belief, they are true, correct, and complete. Declaration of preparer (other than taxpayer) is based on all information of which preparer has any knowledge.</text>
+          <text>Under penalties of perjury, I declare that I have examined this return and accompanying schedules and statements, and to the best of my knowledge and belief, they are true, correct, and accurately list all amounts and sources of income I received during the tax year. Declaration of preparer (other than taxpayer) is based on all information of which preparer has any knowledge.</text>
         </value>
         <ui>
           <textEdit/>
         </ui>
-        <para vAlign="bottom"/>
-        <font size="6.5pt" typeface="HelveticaNeueLT Std"/>
+        <para vAlign="bottom" marginLeft="3pt" spaceBelow="1pt"/>
+        <font size="6.5pt" typeface="HelveticaNeueLT Std" fontHorizontalScale="88%"/>
         <traversal>
           <traverse ref="JointReturn[0]"/>
         </traversal>
-        <?renderCache.bounds 475200 18000 0 0 0 0 0 0?>
-        <?renderCache.textRun 158 Under penalties of perjury, I declare that I have examined this return and accompanying schedules and statements, and to the best of my knowledge and belief,  0 0 8341 0 0 0 "HelveticaNeueLT Std" 0 0 6500 ISO-8859-1?>
-        <?renderCache.textRun 148 they are true, correct, and complete. Declaration of preparer (other than taxpayer) is based on all information of which preparer has any knowledge. 0 0 16141 0 0 0 "HelveticaNeueLT Std" 0 0 6500 ISO-8859-1?>
       </draw>
       <draw name="YourSignature" x="33.018mm" y="232.833mm" w="63.522mm" h="8.467mm" locale="en_US">
         <value>
@@ -14159,7 +14276,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginLeft="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -14173,7 +14290,7 @@ MainCalculation();
             <text>Your occupation </text>
           </value>
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
-          <para marginLeft="4pt" spaceAbove="3pt"/>
+          <para marginLeft="3pt" spaceAbove="3pt"/>
         </caption>
         <border>
           <edge presence="hidden"/>
@@ -14186,6 +14303,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_98[0]"/>
         </traversal>
+        <margin leftInset="0.3528mm"/>
       </field>
       <field name="f2_98" x="162.56mm" y="232.833mm" w="40.658mm" h="8.467mm" locale="en_US">
         <ui>
@@ -14221,7 +14339,7 @@ MainCalculation();
           <traverse ref="SpouseSignature[0]"/>
         </traversal>
       </field>
-      <draw name="SpouseSignature" x="33.018mm" y="241.321mm" w="63.522mm" h="8.446mm" locale="en_US">
+      <draw name="SpouseSignature" x="33.018mm" y="241.321mm" w="63.522mm" h="8.467mm" locale="en_US">
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/">
@@ -14250,7 +14368,7 @@ MainCalculation();
           <traverse ref="Date_SpouseSign[0]"/>
         </traversal>
       </draw>
-      <draw name="Date_SpouseSign" x="96.52mm" y="241.321mm" w="17.78mm" h="8.446mm" locale="en_US">
+      <draw name="Date_SpouseSign" x="96.52mm" y="241.321mm" w="17.78mm" h="8.467mm" locale="en_US">
         <value>
           <text>Date </text>
         </value>
@@ -14274,7 +14392,7 @@ MainCalculation();
         <traversal>
           <traverse ref="f2_99[0]"/>
         </traversal>
-        <?renderCache.bounds 50400 23941 0 0 0 0 0 0?>
+        <?renderCache.bounds 50400 24001 0 0 0 0 0 0?>
         <?renderCache.textRun 5 Date  0 4000 7998 0 0 0 "HelveticaNeueLT Std" 0 0 7000 ISO-8859-1?>
       </draw>
       <draw name="Dingbat_36pt" w="16.933mm" rotate="270" x="35.56mm" y="232.834mm" h="5.08mm" locale="en_US">
@@ -14308,13 +14426,13 @@ MainCalculation();
           <speak disable="1">     </speak>
         </assist>
       </draw>
-      <field name="f2_99" x="114.3mm" y="241.321mm" w="48.221mm" h="8.446mm" locale="en_US">
+      <field name="f2_99" x="114.3mm" y="241.321mm" w="48.221mm" h="8.467mm" locale="en_US">
         <ui>
           <textEdit hScrollPolicy="off">
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginLeft="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" marginLeft="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -14323,12 +14441,12 @@ MainCalculation();
         <assist>
           <speak disable="1">Spouse's occupation. </speak>
         </assist>
-        <caption placement="top" reserve="3.57mm">
+        <caption placement="top" reserve="3.5278mm">
           <value>
             <text>Spouse&#8217;s occupation</text>
           </value>
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
-          <para marginLeft="4pt" spaceAbove="3pt"/>
+          <para marginLeft="3pt" spaceAbove="3pt"/>
         </caption>
         <border>
           <edge/>
@@ -14344,6 +14462,7 @@ MainCalculation();
         <traversal>
           <traverse ref="IRSProvidedPIN[0]"/>
         </traversal>
+        <margin leftInset="0.3528mm"/>
       </field>
       <draw name="IRSProvidedPIN" y="241.3mm" x="162.56mm" w="40.64mm" h="8.467mm" locale="en_US">
         <ui>
@@ -14552,8 +14671,8 @@ MainCalculation();
           </checkButton>
         </ui>
         <items>
-          <text>Yes</text>
-          <text/>
+          <text>1</text>
+          <text>0</text>
         </items>
         <para vAlign="middle"/>
         <event activity="mouseUp" name="event__mouseUp">
@@ -14619,7 +14738,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -14650,6 +14769,7 @@ MainCalculation();
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
           <para vAlign="bottom" marginRight="0pt" marginLeft="7pt" lineHeight="11pt"/>
         </caption>
+        <margin rightInset="0.3528mm"/>
       </field>
       <field name="f2_104" x="33.02mm" y="262.467mm" w="129.54mm" h="4.233mm" locale="en_US">
         <ui>
@@ -14657,7 +14777,7 @@ MainCalculation();
             <margin/>
           </textEdit>
         </ui>
-        <para vAlign="bottom" marginRight="2pt" spaceAbove="0pt"/>
+        <para vAlign="bottom" marginRight="0pt" spaceAbove="0pt"/>
         <font weight="bold" size="8pt" typeface="Helvetica LT Std">
           <fill>
             <color value="0,0,128"/>
@@ -14688,6 +14808,7 @@ MainCalculation();
           <font size="7pt" typeface="HelveticaNeueLT Std"/>
           <para vAlign="bottom" marginRight="0pt" marginLeft="7pt" lineHeight="11pt"/>
         </caption>
+        <margin rightInset="0.3528mm"/>
       </field>
       <field name="f2_105" x="162.56mm" y="258.234mm" w="40.64mm" h="4.233mm" locale="en_US">
         <ui>
@@ -14711,8 +14832,8 @@ MainCalculation();
         <caption reserve="17.2666mm">
           <value>
             <exData contentType="text/html">
-              <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/">
-                <p style="letter-spacing:0in">Firm's EIN<span style="xfa-spacerun:yes">&#160; </span><span style="vertical-align:1pt;font-family:'Universal Std News w Comm Pi';font-size:5pt;kerning-mode:pair">&#9654;</span></p>
+              <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
+                <p style="text-decoration:none;letter-spacing:0in">Firm<span style="text-decoration:none">&#8217;</span>s EIN<span style="xfa-spacerun:yes">&#160; </span><span style="vertical-align:1pt;font-family:'Universal Std News w Comm Pi';font-size:5pt;kerning-mode:pair">&#9654;</span></p>
               </body>
             </exData>
           </value>
@@ -14768,7 +14889,11 @@ MainCalculation();
       <breakBefore targetType="pageArea" target="PageArea2"/>
       <draw name="Irs.gov" w="162.56mm" minH="4.233mm" x="12.7mm" y="266.7mm" locale="en_US">
         <value>
-          <text>www.irs.gov/form1040</text>
+          <exData contentType="text/html">
+            <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
+              <p style="text-decoration:none;letter-spacing:0in">Go to<span style="xfa-spacerun:yes">&#160;</span><span style="font-style:italic">www.irs.gov/Form1040</span> for instructions and the latest information.</p>
+            </body>
+          </exData>
         </value>
         <ui>
           <textEdit/>
@@ -14790,7 +14915,7 @@ MainCalculation();
         <value>
           <exData contentType="text/html">
             <body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="2.7.0.0">
-              <p style="letter-spacing:0in">Form<span style="xfa-spacerun:yes">&#160;</span><span style="font-size:10pt;font-weight:bold">1040<span style="xfa-spacerun:yes">&#160;</span></span>(2015)<span style="xfa-spacerun:yes">&#160;</span></p>
+              <p style="letter-spacing:0in">Form<span style="xfa-spacerun:yes">&#160;</span><span style="font-size:10pt;font-weight:bold">1040<span style="xfa-spacerun:yes">&#160;</span></span>(2017)<span style="xfa-spacerun:yes">&#160;</span></p>
             </body>
           </exData>
         </value>
@@ -14822,9 +14947,10 @@ MainCalculation();
     <?templateDesigner Hyphenation excludeInitialCap:1, excludeAllCaps:1, wordCharCnt:50, remainCharCnt:50, pushCharCnt:50?>
     <?templateDesigner expand 0?>
     <?renderCache.subset "Adobe Pi Std" 0 0 UTF-16 2 8 0046004F?>
-    <?renderCache.subset "HelveticaNeueLT Std" 0 0 ISO-8859-1 4 300 83 0001000500080009000A000D000E000F0010001100120013001400150016001700180019001A001B001C00200022002300240025002600270029002A002B002C002D002E002F00300031003200330034003500360038003A003B00420043004400450046004700480049004A004B004C004D004E004F0050005100520053005400550056005700580059005A005B0068006D00720087 $&#8217;(),-./0123456789:;?ABCDEFHIJKLMNOPQRSTUWYZabcdefghijklmnopqrstuvwxyz'&#8211;&#8226;&#8212;?>
+    <?renderCache.subset "HelveticaNeueLT Std" 0 0 ISO-8859-1 4 300 83 0001000500080009000A000D000E000F0010001100120013001400150016001700180019001A001B001C002000220023002400250026002700280029002A002B002C002D002E002F00300031003200330034003500360038003A003B00420043004400450046004700480049004A004B004C004D004E004F0050005100520053005400550056005700580059005A005B006D00720087 $&#8217;(),-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUWYZabcdefghijklmnopqrstuvwxyz&#8211;&#8226;&#8212;?>
     <?renderCache.subset "HelveticaNeueLT Std" 1 0 ISO-8859-1 4 248 66 000100080009000A000D000E000F001100120013001400150016001700180019001A001B00220023002400250026002700280029002A002F0030003100330034003500360038003A00420043004400450046004700480049004A004B004C004D004E004F005000510053005400550056005700580059005A005B0089 &#8217;(),-.0123456789:ABCDEFGHINOPRSTUWYabcdefghijklmnoprstuvwxyz&#8212;?>
-    <?renderCache.subset "HelveticaNeueLT Std Blk" 0 0 ISO-8859-1 4 8 2 0012001615?>
+    <?renderCache.subset "HelveticaNeueLT Std" 0 1 ISO-8859-1 4 56 14 000F001000110012001500270048004A004E00500053005400570058./014Fgimorsvw?>
+    <?renderCache.subset "HelveticaNeueLT Std Blk" 0 0 ISO-8859-1 4 8 2 0012001817?>
     <?renderCache.subset "HelveticaNeueLT Std Blk Cn" 0 0 ISO-8859-1 4 16 4 0001001100120015 014?>
     <?renderCache.subset "HelveticaNeueLT Std Bold Outln" 0 0 ISO-8859-1 4 8 2 0011001302?>
     <?renderCache.subset "HelveticaNeueLT Std Cn" 0 0 ISO-8859-1 4 120 32 000100080009000A0012001800250027002D00420043004400450046004700480049004A004D004E004F00500051005200530054005500560059005A &#8217;()17DFLabcdefghilmnopqrstuxy?>
@@ -14841,7 +14967,6 @@ MainCalculation();
   <?templateDesigner Print-PageRange 1-2?>
   <?templateDesigner Print-ProductionPrint 0?>
   <?templateDesigner Print-DuplexingOption simplex?>
-  <?templateDesigner Grid show:1, snap:1, units:19, color:ff8080, origin:(0,0), interval:(7200,6000), objsnap:0, guidesnap:0, pagecentersnap:-235872559?>
   <?templateDesigner DefaultLanguage JavaScript?>
   <?templateDesigner DefaultRunAt client?>
   <?acrobat JavaScript strictScoping?>
@@ -14854,10 +14979,11 @@ MainCalculation();
   <?templateDesigner DefaultPreviewType interactive?>
   <?templateDesigner DefaultPreviewPagination simplex?>
   <?templateDesigner XDPPreviewFormat 19?>
+  <?templateDesigner Grid show:1, snap:1, units:19, color:ff8080, origin:(0,0), interval:(7200,6000), objsnap:0, guidesnap:0, pagecentersnap:-1415781933?>
+  <?templateDesigner Zoom 100?>
   <?templateDesigner FormTargetVersion 28?>
   <?templateDesigner Rulers horizontal:1, vertical:1, guidelines:1, crosshairs:0?>
   <?templateDesigner Guidelines v:36000;v:612000;h:36000;h:756000?>
-  <?templateDesigner Zoom 96?>
   <?templateDesigner SaveTaggedPDF 1?>
   <?templateDesigner SavePDFWithEmbeddedFonts 1?>
   <?templateDesigner SavePDFWithLog 0?>

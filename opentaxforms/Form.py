@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 import re
+import requests
+from requests.exceptions import RequestException
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import (
     LTTextBox, LTTextLine, LTTextBoxHorizontal, LAParams, LTChar,
@@ -10,8 +12,6 @@ from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdftypes import resolve1
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from six.moves.urllib.request import urlopen
-from six.moves.urllib.error import URLError, HTTPError
 
 from . import ut, irs
 from .ut import log, ntuple, logg, stdout, Qnty, NL, pathjoin
@@ -124,28 +124,26 @@ class Form(object):
                         url = irs.prevurltmpl % (fname, )
                     else:
                         url = irs.currurltmpl % (fname, )
+                    url = url.encode('utf-8')
                     if url in failurls:
                         continue
                     log.warn(
-                        'downloading: ' + url + ' for ' + formName +
-                        ' from ' + url)
-                    fin = urlopen(url, 'rb')
-                    if fin.getcode() != 200:
+                        'downloading: ' + formName + ' from ' + str(url))
+                    response = requests.get(url)
+                    if response.status_code != 200:
                         # not a pdf, just an html error page
                         continue
-                    pdf = fin.read()
-                    fin.close()
+                    pdf = response.content
                     fout = open(destfpath, 'wb')
                     fout.write(pdf)
                     fout.close()
                     foundfile = True
                     break
-                except HTTPError:
-                    msgs.append('HTTPError at ' + url)
+                except RequestException as e:
+                    msgs.append('RequestException at ' + url)
+                    msgs.append(str(e))
                     failurls.add(url)
-                except URLError as e:
                     log.error(e)
-                    raise
         if not foundfile:
             if not msgs:
                 msgs.append('url does not exist:  {}'.format(url))

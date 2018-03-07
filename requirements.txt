@@ -8,3 +8,4 @@ Flask-Restless==0.17.0
 Flask-SQLAlchemy==2.1
 pytest==3.0.3
 six
+requests==2.18.4
