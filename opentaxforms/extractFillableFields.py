@@ -140,6 +140,17 @@ def xmlFromPdf(pdfpath, xmlpath=None):
     return tree
 
 
+def getNamespace(tree):
+    # xml root pre 2017: <template xmlns="http://www.xfa.org/schema/xfa-template/2.8/">
+    # xml root in 2017:  <template xmlns="http://www.xfa.org/schema/xfa-template/3.0/">
+    rootNodes = tree.xpath('/*[local-name()="template"]')
+    assert len(rootNodes) == 1
+    rootNodeTag = rootNodes[0].tag
+    assert rootNodeTag.startswith('{') and '}' in rootNodeTag
+    namespace = rootNodeTag[1: rootNodeTag.index('}')]
+    return namespace
+
+
 def extractFields(form):
     prefix = form.prefix
     fields = form.fields
@@ -149,9 +160,8 @@ def extractFields(form):
         return
 
     pathprefix = os.path.join(cfg.dirName, prefix)
-
     tree = xmlFromPdf(pathprefix + '.pdf', pathprefix + '-fmt.xml')
-    namespaces = {'t': "http://www.xfa.org/schema/xfa-template/2.8/"}
+    namespaces = {'t': getNamespace(tree)}
     tables = collectTables(tree, namespaces)
     fieldEls = tree.xpath('//t:draw[t:value]|//t:field',
                           namespaces=namespaces)
