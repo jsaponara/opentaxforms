@@ -18,11 +18,15 @@ fromLinePttn = re.compile(r'amounts? (?:on|from) lines? ', re.I)
 possibleColTypes = 'proceeds cost adjustment gain loss'.lower().split()
 
 # irs Prior Year Products
-# https://apps.irs.gov/app/picklist/list/priorFormPublication.html 2014
+# https://apps.irs.gov/app/picklist/list/priorFormPublication.html     # 2014 tax year
 # prevurltmpl='http://www.irs.gov/pub/irs-pdf/%s'%(fname,)
-# currurltmpl='http://www.irs.gov/file_source/pub/irs-pdf/%s'%(fname,) 2015
-prevurltmpl = 'http://www.irs.gov/pub/irs-prior/%s'
-currurltmpl = 'https://www.irs.gov/pub/irs-pdf/%s'
+# currurltmpl='http://www.irs.gov/file_source/pub/irs-pdf/%s'%(fname,) # 2015 tax year
+# prevurltmpl eg http://www.irs.gov/pub/irs-prior/f1040--2015.pdf
+# currurltmpl eg http://www.irs.gov/pub/irs-pdf/f1040.pdf
+#prevurltmpl = 'http://www.irs.gov/pub/irs-prior/%s'                   # 2016 tax year
+#currurltmpl = 'http://www.irs.gov/pub/irs-pdf/%s'                     # 2016
+prevurltmpl = 'https://www.irs.gov/pub/irs-prior/%s'                   # 2017 tax year
+currurltmpl = 'https://www.irs.gov/pub/irs-pdf/%s'                     # 2017
 
 
 # xml that we cannot currently parse, eg 1040 older than 2012
