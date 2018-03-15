@@ -26,11 +26,12 @@ def checkDependencies():
 class TestOtfBase(object):
     def setup_method(self, _):
         dirName = 'forms'
+        formDirName = osp.join(dirName, 'static', 'pdf')
         theForm = 'f1040.pdf'
         dbpath='sqlite:///'+ut.Resource('test','opentaxforms.sqlite3').path()
-        if not osp.exists(dirName):
-            os.makedirs(dirName)
-        formpath = osp.join(dirName, theForm)
+        if not osp.exists(formDirName):
+            os.makedirs(formDirName)
+        formpath = osp.join(formDirName, theForm)
         if not osp.exists(formpath):
             formResourcePath = ut.Resource('test', osp.join('forms-common', theForm)).path()
             shutil.copy(formResourcePath, formpath)
