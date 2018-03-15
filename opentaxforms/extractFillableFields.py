@@ -159,8 +159,9 @@ def extractFields(form):
     if 'x' not in cfg.steps:
         return
 
-    pathprefix = os.path.join(cfg.dirName, prefix)
-    tree = xmlFromPdf(pathprefix + '.pdf', pathprefix + '-fmt.xml')
+    inputprefix = os.path.join(cfg.pdfDir, prefix)
+    outputprefix = os.path.join(cfg.dirName, prefix)
+    tree = xmlFromPdf(inputprefix + '.pdf', outputprefix + '-fmt.xml')
     namespaces = {'t': getNamespace(tree)}
     tables = collectTables(tree, namespaces)
     fieldEls = tree.xpath('//t:draw[t:value]|//t:field',
@@ -464,7 +465,7 @@ def extractFields(form):
             visiblz.append(d)
     ensurePathsAreUniq(fields)
     log.info('found [%d] fields, [%d] visiblz', len(fields), len(visiblz))
-    with open(pathprefix + '-visiblz.txt', 'wb') as f:
+    with open(outputprefix + '-visiblz.txt', 'wb') as f:
         f.write(b'\n'.join(x['text'].encode('utf8') for x in visiblz))
     # fields refers to fillable fields only;
     # draws are all (fillable and read-only/non-fillable) visible fields

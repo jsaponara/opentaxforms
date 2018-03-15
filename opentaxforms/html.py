@@ -45,11 +45,11 @@ def computePageTitle(titlebase, npage, npages):
     return title
 
 
-def createSvgFile(dirName, prefix, npage):
+def createSvgFile(inputDirName, outputDirName, prefix, npage):
     ipage = npage - 1
-    infpath = pathjoin(dirName,'{}.pdf'.format(prefix))
-    outfpath = pathjoin(dirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
-    outfpathFinal = pathjoin(dirName,'static','svg','{}-p{}.svg'.format(prefix, npage))
+    infpath = pathjoin(inputDirName,'{}.pdf'.format(prefix))
+    outfpath = pathjoin(outputDirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
+    outfpathFinal = pathjoin(outputDirName,'{}-p{}.svg'.format(prefix, npage))
     cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
     out, err = ut.run(cmd)
     if err:
@@ -88,11 +88,11 @@ def readImgSize(fname, dirName):
     return img.size
 
 
-def createGifFile(dirName, prefix, npage):
+def createGifFile(inputDirName, outputDirName, prefix, npage):
     ipage = npage - 1
     imgfname = prefix + '.gif'
-    pathPlusPrefix = pathjoin(dirName, prefix)
-    imgfpath = pathjoin(dirName, imgfname)
+    pathPlusPrefix = pathjoin(inputDirName, prefix)
+    imgfpath = pathjoin(outputDirName, imgfname)
     cmd = 'convert -density 144 %s.pdf [%d] %s' % (
           pathPlusPrefix, ipage, imgfpath)
     out, err = ut.run(cmd)
@@ -103,25 +103,25 @@ def createGifFile(dirName, prefix, npage):
         log.error(msg)
         raise Exception(msg)
     try:
-        imgw, imgh = ut.readImgSize(imgfname, dirName)
+        imgw, imgh = ut.readImgSize(imgfname, outputDirName)
     except:
-        log.error('err re file %s in dir %s', imgfname, dirName)
+        log.error('err re file %s in dir %s', imgfname, outputDirName)
         raise
     return imgw, imgh
 
 
-def createPageImg(dirName, prefix, npage):
+def createPageImg(inputDirName, outputDirName, prefix, npage):
     imgFmt = 'svg'  # or 'gif'
     if imgFmt == 'svg':
         imgfname = '{}-p{}.svg'.format(prefix, npage)
         if not ut.exists(imgfname):
-            createSvgFile(dirName, prefix, npage)
+            createSvgFile(inputDirName, outputDirName, prefix, npage)
         imgw, imgh = 1224, 1584
     else:
         # generate page background as gif image
         imgfname = '{}-p{}.gif'.format(prefix, npage)
         if not ut.exists(imgfname):
-            imgw, imgh = createGifFile(dirName, prefix, npage)
+            imgw, imgh = createGifFile(inputDirName, outputDirName, prefix, npage)
     bkgdimgfname = imgfname
     return imgw, imgh, bkgdimgfname
 
@@ -454,7 +454,7 @@ def writeEmptyHtmlPages(form):
     titlebase = computeTitle(prefix)
     for npage in range(1, 1 + npages):
         title = computePageTitle(titlebase, npage, npages)
-        imgw, imgh, bkgdimgfname = createPageImg(dirName, prefix, npage)
+        imgw, imgh, bkgdimgfname = createPageImg(cfg.pdfDir, cfg.svgDir, prefix, npage)
         # inputboxes can be checkboxes:
         # <input type='checkbox' id='c1_01'>
         # <label for='c1_01' style='top:358px; ...; text-align:center'></label>
@@ -625,6 +625,7 @@ def writeEmptyHtmlPages(form):
                 bkgdimgfname=bkgdimgfname,
                 dbid=dbid,
                 formid=formid,
+                staticRoot=cfg.staticRoot,
                 pagelinks=pagelinks,
                 pdflink=pdflink,
                 inputboxes=inputboxes,

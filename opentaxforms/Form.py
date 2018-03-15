@@ -61,7 +61,7 @@ class Form(object):
             fname = self.name
             url = None
         else:
-            fname, url = self.download(cfg.formyear, failurls, cfg.dirName)
+            fname, url = self.download(cfg.formyear, failurls)
         log.name = fname
         self.fname = fname
         self.url = url
@@ -70,7 +70,7 @@ class Form(object):
         prefix = self.fname.rsplit('.', 1)[0]
         log.name = prefix
         self.prefix = prefix
-        pathPlusPrefix = pathjoin(cfg.dirName, prefix)
+        pathPlusPrefix = pathjoin(cfg.pdfDir, prefix)
         self.fpath = pathPlusPrefix + '.pdf'
         cacheprefix = pathPlusPrefix + '-pdfinfo'
         infocache = None if not cfg.useCaches else ut.unpickle(cacheprefix)
@@ -91,8 +91,8 @@ class Form(object):
                 if 'Line 59. Cents.' in f['speak']:
                     f['speak'] = f['speak'].replace('Line 59', 'Line 60')
 
-    def download(self, year, failurls, dirName='forms'):
-        # download form from irs.gov into {dirName} if not already there
+    def download(self, year, failurls):
+        # download form from irs.gov into cfg.pdfDir if not already there
         formName = self.name
         year = int(year)
         formNamesToTry = irs.possibleFilePrefixes(formName)
@@ -106,7 +106,7 @@ class Form(object):
         for formName in formNamesToTry:
             fname = fnametmpl % dict(formName=formName, year=year)
             destfname = formName + '.pdf'
-            destfpath = pathjoin(dirName, destfname)
+            destfpath = pathjoin(cfg.pdfDir, destfname)
             if ut.exists(destfpath):
                 foundfile = True
                 break
@@ -114,7 +114,7 @@ class Form(object):
             for formName in formNamesToTry:
                 fname = fnametmpl % dict(formName=formName, year=year)
                 destfname = formName + '.pdf'
-                destfpath = pathjoin(dirName, destfname)
+                destfpath = pathjoin(cfg.pdfDir, destfname)
                 if not cfg.okToDownload:
                     msg = 'oops no ' + destfpath + ' and not okToDownload'
                     logg(msg, [log.error, stdout])
@@ -347,6 +347,7 @@ class TextPoz(object):
                 # '1040EZ']
                 slsafe = re.escape(sl)
                 slsafeExact = r'(?:^|[\s\W])(' + slsafe + r')(?:$|[\s\W])'
+                log.info('slsafeExact=%s  chrz=%s', slsafeExact, chrz)
                 for m in re.finditer(slsafeExact, chrz):
                     if m:
                         ichar = m.start()

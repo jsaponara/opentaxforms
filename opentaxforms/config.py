@@ -49,6 +49,7 @@ defaults = Bag(dict(
     recurse=False,
     relaxRqmts=False,
     skip=[],
+    staticRoot='static',
     verbose=False,
     version=False,
 ))
@@ -241,10 +242,18 @@ def setup(**overrideArgs):
         logg('config:' + str(cfg), [log.warn])
 
         ut.ensure_dir(dirName)
+        cfg.staticRoot = cfg.staticRoot \
+            if cfg.staticRoot.startswith('/') \
+            else pathjoin(dirName, cfg.staticRoot)
+        cfg.pdfDir = pathjoin(cfg.staticRoot, 'pdf')
+        cfg.svgDir = pathjoin(cfg.staticRoot, 'svg')
+        ut.ensure_dir(cfg.pdfDir)
+        ut.ensure_dir(cfg.svgDir)
+
         def linkStaticDir(appname, dirName):
             # symlink-else-copy the folder of static files
             staticDir = ut.Resource(appname, 'static').path()
-            staticLink = pathjoin(dirName, 'static')
+            staticLink = cfg.staticRoot
             try:
                 if not os.path.lexists(staticLink):
                     os.symlink(staticDir, staticLink)
