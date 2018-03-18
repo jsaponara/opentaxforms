@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from lxml import etree
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdftypes import PDFStream
+from pdfminer.pdftypes import PDFStream, PDFNotImplementedError
 try:
     from cPickle import dump
 except ImportError:
@@ -127,7 +127,11 @@ def xmlFromPdf(pdfpath, xmlpath=None):
             obj = doc.getobj(objid)
             if not isinstance(obj, PDFStream):
                 continue
-            data = obj.get_data()
+            try:
+                data = obj.get_data()
+            except PDFNotImplementedError:
+                # eg for jpeg image: PDFNotImplementedError: Unsupported filter: /DCTDecode
+                continue
             if b'xfa-template' in data:
                 break
         else:

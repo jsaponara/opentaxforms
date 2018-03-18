@@ -156,11 +156,12 @@ class Form(object):
             parser = PDFParser(fp)
             doc = PDFDocument(parser)
             docinfo = {}
+            orgnIsIrs = True
             if 'Metadata' in doc.catalog:
                 metadata = resolve1(doc.catalog['Metadata']).get_data()
                 xmpdict = xmp_to_dict(metadata)
                 docinfo['titl'] = xmpdict['dc']['title']['x-default']
-                docinfo['desc'] = xmpdict['dc']['description']['x-default']
+                docinfo['desc'] = xmpdict['dc'].get('description',{}).get('x-default')
                 docinfo['isfillable'] = (
                     xmpdict['pdf'].get('Keywords', '').lower() == 'fillable')
                 anyMonth = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec'
@@ -199,15 +200,20 @@ class Form(object):
                     if m:
                         taxyr, sched, form1, form2 = m.groups()
                     else:
-                        msg = docinfo['titl'] + ' dont fit'
+                        msg = docinfo['titl'] + ' dont fit form title templates'
                         log.error(msg)
-                        raise Exception(msg)
-                docinfo['taxyr'] = taxyr
-                form = form1 if not form2 or len(form1) < len(form2) else form2
-                docinfo['form'] = form
-                docinfo['sched'] = sched
-                docinfo['formName'] = form if not sched else (form, sched)
-                docinfo['fpath'] = self.fpath
+                        #raise Exception(msg)
+                        orgnIsIrs = False
+                if orgnIsIrs:
+                    docinfo['taxyr'] = taxyr
+                    form = form1 if not form2 or len(form1) < len(form2) else form2
+                    docinfo['form'] = form
+                    docinfo['sched'] = sched
+                    docinfo['formName'] = form if not sched else (form, sched)
+                    docinfo['fpath'] = self.fpath
+                else:
+                    # experimental, for CRA forms
+                    docinfo['formName'] = docinfo['titl'].replace(' ', '')
             # Check if the document allows text extraction. If not, abort.
             if not doc.is_extractable:
                 raise Exception('PDFTextExtractionNotAllowed')

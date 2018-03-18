@@ -52,7 +52,7 @@ def computeFormId(formName):
     return idd
 
 
-def computeTitle(prefix):
+def computeTitle(prefix, form = None):
     '''
     >>> computeTitle('f1040')
     'Form 1040'
@@ -68,7 +68,9 @@ def computeTitle(prefix):
         if typ == 'f':
             doctype = 'Form'
         else:
-            raise Exception('unknown doctype [%s]' % (typ, ))
+            # todo temporary fallback for CRA forms
+            #raise Exception('unknown doctype [%s]' % (typ, ))
+            return form.docinfo['titl']
         if suffix:
             num += suffix.upper()  # .upper for eg 1040EZ
         titleEls = [doctype, num]

@@ -451,7 +451,7 @@ def writeEmptyHtmlPages(form):
                          .replace('}', '}}')
                          .replace('[=[', '{')
                          .replace(']=]', '}'))
-    titlebase = computeTitle(prefix)
+    titlebase = computeTitle(prefix, form)
     for npage in range(1, 1 + npages):
         title = computePageTitle(titlebase, npage, npages)
         imgw, imgh, bkgdimgfname = createPageImg(cfg.pdfDir, cfg.svgDir, prefix, npage)
