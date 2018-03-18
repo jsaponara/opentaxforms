@@ -19,7 +19,7 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
   - **External dependencies**
 
-  [pdf2svg](https://github.com/dawbarton/pdf2svg)
+    [pdf2svg](https://github.com/dawbarton/pdf2svg)
 
   - **Github**
 
@@ -84,7 +84,7 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
   - **To do**
 
-	- Move lower-level ToDo items to github/issues.
+	- Move lower-level ToDo items to [github/issues](https://github.com/jsaponara/opentaxforms/issues).
     - Refactor toward a less script-ish architecture that will scale to more developers. [architecturePlease]
 	- Switch to a pdf-to-svg converter that preserves text (rather than converting text to paths), perhaps pdfjs,
 	  so that testers can easily copy and paste text from forms. [copyableText]
@@ -97,4 +97,10 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 	- Fix countless bugs, especially in forms that contain tables (see [issues])
 	- Don't seek in a separate file a schedule that occurs within a form. [refsToEmbeddedSchedules]
 	- Separate dirName command line option into pdfInputDir,htmlOutputDir. [splitIoDirs]
+
+  - **Other tax- and PDF-related projects**
+
+    - [OpenTaxSolver](http://opentaxsolver.sourceforge.net/)
+    - [FillPDF](https://github.com/desertbit/fillpdf)
+    - [pdf-forms](https://github.com/jkraemer/pdf-forms)
 

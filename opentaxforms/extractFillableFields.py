@@ -117,6 +117,7 @@ def ensurePathsAreUniq(fields):
 
 
 def xmlFromPdf(pdfpath, xmlpath=None):
+    '''find xfa data in pdf file'''
     with open(pdfpath, 'rb') as fp:
         parser = PDFParser(fp)
         doc = PDFDocument(parser)
