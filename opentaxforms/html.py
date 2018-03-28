@@ -61,7 +61,8 @@ def createSvgFile(inputDirName, outputDirName, prefix, npage):
     with open(outfpath) as f:
         svg = f.read()
     # todo move draftNotice to separate file
-    insertDraftNotice = 0
+    # todo this switch shouldnt be here .but. dont want to make it easy to switch off!
+    insertDraftNotice = 1
     if insertDraftNotice:
         draftNotice = '<svg>' \
             '<g fill="gray70" opacity="0.40"' \
