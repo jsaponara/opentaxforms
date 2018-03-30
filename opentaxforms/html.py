@@ -416,6 +416,14 @@ def pdflinkhtml(prefix,imgw,linkwidthprop):
         prefix,imgw*(1-4*linkwidthprop))
 
 
+def webRoot(cfg):
+    '''eg staticRoot is forms/static/
+        but web server is run inside forms/'''
+    # todo formsDir should be part of config
+    formsDir, webRoot = cfg.staticRoot.split('/', 1)
+    return webRoot
+
+
 def getSigns(field, unit=None):
     jdb('>getSigns', field, unit, field['deps'], [d.get('sign', ' ') for d in
         field['deps']])
@@ -626,7 +634,7 @@ def writeEmptyHtmlPages(form):
                 bkgdimgfname=bkgdimgfname,
                 dbid=dbid,
                 formid=formid,
-                staticRoot=cfg.staticRoot,
+                staticRoot=webRoot(cfg),
                 pagelinks=pagelinks,
                 pdflink=pdflink,
                 inputboxes=inputboxes,
