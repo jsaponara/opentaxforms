@@ -381,7 +381,7 @@ class Bag(object):
             >>> assert b('a','b','c')==('11','21','0')
             '''
         # todo error for empty maps[0]
-        zero = type(maps[0].values()[0])()
+        zero = type(list(maps[0].values())[0])()
         for mapp in maps:
             mapp, getitems = self._getGetitems(mapp)
             for k, v in getitems(mapp):
