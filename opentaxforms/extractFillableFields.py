@@ -19,6 +19,10 @@ from .config import cfg
 from .ut import log, setupLogging, skip, Qnty, pf
 from .irs import commandPtn, possibleColTypes, CrypticXml
 
+import logging
+thisModule = __name__.split('.')[0]
+log=logging.getLogger(thisModule)
+
 
 def collectTables(tree, namespaces):
     tableEls = tree.xpath('//*[@layout="table"]', namespaces=namespaces)
@@ -148,6 +152,8 @@ def xmlFromPdf(pdfpath, xmlpath=None):
 def getNamespace(tree):
     # xml root pre 2017: <template xmlns="http://www.xfa.org/schema/xfa-template/2.8/">
     # xml root in 2017:  <template xmlns="http://www.xfa.org/schema/xfa-template/3.0/">
+    # draft [as of 13aug2018] 2018/1040 form is back to 2.8 !
+    # but final 2018/1040 form uses 3.0
     rootNodes = tree.xpath('/*[local-name()="template"]')
     assert len(rootNodes) == 1
     rootNodeTag = rootNodes[0].tag

@@ -14,10 +14,11 @@ from pdfminer.pdftypes import resolve1
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 
 from . import ut, irs
-from .ut import log, ntuple, logg, stdout, Qnty, NL, pathjoin
+from .ut import log, ntuple, logg, stdout, Qnty, NL, pathjoin, rstripAlpha
 from .config import cfg
 from .xmp import xmp_to_dict
 from .cmds import CommandParser, normalize, adjustNegativeField, CannotParse
+from .extractFillableFields import extractFields
 
 # global so that theyre pickle-able
 PageInfo = ntuple('PageInfo', 'pagenum pagewidth pageheight textpoz')
@@ -56,6 +57,7 @@ class Form(object):
         return '<Form %s>' % (self.name, )
 
     def getFile(self, failurls):
+        log.info('+getFile name=%s', self.name)
         if hasattr(self.name, 'endswith') and self.name.endswith('.pdf'):
             # pdf suffix means the file is local
             fname = self.name
@@ -65,8 +67,10 @@ class Form(object):
         log.name = fname
         self.fname = fname
         self.url = url
+        log.debug('-getFile fname,url=%s,%s',fname,url)
 
     def readInfo(self):
+        log.info('+readInfo fname=%s cfg.pdfDir=%s',self.fname,cfg.pdfDir)
         prefix = self.fname.rsplit('.', 1)[0]
         log.name = prefix
         self.prefix = prefix
@@ -82,6 +86,11 @@ class Form(object):
         # todo should store this separately from self.name?
         self.name = self.docinfo['formName']
 
+    def extractFields(self):
+        log.info('+extractFields')
+        extractFields(self)
+        log.info('-extractFields')
+
     def fixBugs(self):
         if cfg.formyear in ('2012', '2013'):
             for f in self.fields:
@@ -93,6 +102,7 @@ class Form(object):
 
     def download(self, year, failurls):
         # download form from irs.gov into cfg.pdfDir if not already there
+        log.debug('+download name=%s', self.name)
         formName = self.name
         year = int(year)
         formNamesToTry = irs.possibleFilePrefixes(formName)
@@ -138,6 +148,7 @@ class Form(object):
                     fout.write(pdf)
                     fout.close()
                     foundfile = True
+                    log.info('- wrote file %s', destfpath)
                     break
                 except RequestException as e:
                     msgs.append('RequestException at ' + url)
@@ -152,6 +163,7 @@ class Form(object):
 
     def pdfInfo(self):
         # collect metadata from pdf file at document and page levels
+        log.debug('+pdfInfo self.fpath=%s', self.fpath)
         with open(self.fpath, 'rb') as fp:
             parser = PDFParser(fp)
             doc = PDFDocument(parser)
@@ -235,8 +247,20 @@ class Form(object):
                     pagenum, pagewidth, pageheight, rr.renderPage(page))
         return docinfo, pageinfo
 
+    def getFieldsDict(self, page, line):
+        if (page, line) in self.fieldsByLine:
+            log.debug('found in fieldsByLine: %s',(page,line))
+            return self.fieldsByLine
+        lineNumeric = rstripAlpha(line)
+        log.debug('fieldsByNumericLine.keys=%s.', self.fieldsByNumericLine.keys())
+        if (page, lineNumeric) in self.fieldsByNumericLine:
+            log.debug('found in fieldsByNumericLine: %s',(page,lineNumeric))
+            return self.fieldsByNumericLine
+        raise Exception('cannot find page %s, line %s in any fields dict' % (page, line))
+
     def orderDependencies(self):
         # reorder by deps to avoid undefined vars
+        log.debug('+orderDependencies')
         computedFields = self.computedFields
         self.upstreamFields.difference_update(computedFields.keys())
         delays = []
@@ -253,8 +277,11 @@ class Form(object):
     def computeMath(self):
         # determines which fields are computed from others
         # 'dep' means dependency
+        # todo computeMath doesnt manip computedFields--pick better names?
+        log.debug('+computeMath fields=%s...', str(self.fields)[:66])
         fields = self.fields if 'm' in cfg.steps else []
         for field in fields:
+            log.debug('computeMath uniqname=%s field=%s', field['uniqname'], field)
             math = CommandParser(field, self)
             speak = normalize(field['speak'])
             adjustNegativeField(field, speak)
@@ -266,7 +293,26 @@ class Form(object):
                     math.parseInstruction(s, field)
                     log.debug('found [%s] in sentence [%s] in field %s',math,s,field['uniqname'])
                 except CannotParse as e:
-                    log.debug('%s',e)
+                    # UnicodeDecodeError: 'ascii' codec can't decode byte 0xe2 in position 30: ordinal not in range(128)
+                        # occurs for unicode(e) or unicode(e.message) or unicode(e.args[0]) below
+                        #   but not for unicode(e.args)  [e.args is a tuple, e.message a string]
+                    #log.debug('234 %s',unicode(e).encode('utf8'))
+                    #log.debug('235 %s',unicode(e.message).encode('utf8'))
+                    #log.debug('236 %s',unicode(e.args[0].decode('latin1')).encode('utf8'))
+                    # todo clean this mess!  for 2018/1040 just print-234 fires: 234 'ascii' codec can't encode character u'\u2019' in position 30: ordinal not in range(128)
+                    try:
+                        log.debug('236 %s',e.args[0].decode('utf8', errors='replace').encode('utf8', errors='replace'))
+                    except Exception as e:
+                        #print 234,e
+                        try:
+                            log.debug('236a %s',e.args[0].decode('latin1', errors='replace').encode('utf8', errors='replace'))
+                        except Exception as e:
+                            #print 235,e
+                            # evidently alr decoded!
+                            log.debug('236b %s',e.args[0].encode('utf8', errors='replace'))
+                            # UnicodeDecodeError: 'ascii' codec can't decode byte 0xe2 in position 34: ordinal not in range(128)
+            if field['uniqname'] == 'f2_01':
+                log.debug('9844 math,math.terms,bool(math and math.terms) %s %s %s',math,math.terms,bool(math and math.terms))
             if math and math.terms:
                 # todo checkbox instructions refer to the named textbox
                 # eg 2016/8814/line15
@@ -280,18 +326,23 @@ class Form(object):
             field['math'] = math
         self.orderDependencies()
         self.bfields = [ut.Bag(f) for f in fields]
-        # just to shorten field['a'] to field.a
+            # just to shorten field['a'] to field.a
+        #log.debug('-computeMath computedFields %s',self.computedFields)
+            # computedFields is ordereddict
+        log.debug('2983 -computeMath f2_01 in computedFields %s','f2_01' in self.computedFields)
 
 
 class Renderer(object):
     def __init__(self):
         # Create a PDF resource manager object that stores shared resources.
+        log.debug('+Renderer')
         rsrcmgr = PDFResourceManager()
         # la=layout analysis
         laparams = LAParams()
         self.device = PDFPageAggregator(rsrcmgr, laparams=laparams)
         self.interpreter = PDFPageInterpreter(rsrcmgr, self.device)
         self.textPoz = None
+        log.debug('-Renderer')
 
     def renderPage(self, page):
         self.interpreter.process_page(page)

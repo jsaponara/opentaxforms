@@ -15,6 +15,8 @@ from .version import appname, appversion
 
 RecurseInfinitely = -1
 RecursionRootLevel = 0
+# SkippableSteps is an OrderedDict
+# todo obviate ChainablyUpdatableOrderedDict with OrderedDict(list of pairs)
 SkippableSteps = (
     ut.ChainablyUpdatableOrderedDict()
     (x='xfaParsing')
@@ -22,7 +24,8 @@ SkippableSteps = (
     (r='referenceParsing')
     (d='databaseOutput')
     (h='htmlOutput')
-    (c='cleanupFiles')) # remove intermediate files
+    (c='cleanupFiles')  # remove intermediate files
+)
 
 defaults = Bag(dict(
     # todo separate dirName into pdfInputDir,htmlOutputDir
@@ -37,7 +40,7 @@ defaults = Bag(dict(
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho
     # could be incomplete eg during dec2016 the 2016 1040 and 400ish other
     # forms are ready but not schedule D and 200ish others
-    latestTaxYear=2016,
+    latestTaxYear=2018,
     loglevel='warn',
     logPrefix=None,
     maxrecurselevel=RecurseInfinitely,
@@ -66,7 +69,8 @@ def parseCmdline():
     addarg = parser.add_argument
     addarg('-f', '--form', dest='rootForms', nargs='?',
            help='forms to parse, eg f1040 or f1040sa,f1040sab')
-    # disallowing --year option for now the code currently assumes all forms
+    # disallowing --year option for now
+    # the code currently assumes all forms
     # are available at irs-prior/ [the collection of all past forms] for each
     # year, eg f1040--2015.pdf; but some forms arent revised every year, so eg
     # the most recent 8903 is f8903--2010.pdf and indeed that's the revision
@@ -138,8 +142,8 @@ def getFileList(dirName):
         else:
             # todo why did this stop working?  my own env?
             try:
-                # could use https://www.irs.gov/pub/irs-pdf/pdfnames.txt but
-                # this way we avoid errors in that file
+                # could use https://www.irs.gov/pub/irs-pdf/pdfnames.txt
+                #   but this way we avoid errors in that file
                 fin = urlopen('https://www.irs.gov/pub/irs-pdf/', 'rb')
                 if fin.getcode() != 200:
                     raise Exception('getFileList/urlopen/getcode=[%d]' % (
@@ -158,7 +162,7 @@ def getFileList(dirName):
                           )
                 raise
     with open(allpdfpath) as f:
-        cfg.allpdfnames = [line.strip().rsplit('.', 1)[0] for line in f]
+        cfg.allpdfnames = [line.strip().split('.', 1)[0] for line in f]
 
 
 alreadySetup = False
@@ -220,15 +224,18 @@ def setup(**overrideArgs):
         logg('commandlineArgs:' + str(args), [ut.stdout])
     if cfg.quiet:
         ut.quiet = True
-    if cfg.debug:
-        cfg.loglevel = 'DEBUG'
-        cfg.verbose = True
     if 'steps' in cfg:
         if cfg.steps and len(cfg.steps[0]) > 1:
             assert len(cfg.steps) == 1
             cfg.steps = cfg.steps[0].split()
     else:
         cfg.steps = [step for step in SkippableSteps if step not in cfg.skip]
+    if cfg.debug:
+        cfg.loglevel = 'DEBUG'
+        cfg.verbose = True
+        # remove file cleanup step if present
+        if 'c' in cfg.steps:
+            cfg.steps = [step for step in cfg.steps if step != 'c']
     if cfg.formyear is None:
         cfg.formyear = cfg.latestTaxYear
     dirName = cfg.dirName

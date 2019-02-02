@@ -3,7 +3,7 @@ import six
 import re
 
 from . import irs
-from .ut import log, jj, ddict
+from .ut import log, jj, ddict, rstripAlpha
 
 
 def findLineAndUnit(speak):
@@ -141,6 +141,7 @@ def linkfields(form):
     fieldsByLinenumYpos = ddict(list)
     fieldsByName = {}
     fieldsByLine = ddict(list)
+    fieldsByNumericLine = ddict(list)
     fieldsByRow = ddict(list)
     fprev = None
     for f in fields:
@@ -149,10 +150,18 @@ def linkfields(form):
         f['uniqname'] = uniqname
         pg = f['npage']
         l, u = findLineAndUnit(f['speak'])
+        log.debug('l_and_u=%s,%s.', l, u)
         # use page,linenum as key eg f3800 has line3 on both page1 and page3.
-        # so p1/line6 deps on which line3? todo can fields w/ same linenum
-        # occur on same page?  eg f990/p12/line1?  track section numbers?
+        # so p1/line6 deps on which line3?
+        # todo can fields w/ same linenum occur on same page?
+        #   eg f990/p12/line1?  thus must track section numbers?
+        lnumeric = rstripAlpha(l)
+        log.debug('linkfields l,lnumeric=%s,%s.', l, lnumeric)
+            # eg if l=='5a' then lnumeric=='5'
+            # eg 2018/1040/line6: 'lines 1 through 5' really means thru 5a and 5b
+            #    so if '5' not in fieldsByLine, try fieldsByNumericLine['5']
         fieldsByLine[(pg, l)].append(f)
+        fieldsByNumericLine[(pg, lnumeric)].append(f)
         ypozByLinenum[(pg, l)].add(f['ypos'])
         fieldsByLinenumYpos[(pg, l, f['ypos'])].append(f)
         f['linenum'] = l
@@ -192,3 +201,4 @@ def linkfields(form):
     uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos)
     form.fieldsByName = fieldsByName
     form.fieldsByLine = fieldsByLine
+    form.fieldsByNumericLine = fieldsByNumericLine

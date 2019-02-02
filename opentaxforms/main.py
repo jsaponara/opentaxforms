@@ -100,9 +100,9 @@ def layoutStatus(fields):
         return nFields, -100
 
 
-statusmsgtmpl = 'layoutBoxes: {}found,{}overlapping,?missing,?spurious;' \
-                ' refs: {}found,{}unrecognized,?missing,?spurious;' \
-                ' computedFields: {}found,{}empty,?missing,?spurious'
+statusmsgtmpl = '   layoutBoxes: {:3}found,{:2}overlapping,?missing,?spurious;\n' \
+                '          refs: {:3}found,{:2}unrecognized,?missing,?spurious;\n' \
+                'computedFields: {:3}found,{:2}empty,?missing,?spurious'
 
 
 def logFormStatus(form):
@@ -115,7 +115,7 @@ def logFormStatus(form):
         def baseline(l):
             return l if nfieldsfound else '?'
         return [baseline(l) if l >= 0 else '?' for l in lst]
-    statusmsg = 'form {} status: '.format(form.name) + statusmsgtmpl.format(
+    statusmsg = 'form {} status:\n'.format(form.name) + statusmsgtmpl.format(
         *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')),z.lgood)
         )
     logg(statusmsg, [log.warn, stdout])
@@ -172,11 +172,11 @@ def opentaxforms(**args):
         try:
             form.getFile(failurls)
             form.readInfo()
-            extractFields(form)
+            form.extractFields()
             form.fixBugs()
             link.linkfields(form)
-            form.computeMath()
             references.findRefs(form)
+            form.computeMath()
             schema.writeFormToDb(form)
             html.writeEmptyHtmlPages(form)
         except irs.CrypticXml as e:

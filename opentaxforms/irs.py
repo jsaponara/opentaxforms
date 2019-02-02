@@ -14,6 +14,11 @@ verbs = [
 verbPtn = '|'.join(verbs)
 commandPtn = re.compile('.*?(' + verbPtn + r') (.+)', re.I)
 fromLinePttn = re.compile(r'amounts? (?:on|from) lines? ', re.I)
+    # todo allow 'lines?' to be a 'LineRef'
+    #   eg in 2018/1040/line6: Add any amount from Schedule 1, line 2
+    #   findRefs would replace 'Schedule 1, line 2' with _lineRef_[(f=1040,s=1,l=2)]
+    #   [where the expression in parens is a boolean or at least a list]
+    #   and this search pattern, instead of 'lines?', would demand '_lineRef_[...]'
 
 possibleColTypes = 'proceeds cost adjustment gain loss'.lower().split()
 

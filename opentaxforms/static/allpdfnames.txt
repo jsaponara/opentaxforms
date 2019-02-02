@@ -1,3 +1,9 @@
+f1040s1.pdf  added manually by johnS 29jan2019  everything after the dot in the pdf filename is ignored
+f1040s2.pdf  added manually by johnS 29jan2019
+f1040s3.pdf  added manually by johnS 29jan2019
+f1040s4.pdf  added manually by johnS 29jan2019
+f1040s5.pdf  added manually by johnS 29jan2019
+f1040s6.pdf  added manually by johnS 29jan2019
 f1000.pdf
 f1023.pdf
 f1023ez.pdf

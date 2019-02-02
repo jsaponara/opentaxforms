@@ -8,7 +8,8 @@ from .config import cfg
 
 # nonforms are numbers that dont represent forms
 nonforms = [str(yr) for yr in range(2000, 2050)]
-''' nonformcontexts are text signals that the number to follow is not a form.
+''' nonformcontexts are text signals that any number to follow is not a form.
+
     eg:
     line 40
     lines 40 through 49
@@ -19,7 +20,7 @@ nonforms = [str(yr) for yr in range(2000, 2050)]
         for each owner must agree with the amounts on Copy B that you received
         from the RIC or REIT.
     3903: This amount should be shown in box 12 of your Form W-2 with code P
-    2015/f1040sd: Box A
+    2015/f1040sd: Box A  [tho this may be specific enought to be part of the extended ref]
     8814/p4/line10 instructions: unrecaptured section 1250 gain, section 1202 gain, ...
     '''
 nonformcontexts = (
@@ -27,6 +28,8 @@ nonformcontexts = (
 
 
 def findRefs(form):
+    # find references to other forms or schedules
+    # todo this is too long, refactor!
     if 'r' not in cfg.steps:
         return
     dirName = cfg.dirName
@@ -91,17 +94,24 @@ def findRefs(form):
     def checkForm(formish, sched=None, **kw):
         # filter out excludedforms and require presence in allpdfnames
         # partly not needed after issues/formInfoPass
+        log.debug('299 checkForm formish,sched=%s;%s arg1=%s',formish,sched,kw.get('arg1'))
+        del kw['arg1']
         if ',' in formish:
             formish = formish.split(',')
         context = kw
         if sched:
             formish = formish, sched
+        log.debug('399 checkForm formish,sched=%s;%s',formish,sched)
+        if formish[0].lower().endswith('.pdf'):
+            formish0 = formish[0].lower()[1:-4]  # remove leading 'f' and trailing '.pdf'
+            formish = [formish0] + formish[1:]
         try:
             form, sched = formish
             formFnames = irs.possibleFilePrefixes((form, sched))
         except ValueError:
             form, sched = formish, None
             formFnames = irs.possibleFilePrefixes(form)
+        log.debug('    checkForm form,sched=%s;%s;;formFnames=%s',form,sched,formFnames)
         # check excludedformsPttn before allpdfnames cuz excludedforms are
         # included in allpdfnames
         m = re.match(irs.excludedformsPttn, form)
@@ -128,6 +138,7 @@ def findRefs(form):
             '(Form[ |\xa0]+(\S+),[ |\xa0]+Schedule[ |\xa0]+(\S+)\b)'
             '''
         return re.sub(r' ($|[^*+{])', '[ |\xa0]+\\1', pttnstr)
+
     formrefs = FormRefs()
     lines = []
     maybeForms.ypos = -99
@@ -143,21 +154,23 @@ def findRefs(form):
         iFormInLine = 0
         txt = rawtext
         # todo match should be assigned the biggest string that will occur on
-        # the form. eg 'Schedule B' is better than just 'B' this way the user
-        # has a bigger area to click on. 2015/8801: or 2014 Form 1041, Schedule
-        # I, line 55
-        # todo order searches by decreasing length?  alg: min length
-        # of a regex eg len(regex)-nSpecialChars where
-        # nSpecialChars=len(re.escape(regex))-len(regex) todo nonformcontexts
-        # have not yet been removed, so eg could use 'line' here
+        # the form.
+        # eg 'Schedule B' is better than just 'B' this way the user
+        #   has a bigger area to click on.
+        # 2015/8801: or 2014 Form 1041, Schedule I, line 55
+        # todo order searches by decreasing length?
+        #   alg: min length of a regex eg len(regex)-nSpecialChars where
+        #   nSpecialChars=len(re.escape(regex))-len(regex)
+        # todo nonformcontexts have not yet been removed, so eg could use 'line' here
         searches = [
+            # these are the longest search patterns, which we seek first...
             ('form,sched',  # arbitrary string to summarize this search
-                            # 1st field should be 'match'; the
-                            #   rest should be 'form' or 'sched'
-                            #   with trailing '?' if optional
                 'match form sched'.split(),
-                # the actual pattern to seek
+                    # 1st field should be 'match'; the
+                    #   rest should be 'form' or 'sched'
+                    #   with trailing '?' if optional
                 r'(Form (\S+), Schedule (\S+)\b)'),
+                    # the actual pattern to seek
             ('schedAorBInForm',
                 'match sched sched2? form'.split(),
                 r'(Schedules? (\S+)(?: or (\S+))? *\(Form (\S+?)\))'),
@@ -235,7 +248,7 @@ def findRefs(form):
                                form, sched,
                                **dict(
                                  iFormInLine=iFormInLine, draw=el, match=match,
-                                 form=formName, context=context))):
+                                 form=formName, context=context, arg1='form'))):
                             formsinline.append(
                                 jj(
                                     idraw, summa, jj(form, sched, delim=','),
@@ -248,15 +261,24 @@ def findRefs(form):
         # 1040-cez: See the instructions for line I in the instructions
         #           for Schedule C to help determine if you are required
         #           to file any Forms 1099.
+        # 'from' as delimiter because:
+        #   2018/1040: otherwise, subtract Schedule 1, line 36, from line 6
         # 8824: If more than zero, enter here and on Schedule D or Form 4797 
         #       -> (8824,4797) wh is wrong, but may be tricky to get right
         nicetext = re.sub(u'[\s\xa0|]+', ' ', txt)
-        p = '(((Form|Schedule)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)'
+        log.debug('300 nicetext=%s', nicetext)
+        # ...whereas these are the shorter search patterns
+
+        # resum rmv comma to unify 'sched x, line y' into a single ref
+
+       #p = '(((Form|Schedule|Sch\.)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)'
+        p = '(((Form|Schedule|Sch\.)(?:s|\(s\))?)\s*(.+?))(?:[\.;:\)]| to | if | from |$)'
         matches = re.findall(p, nicetext)
         for match in matches:
             context, fulltype, typ, rest = match
             words = rest.split()
             wordslower = rest.lower().split()
+            log.debug('311 typ; words: %s; %s', typ, words)
 
             def couldbeform(s):
                 # Schedule EIC requires isalpha len to allow up to 3
@@ -270,12 +292,20 @@ def findRefs(form):
                     '''
                 return (
                     s and (
-                        (len(s) >= 4 and s[0].isdigit())
+                        (s[0].isdigit() and (
+                            len(s) >= 4 
+                                # eg 4962
+                            or len(s) == 1 
+                                # eg Schedule 1
+                        ))
                         or (len(s) <= 3 and s[0].isalpha())
+                            # eg EIC
                         or (len(s) > 1 and s[1] == '-'))
+                            # eg ??
                     and
                     all(c.isupper() or c.isdigit() for c in s if c not in '-')
                     and s not in nonforms and not s.startswith('1-800-'))
+            # excise noun-number pairs that are not form or sched 
             for signal in nonformcontexts:  # eg 'line' or 'pub'
                 while signal in wordslower:
                     # excise eg 'line','19' from list
@@ -284,7 +314,7 @@ def findRefs(form):
                     gap = (
                         4
                         if signal == 'lines' and len(wordslower) > i + 2
-                        and wordslower[i + 2] in 'and or'
+                        and wordslower[i + 2] in ('and', 'or')
                         else 2)
                     words = words[:i] + words[i + gap:]
                     wordslower = wordslower[:i] + wordslower[i + gap:]
@@ -311,14 +341,16 @@ def findRefs(form):
                         formcontext=scheduleContext.get(txt.lower(),formName)
                     else:
                         formcontext=formName
+                    log.debug('322 txt=%s formcontext=%s',txt,formcontext)
                     key = txt if typ == 'Form' else merge(formcontext, txt)
                     if iword == 0:
                         matchingtext = fulltype + ' ' + txt
                     else:
                         matchingtext = txt
+                    log.debug('355 >checkedForm key=%s',key)
                     checkedForm = checkForm(key, **dict(
                         iFormInLine=iFormInLine, draw=el, match=matchingtext,
-                        form=formName, call='words'))
+                        form=formName, call='words', arg1='key'))
                     if formrefs.add(*checkedForm):
                         formsinline.append(
                             jj(idraw, 'couldbe', key,
@@ -334,7 +366,7 @@ def findRefs(form):
                 if len(txt) > 1 and couldbeform(txt):
                     if formrefs.add(*checkForm(txt, **dict(
                          iFormInLine=iFormInLine, draw=el, match=txt,
-                         form=formName, call='rawtext'))):
+                         form=formName, call='rawtext', arg1='txt'))):
                         matchingtext = txt
                         formsinline.append(
                             jj(idraw, 'maybe', txt,
