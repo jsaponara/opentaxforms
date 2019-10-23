@@ -27,7 +27,7 @@ setup(
         'lxml>=3.6.4',
         'SQLAlchemy==1.0.15',
         'pdfminer.six',
-        'Flask==0.11.1',
+        'Flask==1.0',
         'Flask-Restless==0.17.0',
         'Flask-SQLAlchemy==2.1',
         'six',
