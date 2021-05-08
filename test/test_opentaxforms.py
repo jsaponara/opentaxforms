@@ -111,7 +111,7 @@ class TestOtfApiBase(object):
         dbFilePath = osp.join('test', 'opentaxforms.sqlite3')
         shutil.copy(dbResourcePath, dbFilePath)
         dbpath='sqlite:///' + dbFilePath
-        self.app=createApp(dbpath=dbpath)
+        self.app=createApp(dbpath=dbpath, relaxRqmts=True)
         self.client=self.app.test_client()
     def teardown_method(self, _):
         pass
@@ -149,7 +149,7 @@ def main(args):
     def usage():
         print('usage: "%s -f" for fasttests or "%s -s" for slow tests'%(args[0],args[0]))
     if len(args)==2:
-        if args[1]=='-f':
+        if args[1]=='-f': # run fast tests
             testRunner=TestOtfApi()
             testRunner.setup_method(0)
 

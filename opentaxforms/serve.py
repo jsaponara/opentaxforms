@@ -6,41 +6,53 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import func, select
 
 from .db import connect
 from .version import appname, apiVersion
 from .ut import Bag
 
-
 def createApi(app,**kw):
-    db = SQLAlchemy(app)
     conn, engine, metadata, md = connect(appname, **kw)
-    Base = declarative_base()
+    print(engine.url)
+    app.config['SQLALCHEMY_DATABASE_URI'] = engine.url
+    app.config['DEBUG'] = True
+    db = SQLAlchemy(app)
     Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     mysession = scoped_session(Session)
+    Base = declarative_base()
+    Base.metadata.bind = engine
     apimanager = flask_restless.APIManager(app, session=mysession)
     counts = {}
+    tableClasses = {}
     for tabl in md:
         tablobj = md[tabl]
-        counts[tabl] = tablobj.count().execute().fetchone()[0]
+        stmt = select([func.count()]).select_from(tablobj)
+        counts[tabl] = stmt.execute().fetchone()[0]
         attrs = dict(
             __table__=tablobj,
             # todo should flask_restless need __tablename__?
             __tablename__=str(tabl),
             )
-        attrs.update(dict(
-            orgn=dict(
-                form=db.relationship('Form'),
-                ),
-            form=dict(
-                orgn=db.relationship('Orgn', back_populates='form'),
-                slot=db.relationship('Slot', back_populates='form'),
-                ),
-            slot=dict(
-                form=db.relationship('Form'),
-                ),
-            )[tabl])
-        tablcls = type(str(tabl).capitalize(), (Base, ), attrs)
+        tableClasses[tabl] = tablobj, type(str(tabl).capitalize(), (Base, ), attrs)
+    attrs_by_table = dict(
+        orgn=dict(
+            form=lambda cls: db.relationship(cls),
+        ),
+        form=dict(
+            orgn=lambda cls: db.relationship(cls, back_populates='form'),
+            slot=lambda cls: db.relationship(cls, back_populates='form'),
+        ),
+        slot=dict(
+            form=lambda cls: db.relationship(cls),
+        ),
+    )
+    for tabl, (tablobj, tableClass) in tableClasses.items():
+        attrs = attrs_by_table[tabl]
+        for linkTabl, linker in attrs.items():
+            _, linkTableClass = tableClasses[linkTabl]
+            setattr(tableClass, linkTabl, linker(linkTableClass))
+    for tabl, (tablobj, tableClass) in tableClasses.items():
         colsToAdd = dict(
             orgn=(),
             form=(
@@ -52,11 +64,11 @@ def createApi(app,**kw):
             )[tabl]
         colsToShow = [c.name for c in tablobj.columns]
         colsToShow.extend(colsToAdd)
-        # print tabl,colsToShow
         apimanager.create_api(
-            tablcls,
+            tableClass,
             url_prefix='/api/v%s' % (apiVersion, ),
-            include_columns=colsToShow,
+            #include_columns=colsToShow,
+            includes=colsToShow,
             )
     return counts
 

@@ -40,6 +40,8 @@ def connect_(**kw):
     config.setup(**kw)
     if 'dirName' in kw:
         del kw['dirName']
+    if 'relaxRqmts' in kw:
+        del kw['relaxRqmts']
     usepostgres = kw.get('postgres', False) if cfg is None else cfg.postgres
     if usepostgres:
         kw.setdefault('user', 'postgres')
