@@ -4,6 +4,7 @@ import re
 
 from . import irs
 from .ut import log, jj, ddict, rstripAlpha
+from .config import cfg
 
 
 def findLineAndUnit(speak):
@@ -36,20 +37,27 @@ def findLineAndUnit(speak):
     '''
     if isinstance(speak, six.binary_type):
         speak = speak.decode('utf8')
-    findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?',
-                             speak)
-    # Line 62. a. etc
+    findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', speak)
+        # Line 62. a. etc
     findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', speak)
-    # Exemptions. 62. a. etc
+        # Exemptions. 62. a. etc
     findLineNum3 = re.search(r'^(\d+\w*)\.\s', speak)
-    # 16b. ... eg 990/page6/line16b
-    units = re.findall(r'\.?\s*(Dollars|Cents)\.?', speak, re.I)
+        # 16b. ... eg 990/page6/line16b
+    findLineNum3a = re.search(r'(\d+)\.(?:.+:)\s*(\w)\.', speak)
+        # 2020/1040/10a: 10. Adjustments to income: a. From Schedule 1, line 22.
+    if cfg.formyear <= 2017:  # todo was 2017 the last year of Dollars and Cents?
+        units = re.findall(r'\.?\s*(Dollars|Cents)\.?', speak, re.I)
+    else:
+        units = ['dollars']
     if findLineNum1:
         # linenum is eg 'line62a' for 'Line 62. a. etc' or even for
         # 'Exemptions. 62. a. etc'
         linenum = findLineNum1.groups()[0]
     elif findLineNum2:
         linenum = 'line' + findLineNum2.groups()[0]
+    elif findLineNum3a:
+        num, letter = findLineNum3a.groups()
+        linenum = 'line' + num + letter
     elif findLineNum3:
         linenum = 'line' + findLineNum3.groups()[0]
     else:

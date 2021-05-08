@@ -287,7 +287,12 @@ class Form(object):
             adjustNegativeField(field, speak)
             colinstruction = normalize(field['colinstruction'])
             instruction = colinstruction if colinstruction else speak
-            sentences = re.split(r'\.\s*', instruction)
+            sentences = [s for s in re.split(r'\.\s*', instruction) if s.strip()]
+            maybe_just_numbering, *rest = sentences
+            if maybe_just_numbering.isdigit():
+                # eg skip the "1." in "1. Wages, salaries, tips, etc. Attach Form(s) W-2."
+                sentences = rest
+            # all fields have null unit in this loop   if field['name']=='f3_28': import pdb ; pdb.set_trace()
             for s in sentences:
                 try:
                     math.parseInstruction(s, field)

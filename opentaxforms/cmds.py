@@ -356,7 +356,7 @@ class CommandParser(object):
         seekConstant=re.match(r'^\$?(\d+)(?:,?(\d+))?$',s)
         if s == 'zero':
             s = '-0-'
-        elif seekConstant:
+        elif not cond and seekConstant:
             constant=''.join((string or '') for string in seekConstant.groups())
             self.op = '='
             self.terms = [constant]
@@ -386,10 +386,14 @@ class CommandParser(object):
         # 1040/line42 line 38 is $154,950 or less
         # 1040/line4  the qualifying person is a child but not your dependent
         terms = self.terms
-        if cond.startswith('zero or') and terms and len(terms) == 2:
-            # 4684/line9: Subtract line 3 from line 8. If zero or less, enter -0-
-            cond = (terms[0].replace('line', 'line ') + ' is more than ' +
-                    terms[1].replace('line', 'line '))
+        if cond.startswith('zero or'):
+            if terms:
+                if len(terms) == 2:
+                    # 4684/line9: Subtract line 3 from line 8. If zero or less, enter -0-
+                    cond = (terms[0].replace('line', 'line ') + ' is more than ' +
+                            terms[1].replace('line', 'line '))
+                elif terms == ['0']:
+                    pass# todo self.field['linenum']
         m1 = re.match(
             r'(line \w+) '
             r'is (less|more|larger|smaller|greater) than '

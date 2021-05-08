@@ -153,14 +153,12 @@ def findRefs(form):
         lineHasForms = False
         iFormInLine = 0
         txt = rawtext
-        # todo match should be assigned the biggest string that will occur on
-        # the form.
-        # eg 'Schedule B' is better than just 'B' this way the user
-        #   has a bigger area to click on.
+        # todo match should be assigned the biggest string that will occur on the form.
+        # eg 'Schedule B' is better than just 'B' this way the user has a bigger area to click on.
         # 2015/8801: or 2014 Form 1041, Schedule I, line 55
         # todo order searches by decreasing length?
-        #   alg: min length of a regex eg len(regex)-nSpecialChars where
-        #   nSpecialChars=len(re.escape(regex))-len(regex)
+        # alg: min length of a regex eg len(regex)-nSpecialChars
+        # where nSpecialChars=len(re.escape(regex))-len(regex)
         # todo nonformcontexts have not yet been removed, so eg could use 'line' here
         searches = [
             # these are the longest search patterns, which we seek first...
@@ -177,7 +175,7 @@ def findRefs(form):
             ('schedInFormAorB',
                 'match sched form1 form2'.split(),
                 r'(Schedules? (\S+) \(Form (\S+?) or (?:Form )?(\S+?)\))'),
-            ]
+        ]
 
         def fieldIsOptional(field):
             return field.endswith('?')

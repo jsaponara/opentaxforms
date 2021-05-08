@@ -267,7 +267,7 @@ def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
             # moved this to sep func so that exception in mere html/title
             # doesnt error the entire form
             return (
-                math(form.computedFields[f.uniqname])
+                ' '.join((f.uniqname, math(form.computedFields[f.uniqname])))
                 if f.uniqname in form.computedFields
                 else '%s %s(%s) %sx%s xy=%s,%s' % (
                     f.name,
@@ -323,6 +323,18 @@ def computeSteps(cfield):
         'math'))
     steps = []
     if cfield.get('deps'):
+        if cfield['name']=='f2_04': import pdb ; pdb.set_trace()
+        '''
+            if cfield['name']=='f2_04': import pdb ; pdb.set_trace()
+                (Pdb) [f['name'] for f in cfield.get('deps')]
+                ['c2_01', 'f2_02', 'f2_03']
+            this checkbox field causes line16 to be added twice to produce line18.
+            for now we remove checkbox fields from deps.
+            todo but how did it get there?
+        '''
+        if any(f for f in cfield['deps'] if f['typ'] == 'text'):
+            cfield['deps'] = [f for f in cfield['deps'] if f['typ'] == 'text']
+            log.debug(f"n_deps {len(cfield['deps'])}")
         steps.append('var result=%s;' % (
             cfield['op'].join(
                 jsterm(dep, 'uniqlinenum')
@@ -400,12 +412,12 @@ def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
             result = (
                 "<a id='{whichway}pagelink' href='{prefix}-p{npage}.html'"
                 " title='page {npage}' {css}>"
-                "<img class='tff' src='/static/img/"
+                "<img class='tff' src='static/img/"
                 "arrow_{whichway}_32px.png'></a>"
             ).format(prefix=prefix, npage=nnpage, whichway=whichway, css=css)
         else:
             result = (
-                "<img class='tff' src='/static/img/"
+                "<img class='tff' src='static/img/"
                 "arrow_{whichway}_gray_32px.png' {css}>"
             ).format(whichway=whichway, css=css)
         jdb('<pagelinktmpl', result)
@@ -414,7 +426,7 @@ def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
 
 
 def pdflinkhtml(prefix,imgw,linkwidthprop):
-    return '<a href="/static/pdf/%s.pdf" style="top:6px;left:%dpx">PDF</a>'%(
+    return '<a href="static/pdf/%s.pdf" style="top:6px;left:%dpx">PDF</a>'%(
         # using 4 linkwidths because 3 looks too tight
         prefix,imgw*(1-4*linkwidthprop))
 
@@ -491,14 +503,17 @@ def writeEmptyHtmlPages(form):
             for name in form.upstreamFields
             if form.fieldsByName[name]['unit'] is None and
             form.fieldsByName[name]['npage'] == npage]
-        # inputdepsDc is dollar n cents pairs centfield handled seply cuz
-        # 1040a/40 has dollar field w/ no centfield partner
-        inputdepsDc = ["{dname}{centfield}".format(
-            dname=jsvar(name),
-            centfield=" {cname}".format(
-                cname=jsvar(form.fieldsByName[name]['centfield']['uniqname']))
-            if 'centfield' in form.fieldsByName[name]
-            else '')
+        # inputdepsDc is dollar n cents pairs ['Dc' = Dollars and cents]
+        # centfield handled seply cuz 2017?/1040a/40 has dollar field w/ no centfield partner
+        def getInputdepsDc(name):
+            return "{dname}{centfield}".format(
+                dname=jsvar(name),
+                centfield=" {cname}".format(
+                    cname=jsvar(form.fieldsByName[name]['centfield']['uniqname'])
+                ) if 'centfield' in form.fieldsByName[name] else ''
+            )
+        inputdepsDc = [
+            getInputdepsDc(name)
             for name in form.upstreamFields
             if form.fieldsByName[name]['unit'] == 'dollars'
             and form.fieldsByName[name]['npage'] == npage]
