@@ -98,3 +98,7 @@ ENV/
 .ropeproject
 
 .idea
+
+# vim
+.vim.sess
+.*.sw?
