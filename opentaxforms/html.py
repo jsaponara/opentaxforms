@@ -51,7 +51,7 @@ def createSvgFile(inputDirName, outputDirName, prefix, npage):
     outfpath = pathjoin(outputDirName,'{}-p{}-fixedDims.svg'.format(prefix, ipage))
     outfpathFinal = pathjoin(outputDirName,'{}-p{}.svg'.format(prefix, npage))
     cmd = 'pdf2svg {} {} {}'.format(infpath, outfpath, npage)
-    out, err = ut.run(cmd)
+    out, err = ut.run(cmd, logprefix='run pdf2svg on page %d' % npage)
     if err:
         msg = (
             'dotaxes.py/writeEmptyHtmlPages: command [%s] returned error [%s] and output [%s]'
@@ -244,15 +244,17 @@ def checkbox(f, form, pageinfo, imgw, imgh, tooltip=0):
 
 
 def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
+    # generate html for textbox, eg:
+    # <input id='f1_01' type='text' style='top:120px; left:451px;
+    #        width:182px; height:24px' >
 
-    # textboxes: <input id='f1_01' type='text' style='top:120px; left:451px;
-    # width:182px; height:24px' >
     def linemath(f):
         if f.uniqname in form.computedFields:
             uniqname = f.uniqname
         elif f.unit == 'cents' and f.dollarfieldname in form.computedFields:
             # for now we will not repeat the linemath in the cents field--too
-            # busy NOTE this func isnt called for cents fields currently
+            # busy.
+            # NOTE this func isnt called for cents fields currently.
             # uniqname=f.dollarfieldname
             return ''
         else:
@@ -281,6 +283,7 @@ def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
 
     def dollarfieldname(f):
         return form.fieldsByName[f.uniqname].get('dollarfieldname')
+
     return (
         "<{tag} id='{name}' type='{typ}' {etc} title='{val}'"
         " style='top:{top:.0f}px; left:{left:.0f}px;"

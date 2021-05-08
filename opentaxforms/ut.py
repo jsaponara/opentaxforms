@@ -9,6 +9,7 @@ from collections import (
     namedtuple as ntuple,
     defaultdict as ddict,
     OrderedDict as odict)
+from itertools import takewhile
 from datetime import datetime
 from os.path import join as pathjoin, exists
 from pint import UnitRegistry
@@ -27,6 +28,34 @@ quiet = False
 
 
 Bbox = ntuple('Bbox', 'x0 y0 x1 y1')
+
+
+# not used?
+def leadingDigits(s):
+    if s is None:
+        return s
+    return ''.join(takewhile(lambda c: c.isdigit(), s))
+
+
+def rstripAlpha(s):
+    '''
+    >>> rstripAlpha('line2')
+    'line2'
+    >>> rstripAlpha('line2a')
+    'line2'
+    >>> rstripAlpha(None)
+    None
+    '''
+    if s is not None:
+        ncharsToStrip = sum(
+            1 for _ in takewhile(
+                lambda c:c.isalpha(),
+                reversed(s)
+            )
+        )
+        if ncharsToStrip:
+            s = s[:-ncharsToStrip]
+    return s
 
 
 def merge(bb1, bb2):
@@ -164,6 +193,9 @@ alreadySetupLogging = False
 
 
 def setupLogging(loggerId, args=None):
+    # suppress pdfminer logging, which is voluminous
+    logging.getLogger('pdfminer').setLevel(logging.ERROR)
+
     global alreadySetupLogging
     if alreadySetupLogging:
         log.warn('ignoring extra call to setupLogging')
