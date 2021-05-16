@@ -186,7 +186,8 @@ def opentaxforms(**args):
             formsfail.append(form)
         except Exception as e:
             log.error(jj('EEEError', traceback.format_exc()))
-            if cfg.debug:
+            debug_first_error = 0
+            if cfg.debug and debug_first_error:
                 raise
             formsfail.append(form)
         else:

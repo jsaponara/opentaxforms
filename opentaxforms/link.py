@@ -3,11 +3,11 @@ import six
 import re
 
 from . import irs
-from .ut import log, jj, ddict, rstripAlpha
+from .ut import log, jj, ddict, rstripAlpha, Qnty
 from .config import cfg
 
 
-def findLineAndUnit(speak):
+def findLineAndUnit(field):
     '''
     >>> import logging
     >>> log.addHandler(logging.NullHandler())
@@ -35,6 +35,7 @@ def findLineAndUnit(speak):
         " for entry.")  # f2441
     ('line1', '')
     '''
+    speak = field['speak']
     if isinstance(speak, six.binary_type):
         speak = speak.decode('utf8')
     findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', speak)
@@ -48,7 +49,12 @@ def findLineAndUnit(speak):
     if cfg.formyear <= 2017:  # todo was 2017 the last year of Dollars and Cents?
         units = re.findall(r'\.?\s*(Dollars|Cents)\.?', speak, re.I)
     else:
-        units = ['dollars']
+        # we assume very wide fields are not quantities
+        # eg 2020/1040sb amount fields are ~30mm wide [amt fields are also labeled "Amount." but not eg in 1040]
+        if field['wdim'] < Qnty(50,'mm'):
+            units = ['dollars']
+        else:
+            units = None
     if findLineNum1:
         # linenum is eg 'line62a' for 'Line 62. a. etc' or even for
         # 'Exemptions. 62. a. etc'
@@ -90,10 +96,10 @@ def computeUniqname(f, fieldsSofarByName):
 
 def unifyTableRows(fieldsByRow):
 
-    # force cells in each row to have same linenum as leftmost cell todo give
-    # example [form/line] of where this is needed todo consider adding
-    # tolerance, eg if y,y+ht overlap >=90% for two cells then theyre in the
-    # same row
+    # force cells in each row to have same linenum as leftmost cell.
+    # eg 2020/1040sh/line17
+    # todo consider adding tolerance, eg if y,y+ht overlap >=90% for two cells
+    #   then theyre in the same row
     def byPageAndYpos(pg_ypos_val):
         '''
             >>> byPageAndYpos((1,'67.346 mm'),['et','cetera'])
@@ -101,11 +107,14 @@ def unifyTableRows(fieldsByRow):
             '''
         (pg, ypos), val = pg_ypos_val
         return (pg, float(ypos.split(None, 1)[0]))
+    most_recent_linenum = None
     for row, fs in sorted(fieldsByRow.items(), key=byPageAndYpos):
         page, ht = row
         fs.sort(key=lambda f: f['xpos'])
         if fs[0].get('currTable'):
-            ll0 = fs[0]['linenum']
+            ll0 = fs[0]['linenum'] or most_recent_linenum
+                # todo is there a better way to handle null linenum in a leftmost cell?
+                #      eg can prevent it?
             for f in fs[1:]:
                 if f['linenum'] != ll0:
                     f['linenum-orig'] = f['linenum']
@@ -115,6 +124,7 @@ def unifyTableRows(fieldsByRow):
                     log.info(
                         msgtmpl, page, f['linenum-orig'], f['uniqname'],
                         ll0, fs[0]['uniqname'])
+            most_recent_linenum = fs[0]['linenum']
 
 
 def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
@@ -157,12 +167,13 @@ def linkfields(form):
         fieldsByName[uniqname] = f
         f['uniqname'] = uniqname
         pg = f['npage']
-        l, u = findLineAndUnit(f['speak'])
+        l, u = findLineAndUnit(f)
         log.debug('l_and_u=%s,%s.', l, u)
-        # use page,linenum as key eg f3800 has line3 on both page1 and page3.
-        # so p1/line6 deps on which line3?
+        # use page,linenum as key
+        #   eg f3800 has line3 on both page1 and page3.
+        #   so p1/line6 deps on which line3?
         # todo can fields w/ same linenum occur on same page?
-        #   eg f990/p12/line1?  thus must track section numbers?
+        #   eg f990/p12/line1?  thus must track section numbers as well?
         lnumeric = rstripAlpha(l)
         log.debug('linkfields l,lnumeric=%s,%s.', l, lnumeric)
             # eg if l=='5a' then lnumeric=='5'

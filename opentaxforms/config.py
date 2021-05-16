@@ -40,7 +40,7 @@ defaults = Bag(dict(
     # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho
     # could be incomplete eg during dec2016 the 2016 1040 and 400ish other
     # forms are ready but not schedule D and 200ish others
-    latestTaxYear=2018,
+    latestTaxYear=2020,
     loglevel='warn',
     logPrefix=None,
     maxrecurselevel=RecurseInfinitely,

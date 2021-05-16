@@ -43,6 +43,10 @@ def lineOrRange(s, pg, getFieldsDict, fieldsByLine, col=None):
             prefix = ''
         startnum, endnum = numerify(start), numerify(end)
         start, end = (prefix + start, prefix + end)
+        # remove spaces in start and end
+        # eg 2020/8995 Combine lines 1 i through 1 v, column (c)
+        start = start.replace(' ', '')
+        end = end.replace(' ', '')
         # find horizontally aligned non-cent start and end fields
         fieldsDictForStart = getFieldsDict(pg, start)
         fieldsDictForEnd = getFieldsDict(pg, end)
@@ -462,7 +466,13 @@ class CommandParser(object):
                 # if coltitle restricts fields down to zero, ignore it [eg
                 # 1040sd/line4-6 called 'column h'in line7]
                 term = line
-        found = fieldsByLine[(pgnum, term)]
+        found = [f
+            for f in fieldsByLine[(pgnum, term)]
+            if f['unit'] == 'dollars'
+                # in 2020/1040sb we were adding non-dollar [text] fields,
+                #   which caused double-counting of the numeric fields.
+                # todo does this break forms other than 1040sb?
+        ]
         if not found:
             canGetValuesFromOtherPages = True
             if canGetValuesFromOtherPages:
