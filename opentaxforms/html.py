@@ -128,6 +128,8 @@ def createPageImg(inputDirName, outputDirName, prefix, npage):
 
 
 def jsvar(s):
+    if not s:
+        return ''
     return re.sub(r'[\-\[\]\.\#]', '_', s)
 
 
@@ -269,9 +271,10 @@ def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
             return (
                 ' '.join((f.uniqname, math(form.computedFields[f.uniqname])))
                 if f.uniqname in form.computedFields
-                else '%s %s(%s) %sx%s xy=%s,%s' % (
+                else '%s %s/%s(%s) %sx%s xy=%s,%s' % (
                     f.name,
                     f.linenum if f.linenum else '',
+                    f.uniqlinenum if f.uniqlinenum else '',
                     f.__dict__.get('coltitle', ''),
                     shorten(f.wdim),
                     shorten(f.hdim),
@@ -323,7 +326,6 @@ def computeSteps(cfield):
         'math'))
     steps = []
     if cfield.get('deps'):
-        if cfield['name']=='f2_04': import pdb ; pdb.set_trace()
         '''
             if cfield['name']=='f2_04': import pdb ; pdb.set_trace()
                 (Pdb) [f['name'] for f in cfield.get('deps')]
@@ -492,9 +494,7 @@ def writeEmptyHtmlPages(form):
             if f.npage == npage and not f.isReadonly)
         # generate js code for automath
         # math dependencies [examples from f1040]
-        # todo accommodate multiple taxpayers or multiple w2 forms
-        dbid = 'opentaxforms_%s' % (cfg.formyear)
-        formid = computeFormId(formName)   # eg 1040 or 1040sb??
+        formid = computeFormId(formName).lower()   # eg 1040 or 1040sb
         # create lists of js variables to process [see form.html]
         # inputdepsUnitless is unitless (eg nonmonetary) boxes eg counting
         # number of boxes checked
@@ -532,8 +532,7 @@ def writeEmptyHtmlPages(form):
             'centfield' in dep else '') for cfield in form.computedFields.
             values() if cfield['npage'] == npage for dep in cfield['deps'] if
             dep['npage'] != npage]
-        obsvblz = ' '.join(
-            chain(inputdepsUnitless, inputdepsDc, inputdepsOffpage))
+        obsvblz = list(chain(inputdepsUnitless, inputdepsDc, inputdepsOffpage))
         # eg 'c1_04 c1_05 f1_31 f1_32 f1_33'
         readonlyz = ' '.join(inputdepsOffpage)
         nonobsvblz = ' '.join(
@@ -544,7 +543,7 @@ def writeEmptyHtmlPages(form):
             # forbid obsvbls [eg centfields?] getting into nonobsvblz
             and f.uniqname not in obsvblz
             and form.fieldsByName[f.uniqname]['npage'] == npage)
-        obsvblz = ' '.join(sorted(obsvblz.split(), key=sortableFieldname))
+        obsvblz = ' '.join(sorted(obsvblz, key=sortableFieldname))
         readonlyz = ' '.join(sorted(readonlyz.split(), key=sortableFieldname))
         nonobsvblz = ' '.join(
             sorted(nonobsvblz.split(), key=sortableFieldname))
@@ -650,7 +649,7 @@ def writeEmptyHtmlPages(form):
             fh.write(emptyHtml.format(
                 title=title,
                 bkgdimgfname=bkgdimgfname,
-                dbid=dbid,
+                year=cfg.formyear,
                 formid=formid,
                 staticRoot=webRoot(cfg),
                 pagelinks=pagelinks,

@@ -5,6 +5,14 @@
 <meta http-equiv="cache-control" content="no-cache">
 <link rel="shortcut icon" href="[=[staticRoot]=]/img/favicon.ico">
 <link rel="stylesheet" type="text/css" href="[=[staticRoot]=]/css/styles.css">
+<style>
+	@media print {
+		/* dont print input placeholders */
+		input::placeholder {
+			visibility: hidden;
+		}
+	}
+</style>
 <script type='text/javascript' src='[=[staticRoot]=]/js/knockout-3.4.0.js'></script>
 <script type='text/javascript' src='[=[staticRoot]=]/js/opentaxforms.js'></script>
 <script type='text/javascript' src='[=[staticRoot]=]/js/basil.js'></script>
@@ -20,8 +28,20 @@
 <a style='border:none;top:1584px;left:1px;width:1px;height:1px;'></a>
 </body>
 <script type='text/javascript'>
-	var db=new window.Basil({namespace:'[=[dbid]=]',storage:'local'});
-	var dbform='[=[formid]=]'
+window.onload = function() {
+	var url=new URL(window.location.href);
+	// add search params to all links in page
+	var anchors = document.getElementsByTagName('a');
+	for (var i = 0; i < anchors.length; i++) {
+		anchors[i].href += url.search;
+	}
+	var year=url.searchParams.get("year") || '[=[year]=]';
+	var filer=url.searchParams.get("filer");
+	var namespace='opentaxforms_'+year;
+	var db=new window.Basil({namespace:namespace,storage:'local'});
+	var dbform=[filer,'[=[formid]=]'].filter(Boolean).join('/');
+	console.log('year='+year+'; filer='+filer+';');
+	console.log('namespace='+namespace+'; dbform='+dbform+';');
 	var vals=db.get(dbform)||{};
 	var rz='[=[readonlyz]=]'.split(' ');
 	var nz='[=[nonobsvblz]=]'.split(' ');
@@ -52,6 +72,7 @@
 	}
 	data=inputs();
 	ko.applyBindings(data);
+};
 
 document.onkeydown = function(evt) { evt = evt || window.event;
     switch (evt.keyCode) {
