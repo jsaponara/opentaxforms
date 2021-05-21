@@ -28,25 +28,27 @@
 <a style='border:none;top:1584px;left:1px;width:1px;height:1px;'></a>
 </body>
 <script type='text/javascript'>
+var url=new URL(window.location.href),
+	year=url.searchParams.get("year") || '[=[year]=]',
+	filer=url.searchParams.get("filer"),
+	namespace='opentaxforms_'+year,
+	db=new window.Basil({namespace:namespace,storage:'local'}),
+	dbform=[filer,'[=[formid]=]'].filter(Boolean).join('/'),
+	vals=db.get(dbform)||{},
+	rz='[=[readonlyz]=]'.split(' '),
+	nz='[=[nonobsvblz]=]'.split(' '),
+	oz='[=[obsvblz]=]'.split(' '),
+	cz='[=[computedz]=]'.split(' ');
+console.log(
+	'year='+year+'; filer='+filer+';'+
+	'namespace='+namespace+'; dbform='+dbform+';'
+);
 window.onload = function() {
-	var url=new URL(window.location.href);
 	// add search params to all links in page
 	var anchors = document.getElementsByTagName('a');
 	for (var i = 0; i < anchors.length; i++) {
 		anchors[i].href += url.search;
 	}
-	var year=url.searchParams.get("year") || '[=[year]=]';
-	var filer=url.searchParams.get("filer");
-	var namespace='opentaxforms_'+year;
-	var db=new window.Basil({namespace:namespace,storage:'local'});
-	var dbform=[filer,'[=[formid]=]'].filter(Boolean).join('/');
-	console.log('year='+year+'; filer='+filer+';');
-	console.log('namespace='+namespace+'; dbform='+dbform+';');
-	var vals=db.get(dbform)||{};
-	var rz='[=[readonlyz]=]'.split(' ');
-	var nz='[=[nonobsvblz]=]'.split(' ');
-	var oz='[=[obsvblz]=]'.split(' ');
-	var cz='[=[computedz]=]'.split(' ');
 	function inputs() {
 		var o=opentaxforms,
 			koo=o.koo,
@@ -74,15 +76,7 @@ window.onload = function() {
 	ko.applyBindings(data);
 };
 
-document.onkeydown = function(evt) { evt = evt || window.event;
-    switch (evt.keyCode) {
-        case 37:
-            el=document.getElementById('prevpagelink');if(el)el.click();break;
-        case 39:
-            el=document.getElementById('nextpagelink');if(el)el.click();break;
-    }
-};
-window.onbeforeunload=function(e) {
+save_inputs=function() {
 	for (var i=0;i<oz.length;i++) {
 		if (rz.indexOf(oz[i])==-1) {
 			vals[oz[i]]=opentaxforms.getval(oz[i]);
@@ -95,7 +89,20 @@ window.onbeforeunload=function(e) {
 		vals[cz[i]]=opentaxforms.getval(cz[i]);
 	}
 	db.set(dbform,vals);
-	//var msg = "Yo.", e = e || window.event; if (e) { e.returnValue = msg; } return msg;
 };
+document.onkeydown = function(evt) {
+	evt = evt || window.event;
+	if (evt.shiftKey) {
+		switch (evt.keyCode) {
+			case 37:
+				el=document.getElementById('prevpagelink');if(el)el.click();break;
+			case 39:
+				el=document.getElementById('nextpagelink');if(el)el.click();break;
+			case 38:  // for now, shift-up saves!
+				save_inputs();
+		}
+    }
+};
+window.onbeforeunload=save_inputs;
 </script>
 </html>
