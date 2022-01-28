@@ -67,8 +67,8 @@ def createApi(app,**kw):
         apimanager.create_api(
             tableClass,
             url_prefix='/api/v%s' % (apiVersion, ),
-            #include_columns=colsToShow,
-            includes=colsToShow,
+            include_columns=colsToShow,
+            #includes=colsToShow,
             )
     return counts
 

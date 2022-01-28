@@ -198,7 +198,7 @@ def setupLogging(loggerId, args=None):
 
     global alreadySetupLogging
     if alreadySetupLogging:
-        log.warn('ignoring extra call to setupLogging')
+        log.warning('ignoring extra call to setupLogging')
         fname = log.name
     else:
         if args:
@@ -231,7 +231,7 @@ defaultOutput = stdout
 def logg(msg, outputs=None):
     '''
         log=setupLogging('test')
-        logg('just testing',[stdout,log.warn])
+        logg('just testing',[stdout,log.warning])
         '''
     if outputs is None:
         outputs = [defaultOutput]

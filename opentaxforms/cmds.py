@@ -280,7 +280,7 @@ class CommandParser(object):
         else:
             msg = ('cannotParse: cannot parse [{}] cmd [{}] on {}/p{}/{}'.
                    format(cmd, s, self.form.prefix, pg, ll))
-            log.warn(msg)
+            log.warning(msg)
             if terms is None:
                 op = '?'
                 terms = []
@@ -331,7 +331,7 @@ class CommandParser(object):
                 terms = [linecolterm(t) for t in terms]
             else:
                 msg = 'cannotParse: cannot parse [%s]' % (terms[1], )
-                log.warn(msg)
+                log.warning(msg)
                 op = '?'
         if op == '-':
             # swap 1st two terms cuz 'subtract a from b' means 'b-a'
@@ -381,7 +381,7 @@ class CommandParser(object):
             else:
                 msg = jj('cannotParseMath: cannot parse math: cmd,s,cond:',
                          cmd, cond, s, delim='|')
-                log.warn(msg)
+                log.warning(msg)
                 raise CannotParse(msg)
         return s
 
@@ -555,7 +555,7 @@ class CommandParser(object):
                 msg = jj(
                     'cannotParseCmd: cannot parse command: cmd pred cond:',
                     cmd, pred, cond, delim='|')
-                log.warn(msg)
+                log.warning(msg)
                 raise CannotParse(msg)
             if cond:
                 self.parseCondition(cmd, pred, cond)

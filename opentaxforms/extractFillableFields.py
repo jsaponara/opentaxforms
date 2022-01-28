@@ -270,7 +270,7 @@ def extractFields(form):
                     info = str(uikids)
                 else:
                     info = str(el.attrib)
-                log.warn(
+                log.warning(
                     'not sure of element type: textbox, checkbox, other?  ' +
                     info)
         else:  # el is a draw
@@ -400,7 +400,7 @@ def extractFields(form):
             continue
             # skip draw elements not assoc'd w/ a page; they are in some header
         if npage < 1:
-            log.warn('rejecting visibl [%s] on invalid page [%s]',
+            log.warning('rejecting visibl [%s] on invalid page [%s]',
                      elname, npage)
             continue
         d = dict(el.attrib.items())  # todo is el.attrib needed here?

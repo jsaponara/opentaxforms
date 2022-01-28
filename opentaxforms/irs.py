@@ -100,7 +100,7 @@ def sortableFieldname(fieldname):
         except ValueError:
             return s
     try:
-        segs = re.findall('(\D+|\d+)', fieldname)
+        segs = re.findall(r'(\D+|\d+)', fieldname)
         segs = [intify(seg) for seg in segs]
         return segs
     except Exception:

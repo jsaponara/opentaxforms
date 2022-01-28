@@ -137,7 +137,7 @@ class Form(object):
                     url = url.encode('utf-8')
                     if url in failurls:
                         continue
-                    log.warn(
+                    log.warning(
                         'downloading: ' + formName + ' from ' + str(url))
                     response = requests.get(url)
                     if response.status_code != 200:
@@ -183,7 +183,7 @@ class Form(object):
                     (?: \w\w?)?)           # AS
                     (?: or ([\w-]+))?      # or 1040A
                     (?:  ?\(?(?:Schedule ([\w-]+))\)?)?  # (Schedule B)
-                    (?:  ?\((?:Rev|'''+anyMonth+''').+?\))?\s*$'''
+                    (?:  ?\((?:Rev|'''+anyMonth+r''').+?\))?\s*$'''
                     ))
                 # eg 2016 Form W-2 AS
                 # eg 2015 Form 1120 S (Schedule D)
@@ -202,7 +202,7 @@ class Form(object):
                         Schedule ([\w-]+)[ ]   # Schedule B
                         \(Form ([\w-]+)        # (Form 1040
                         (?: or ([\w-]+))? ?\)  # or 1040A)
-                        (?: \((?:Rev|'''+anyMonth+''').+?\))?\s*$''',
+                        (?: \((?:Rev|'''+anyMonth+r''').+?\))?\s*$''',
                         ))
                     # eg 2015 Schedule M-3 (Form 1065)
                     # eg 2015 Schedule O (Form 990 or 990-EZ)
@@ -235,7 +235,7 @@ class Form(object):
             for ipage, page in enumerate(PDFPage.create_pages(doc)):
                 pagenum = 1 + ipage
                 if page.cropbox != page.mediabox:
-                    log.warn(
+                    log.warning(
                         'boxesDontMatch: cropbox!=mediabox on page %d:'
                         ' cropbox=%s; mediabox=%s',
                         pagenum, page.cropbox, page.mediabox)
@@ -434,7 +434,7 @@ class TextPoz(object):
             else:
                 break
         if not found:
-            log.warn('textNotFound: ' + s + ' in ' + self.alltext().replace(
+            log.warning('textNotFound: ' + s + ' in ' + self.alltext().replace(
                 NL, ' [newline] '))
         if len(found) > 1:
             msgtmpl = 'textRepeats: found too many (returning all of them),' \

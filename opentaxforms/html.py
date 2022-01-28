@@ -281,7 +281,7 @@ def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
                     shorten(f.xpos),
                     shorten(f.ypos)) if tooltip else '')
         except Exception:
-            log.warn(ut.jj('caughtError:', traceback.format_exc()))
+            log.warning(ut.jj('caughtError:', traceback.format_exc()))
             return ''
 
     def dollarfieldname(f):

@@ -132,7 +132,7 @@ def getFileList(dirName):
                 if not ut.exists(allpdfLink):
                     os.symlink(allpdfpath, allpdfLink)
             except Exception as e:
-                log.warn('cannot symlink %s to %s because %s, copying instead'%(
+                log.warning('cannot symlink %s to %s because %s, copying instead'%(
                     allpdfpath, allpdfLink, e, ))
                 shutil.copy(allpdfpath,allpdfLink)
         elif not cfg.okToDownload:
@@ -187,9 +187,9 @@ def copyStaticDir(appname):
     staticDir = ut.Resource(appname, 'static').path()
     try:
         import shutil
-        shutil.copytree(staticDir, cfg.staticRoot)
+        shutil.copytree(staticDir, cfg.staticRoot, dirs_exist_ok=True)
     except Exception as e:
-        log.warn('cannot copy %s to %s because %s,'
+        log.warning('cannot copy %s to %s because %s,'
             ' continuing without static files,'
             ' which are used only when serving html files'%(
             staticDir, cfg.staticRoot, e))
@@ -249,7 +249,7 @@ def setup(**overrideArgs):
     cfg.log = log
     if not cfg.quiet:
         logg('logfilename is "{}"'.format(cfg.logfilename))
-        log.warn('commandline: %s at %s', ' '.join(sys.argv), ut.now())
+        log.warning('commandline: %s at %s', ' '.join(sys.argv), ut.now())
 
     if dirName is not None:
         # deferred import to avoid circular reference
@@ -270,7 +270,7 @@ def setup(**overrideArgs):
         cfg.indicateProgress = cfg.recurse or len(cfg.formsRequested) > 1
 
         # log entire config .before. getFileList makes it huge
-        logg('config:' + str(cfg), [log.warn])
+        logg('config:' + str(cfg), [log.warning])
 
         ut.ensure_dir(dirName)
         setupStaticDir(dirName)

@@ -69,7 +69,7 @@ def findLineAndUnit(field):
     else:
         linenum = None
         if re.search(r'line\s+\d+', speak, re.I):
-            log.warn(jj('linenumNotFound: cannot find the linenum in:', speak))
+            log.warning(jj('linenumNotFound: cannot find the linenum in:', speak))
     if linenum:
         linenum = linenum.lower().replace(' ', '').replace('.', '')
     unit = units[-1].lower().strip(' .') if units else ''
@@ -200,7 +200,7 @@ def linkfields(form):
                 msgtmpl=('expectedDollars: expected field [%s]'
                          ' to have unit==dollars, instead got [%s]'
                          ' from previous speak: [%r]')
-                log.warn(msgtmpl, dd['uniqname'], dd['unit'], dd['speak'])
+                log.warning(msgtmpl, dd['uniqname'], dd['unit'], dd['speak'])
                 dd['unit'] = 'dollars'
                 dd['expectedDollars'] = 1  # just in case it's useful later
             dd['centfield'] = cc

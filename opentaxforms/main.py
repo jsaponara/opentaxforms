@@ -45,7 +45,7 @@ def addFormsTodo(form, formsdone, formstodo, formsfail):
             .difference(f.nameAsTuple for f in formsfail)
         formstodo.extend(Form(f, 1 + recurselevel) for f in newforms)
         if ut.hasdups(formstodo):
-            log.warn('dups: %s',[f for i,f in enumerate(formstodo) if f in formstodo[1+i:]])
+            log.warning('dups: %s',[f for i,f in enumerate(formstodo) if f in formstodo[1+i:]])
             raise Exception('formstodo hasdups')
     return formstodo
 
@@ -118,7 +118,7 @@ def logFormStatus(form):
     statusmsg = 'form {} status:\n'.format(form.name) + statusmsgtmpl.format(
         *neg2unkn(z(*('lgood', 'lerrs', 'rgood', 'rerrs', 'mgood', 'merrs')),z.lgood)
         )
-    logg(statusmsg, [log.warn, stdout])
+    logg(statusmsg, [log.warning, stdout])
     return z.__dict__
 
 
@@ -128,7 +128,7 @@ def logRunStatus(formsdone, formsfail, status):
         statusTotals = sum(status.values(), Bag())
         msg = 'status totals:' + statusmsgtmpl.format(
               *statusTotals(*'lgood lerrs rgood rerrs mgood merrs'.split()))
-        logg(msg, [log.warn, stdout])
+        logg(msg, [log.warning, stdout])
     if formsfail:
         msg = 'failed to process %d forms: %s' % (
               len(formsfail), [irs.computeFormId(f.nameAsTuple) for f in formsfail])
@@ -138,7 +138,7 @@ def logRunStatus(formsdone, formsfail, status):
     statusStr = json.dumps(status.__dict__)
     # status is partial because missing,spurious values are unknown and thus
     # omitted
-    log.warn('status partial data: %s', statusStr)
+    log.warning('status partial data: %s', statusStr)
 
 
 def indicateProgress(form):
@@ -154,7 +154,7 @@ def indicateProgress(form):
         msg = '--------' + jj(
               form.name,
               ('recurselevel=%d' % (form.recurselevel) if cfg.recurse else ''))
-        logg(msg, [stdout, log.warn])
+        logg(msg, [stdout, log.warning])
         # use warn level so that transition to new form is logged by default
 
 

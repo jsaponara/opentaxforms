@@ -122,7 +122,7 @@ def findRefs(form):
             if formFname in cfg.allpdfnames:
                 context['fprefix'] = formFname
                 return (form, sched), context
-        log.warn(u'unrecognizedRefs: not in allpdfnames:'
+        log.warning(u'unrecognizedRefs: not in allpdfnames:'
                  u' %s from %s originally %s eg %s',
                  formFnames, formish, context, cfg.allpdfnames[:4])
         return ['err']
@@ -132,7 +132,7 @@ def findRefs(form):
         # chars] do this .only. for spaces not followed by a count [like * or +
         # or {}] u'\xa0' is unicode char used as newline [in xfa or just irs?]
         # eg f2438: 'Schedule  D (Form 1120)'  # note extra space
-        '''
+        r'''
             # this doctest doesnt work [even when un-nested] due to \xa0
             >>> relaxRegex(r'(Form (\S+), Schedule (\S+)\b)')
             '(Form[ |\xa0]+(\S+),[ |\xa0]+Schedule[ |\xa0]+(\S+)\b)'
@@ -263,14 +263,14 @@ def findRefs(form):
         #   2018/1040: otherwise, subtract Schedule 1, line 36, from line 6
         # 8824: If more than zero, enter here and on Schedule D or Form 4797 
         #       -> (8824,4797) wh is wrong, but may be tricky to get right
-        nicetext = re.sub(u'[\s\xa0|]+', ' ', txt)
+        nicetext = re.sub(r'[\s\xa0|]+', ' ', txt)
         log.debug('300 nicetext=%s', nicetext)
         # ...whereas these are the shorter search patterns
 
         # resum rmv comma to unify 'sched x, line y' into a single ref
 
-       #p = '(((Form|Schedule|Sch\.)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)'
-        p = '(((Form|Schedule|Sch\.)(?:s|\(s\))?)\s*(.+?))(?:[\.;:\)]| to | if | from |$)'
+       #p = r'(((Form|Schedule|Sch\.)(?:s|\(s\))?)\s*(.+?))(?:[,\.;:\)]| to | if |$)'
+        p = r'(((Form|Schedule|Sch\.)(?:s|\(s\))?)\s*(.+?))(?:[\.;:\)]| to | if | from |$)'
         matches = re.findall(p, nicetext)
         for match in matches:
             context, fulltype, typ, rest = match
@@ -386,7 +386,7 @@ def findFormRefPoz(formrefs, pageinfo):
         try:
             textpoz = pageinfo[npage].textpoz
         except KeyError:
-            log.warn(jj('noSuchPage: no page', npage,
+            log.warning(jj('noSuchPage: no page', npage,
                         'in', form, '; ref:', ref))
             continue
         found = textpoz.find(matchingtext)
