@@ -1,8 +1,7 @@
 
 var displayStorage = function(selector) {
   var 
-    //content = '',  // pretty outline, but useless.
-    code = '',       // executable format.
+    code = '',
     params = (new URL(window.location.href)).searchParams,
     this_year = new Date().getFullYear(),
     target_year = params.get("year"),
@@ -17,20 +16,15 @@ var displayStorage = function(selector) {
     var namespace='opentaxforms_'+year,
       db=new window.Basil({namespace:namespace,storage:'local'}),
       forms=db.keys().sort();
-    if (forms.length) {
-      //content+='namespace '+namespace+'\n';
-    }
     var form_codes = [];
     for (var i=0; i<forms.length; i++) {
       formname=forms[i];
       if (filer && !formname.startsWith(filer)) continue;
-      //content+='  form '+formname+'\n';
       var code_form = '',
         quote = '';
       vals=db.get(formname)||{};
       for (var key in vals) {
         if (vals[key]) {
-          //content+='    '+key+' '+vals[key]+'\n';
           quote = (typeof(vals[key]) === 'string' && isNaN(Number(vals[key])) ? '"' : '')
           code_form += `  ${key}: ${quote}${vals[key]}${quote},\n`;
         }
