@@ -4,6 +4,7 @@ import os.path
 import re
 import shutil
 import sys
+from datetime import date
 from argparse import ArgumentParser
 from os.path import isfile, join as joinpath
 from six.moves.urllib.request import urlopen
@@ -37,10 +38,10 @@ defaults = Bag(dict(
     rootForms=None,
     formyear=None,
     useCaches=False,
-    # todo for latestTaxYear, check irs-prior url for latest f1040 pdf, tho
-    # could be incomplete eg during dec2016 the 2016 1040 and 400ish other
-    # forms are ready but not schedule D and 200ish others
-    latestTaxYear=2020,
+    # for latestTaxYear, could check irs-prior url for latest f1040 pdf,
+    # tho could be incomplete; eg during dec2016 the 2016 1040 and
+    # 400ish other forms were ready but 200ish werent including schedule D.
+    latestTaxYear=date.today().year - 1,
     loglevel='warn',
     logPrefix=None,
     maxrecurselevel=RecurseInfinitely,
@@ -269,7 +270,7 @@ def setup(**overrideArgs):
                 )
         cfg.indicateProgress = cfg.recurse or len(cfg.formsRequested) > 1
 
-        # log entire config .before. getFileList makes it huge
+        # log entire config here, .before. the call to getFileList makes it huge
         logg('config:' + str(cfg), [log.warning])
 
         ut.ensure_dir(dirName)

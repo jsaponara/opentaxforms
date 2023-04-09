@@ -153,6 +153,7 @@ def indicateProgress(form):
     if cfg.indicateProgress:
         msg = '--------' + jj(
               form.name,
+              irs.computeFormId(form.nameAsTuple),
               ('recurselevel=%d' % (form.recurselevel) if cfg.recurse else ''))
         logg(msg, [stdout, log.warning])
         # use warn level so that transition to new form is logged by default
@@ -190,6 +191,7 @@ def opentaxforms(**args):
             if cfg.debug and debug_first_error:
                 raise
             formsfail.append(form)
+            logg(f'end of form {irs.computeFormId(form.nameAsTuple)}', [log.warning])
         else:
             formsdone.append(form)
             formstodo = addFormsTodo(form, formsdone, formstodo, formsfail)

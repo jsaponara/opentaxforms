@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import re
 import six
+from pprint import pformat
 
 from . import ut, irs
 from .ut import log, jj, numerify
@@ -60,6 +61,11 @@ def lineOrRange(s, pg, getFieldsDict, fieldsByLine, col=None):
                      if f['unit'] != 'cents']
         endxpoz = [f['xpos'] for f in fieldsDictForEnd[(pg, end)]
                    if f['unit'] != 'cents']
+        if not startxpoz:
+            msg = f'found no fields for start of range [{start}]'
+            log.warn(msg)
+            #raise Exception(msg)
+            pass
         # todo this loop could find nontarget fields
         #   eg in 2018/1040, a hypothetical "add lines 2 through 5"
         #      could yield start=line2a and end=line5a
@@ -262,6 +268,10 @@ class CommandParser(object):
             if m:
                 col = m.group(1)
                 s = s[:m.start()]
+            log.warning(str(
+                ut.flattened([lineOrRange(entry, pg, self.form.getFieldsDict, self.form.fieldsByLine, col)
+                             for entry in re.split(r' and |, (?:and )?', s)])
+            ))
             terms = sorted(
                 ut.flattened([lineOrRange(entry, pg, self.form.getFieldsDict, self.form.fieldsByLine, col)
                              for entry in re.split(r' and |, (?:and )?', s)]),
@@ -306,6 +316,11 @@ class CommandParser(object):
             divide=(' by ', '/'),
             )[cmd]
         terms = re.split(delim, s, re.I)
+        def unparenthesize(s):
+            if m := re.search(r'\((.*?)\)', s):
+                s = m.group(1)
+            return s
+        terms = [unparenthesize(t) for t in terms]
         if len(terms) != 2:
             msg = ('oops, expected 2 terms for cmd [{}] using delim [{}]'
                    ' in [{}], found [{}]: [{}]'
@@ -444,7 +459,13 @@ class CommandParser(object):
         # find fields that correspond to the term; parentline is lhs
         # typically returns the dollar and cent fields
         #   corresponding to a term such as 'line7'
-        if term.isdigit():
+        log.debug('term %s',term)
+        def is_number(s):
+            try:
+                return s.isdigit() or sum(t.isdigit() for t in s.split('.', 1)) == 2
+            except ValueError:
+                return false
+        if is_number(term):
             return [dict(
                 typ='constant',
                 uniqname=term,
@@ -500,8 +521,10 @@ class CommandParser(object):
             # eg 1040/line42 our dep fields are unitless cuz our constant is in
             # dollars
             myFieldUnit = None
+        log.debug('%d terms %s', len(terms), terms)
         upfields = [self.getFieldsFromTerm(term, ll, pg, fieldsByLine)
                     for term in terms]
+        log.debug('%d upfields %s sameCents=%s', len(upfields), pformat(upfields), any((upf[self.unitk] == 'cents') == (myFieldUnit == 'cents') for upfs in upfields for upf in upfs))
         upfields = [upf for upfs in upfields for upf in upfs
                     # a field cannot be its own input
                     if upf[self.namek] != myFieldName
@@ -509,6 +532,7 @@ class CommandParser(object):
                     # todo this should depend on op: eg for '/' op,
                     # it's the operands whose units should match.
                     and (upf[self.unitk] == 'cents') == (myFieldUnit == 'cents')]
+        log.debug('%d upfields %s', len(upfields), pformat(upfields))
         if op == '*':
             # todo revisit: here we assume that 1. we want to multiply only two
             # fields, and specifically 2. we want the first and the last [and

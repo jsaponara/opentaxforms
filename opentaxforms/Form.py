@@ -247,7 +247,7 @@ class Form(object):
                     pagenum, pagewidth, pageheight, rr.renderPage(page))
         return docinfo, pageinfo
 
-    def getFieldsDict(self, page, line):
+    def getFieldsDictForPage(self, page, line):
         if (page, line) in self.fieldsByLine:
             log.debug('found in fieldsByLine: %s',(page,line))
             return self.fieldsByLine
@@ -256,6 +256,15 @@ class Form(object):
         if (page, lineNumeric) in self.fieldsByNumericLine:
             log.debug('found in fieldsByNumericLine: %s',(page,lineNumeric))
             return self.fieldsByNumericLine
+    def getFieldsDict(self, page, line):
+        if fdict := self.getFieldsDictForPage(page, line):
+            return fdict
+        # 2021/1040s2/page2/line21 Add lines 4, 7 through 16, 18, and 19.  [but all those lines are on page1]
+        if not fdict and page > 1:
+            for pagenum in range(1, page):
+                if fdict := self.getFieldsDictForPage(pagenum, line):
+                    log.warning(f'found field on a previous page: found {line} on {pagenum=} in form {self.name}')
+                    return fdict
         raise Exception('cannot find page %s, line %s in any fields dict' % (page, line))
 
     def orderDependencies(self):
@@ -274,6 +283,18 @@ class Form(object):
             del computedFields[name]
             computedFields[name] = val
 
+    def getSentences(self, instruction):
+        # retain 'Multiply line 6a by 30% (0.30)' as a single sentence despite the dot in the parens.
+        # assumes parens wont contain more than one period.
+        sentences0 = [s for s in re.split(r'\.\s*', instruction) if s.strip()]
+        sentences = []
+        for s in sentences0:
+            if ')' in s and '(' not in s:
+                sentences[-1] += '.' + s
+            else:
+                sentences.append(s)
+        return sentences
+
     def computeMath(self):
         # determines which fields are computed from others
         # 'dep' means dependency
@@ -287,7 +308,7 @@ class Form(object):
             adjustNegativeField(field, speak)
             colinstruction = normalize(field['colinstruction'])
             instruction = colinstruction if colinstruction else speak
-            sentences = [s for s in re.split(r'\.\s*', instruction) if s.strip()]
+            sentences = self.getSentences(instruction)
             maybe_just_numbering, *rest = sentences
             if maybe_just_numbering.isdigit():
                 # eg skip the "1." in "1. Wages, salaries, tips, etc. Attach Form(s) W-2."
@@ -329,6 +350,7 @@ class Form(object):
                 if field['typ']!='checkbox':
                     math.assembleFields()
             field['math'] = math
+            log.debug('math %s',math)
         self.orderDependencies()
         self.bfields = [ut.Bag(f) for f in fields]
             # just to shorten field['a'] to field.a

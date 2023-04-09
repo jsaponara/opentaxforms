@@ -11,6 +11,11 @@ from .irs import computeTitle, computeFormId, sortableFieldname
 from .ut import log, jdb, Qnty, NL, pathjoin
 
 
+class C:
+    box_width = 4
+        # typical width of each box of eg routing number, in characters.
+
+
 def computeFormFilename(form):
     try:
         # form may be eg ('1040','A')
@@ -164,6 +169,8 @@ def jsterm(field, key='uniqname', display=False):
         's.f1_1'
         >>> jsterm(dict(typ='constant',val='4000'),None,True)
         '4000'
+        >>> jsterm(dict(typ='constant',val='0.30'),None,True)
+        '0.30'
 
         # display is False, internally uses cents
         >>> jsterm(dict(typ='constant',val='4000'))
@@ -173,7 +180,10 @@ def jsterm(field, key='uniqname', display=False):
         # todo assuming integer number and thus adding '00' to convert to cents
         if display:
             return field['val']
+        elif '.' in field['val']:
+            return field['val']
         else:
+            # val must be an integer
             return '{}00'.format(field['val'])
     tmpl = '{factor}s.{name}{coltitle}'
     expr = tmpl.format(
@@ -187,6 +197,7 @@ def jsterm(field, key='uniqname', display=False):
 
 
 def math(cfield):
+    log.debug('math: cfield %s deps=%s', cfield, cfield['deps'])
     def opjoin(op, ll, termz):
         return op.join(termz)
     lhsline = (cfield['linenum'] or '') + cfield.get('coltitle', '')
@@ -296,7 +307,7 @@ def textbox(f, form, pageinfo, imgw, imgh, tooltip=0):
             val=titleValue(f),
             typ=f.typ,
             etc=' '.join([
-                'maxlength=' + f.maxchars if f.maxchars else '',
+                'maxlength=' + C.box_width * f.maxchars if f.maxchars else '',
                 "class='dd'" if f.unit == 'dollars' else '',
                 '%s' % ('readonly placeholder="%s"' % (
                     linemath(f))
@@ -322,8 +333,8 @@ def computeSteps(cfield):
     # result=s.line22()-s.line36(); return result; f1040/line42: var
     # result=400000*s.line6d_5(); if(s.line38()>15495000)result="-0-"; return
     # result;
-    jdb('>computeSteps', cfield, cfield.get('deps'), cfield['op'], cfield.get(
-        'math'))
+    jdb('>computeSteps', cfield, f'{len(cfield.get("deps",[]))} deps:',
+        cfield.get('deps'), cfield['op'], cfield.get('math'))
     steps = []
     if cfield.get('deps'):
         '''
@@ -335,13 +346,14 @@ def computeSteps(cfield):
             todo but how did it get there?
         '''
         if any(f for f in cfield['deps'] if f['typ'] == 'text'):
-            cfield['deps'] = [f for f in cfield['deps'] if f['typ'] == 'text']
+            cfield['deps'] = [f for f in cfield['deps'] if f['typ'] != 'checkbox']
             log.debug(f"n_deps {len(cfield['deps'])}")
         steps.append('var result=%s;' % (
             cfield['op'].join(
                 jsterm(dep, 'uniqlinenum')
                 + ('()' if dep.get('typ') != 'constant' else '')
                 for dep in cfield['deps'])))
+        #if cfield['op'] == '*': import pdb ; pdb.set_trace()
     elif len(cfield.get('math').terms)==1:
         steps.append('var result=%s;' % (cfield['math'].terms[0]+'00',))
     if cfield['math'].zcond:
@@ -412,14 +424,14 @@ def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
         css = "style='top:0px; left:{left:.0f}px;'".format(left=left)
         if 1 <= nnpage <= npages:
             result = (
-                "<a id='{whichway}pagelink' href='{prefix}-p{npage}.html'"
+                "<a class='pagelink' href='{prefix}-p{npage}.html'"
                 " title='page {npage}' {css}>"
                 "<img class='tff' src='static/img/"
                 "arrow_{whichway}_32px.png'></a>"
             ).format(prefix=prefix, npage=nnpage, whichway=whichway, css=css)
         else:
             result = (
-                "<img class='tff' src='static/img/"
+                "<img class='tff pagelink' src='static/img/"
                 "arrow_{whichway}_gray_32px.png' {css}>"
             ).format(whichway=whichway, css=css)
         jdb('<pagelinktmpl', result)
@@ -428,7 +440,7 @@ def pagelinkhtml(prefix, npage, npages, imgw, linkwidthprop):
 
 
 def pdflinkhtml(prefix,imgw,linkwidthprop):
-    return '<a href="static/pdf/%s.pdf" style="top:6px;left:%dpx">PDF</a>'%(
+    return '<a id="pdflink" href="static/pdf/%s.pdf" style="top:6px;left:%dpx">PDF</a>'%(
         # using 4 linkwidths because 3 looks too tight
         prefix,imgw*(1-4*linkwidthprop))
 

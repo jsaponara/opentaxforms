@@ -74,8 +74,9 @@ def numerify(s):
 
 
 def compactify(multilineRegex):
-    # to avoid having to replace spaces in multilineRegex's with less readable
-    # '\s' etc no re.VERBOSE flag needed
+    # to avoid having to replace spaces in multilineRegex's
+    #   with less readable '\s' etc
+    # no re.VERBOSE flag needed
     r"""
     line too long (folded):
         titlePttn1=re.compile(r'(?:(\d\d\d\d) )?Form ([\w-]+(?: \w\w?)?)

@@ -36,22 +36,31 @@ def findLineAndUnit(field):
     ('line1', '')
     '''
     speak = field['speak']
+    log.debug('speak %s',speak)
     if isinstance(speak, six.binary_type):
         speak = speak.decode('utf8')
+    speak = re.sub(r'Page \d+\.\s*', '', speak)
+        # remove any eg "Page 2. " eg 1040/2022/line16
+    # todo unify searches and if-else via walrus op.
     findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', speak)
         # Line 62. a. etc
+    findLineNum1a = re.search(r'(\d+)\.(?:.+:)\s*(\w)\.', speak)
+        # 2020/1040/10a: 10. Adjustments to income: a. From Schedule 1, line 22.
+        # 2022/1040/25a: Payments. 25. Federal income tax withheld from: a. Form(s) W-2.
+    findLineNum1b = re.search(r'(\d+)\.\s*(\d)\.', speak)
+        # 2022/1040/16/checkboxes: 16. 2. 4972.
     findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', speak)
         # Exemptions. 62. a. etc
+    findLineNum2a = re.search(r'(?:\.\s*)(\d+\w?)\.', speak)
+        # Income. Attach Form(s) W-2 here. Also attach Forms W-2G and 1099-R if tax was withheld. If you did not get a Form W-2, see instructions. 1a. Total amount from Form(s) W-2, box 1 (see instructions).
     findLineNum3 = re.search(r'^(\d+\w*)\.\s', speak)
         # 16b. ... eg 990/page6/line16b
-    findLineNum3a = re.search(r'(\d+)\.(?:.+:)\s*(\w)\.', speak)
-        # 2020/1040/10a: 10. Adjustments to income: a. From Schedule 1, line 22.
     if cfg.formyear <= 2017:  # todo was 2017 the last year of Dollars and Cents?
         units = re.findall(r'\.?\s*(Dollars|Cents)\.?', speak, re.I)
     else:
         # we assume very wide fields are not quantities
         # eg 2020/1040sb amount fields are ~30mm wide [amt fields are also labeled "Amount." but not eg in 1040]
-        if field['wdim'] < Qnty(50,'mm'):
+        if field['name'].startswith('f') and field['wdim'] < Qnty(50,'mm'):
             units = ['dollars']
         else:
             units = None
@@ -59,16 +68,22 @@ def findLineAndUnit(field):
         # linenum is eg 'line62a' for 'Line 62. a. etc' or even for
         # 'Exemptions. 62. a. etc'
         linenum = findLineNum1.groups()[0]
+    elif findLineNum1a:
+        num, num_or_letter = findLineNum1a.groups()
+        delim = '_' if num_or_letter.isdigit() else ''
+        linenum = 'line' + num + delim + num_or_letter
+    elif findLineNum1b:
+        num_line, num_checkbox = findLineNum1b.groups()
+        linenum = f'line{num_line}_{num_checkbox}'
     elif findLineNum2:
         linenum = 'line' + findLineNum2.groups()[0]
-    elif findLineNum3a:
-        num, letter = findLineNum3a.groups()
-        linenum = 'line' + num + letter
+    elif findLineNum2a:
+        linenum = 'line' + findLineNum2a.groups()[0]
     elif findLineNum3:
         linenum = 'line' + findLineNum3.groups()[0]
     else:
         linenum = None
-        if re.search(r'line\s+\d+', speak, re.I):
+        if 'amount' in speak or re.search(r'line\s+\d+', speak, re.I):
             log.warning(jj('linenumNotFound: cannot find the linenum in:', speak))
     if linenum:
         linenum = linenum.lower().replace(' ', '').replace('.', '')
@@ -150,6 +165,7 @@ def uniqifyLinenums(ypozByLinenum, fieldsByLine, fieldsByLinenumYpos):
                 else:
                     uniqlinenum = ff['linenum']
                 ff['uniqlinenum'] = uniqlinenum
+                if uniqlinenum: log.debug('uniqifyLinenums: pg=%s, uniqlinenum=%s', pg, uniqlinenum)
 
 
 def linkfields(form):
@@ -207,8 +223,8 @@ def linkfields(form):
             cc['dollarfieldname'] = dd['uniqname']
         elif b'Numbers after the decimal.' in f['speak']:
             cc, dd = f, fprev
-            assert 'Numbers before the decimal.' in dd['speak']
-            assert dd['unit'] is None
+            assert b'Numbers before the decimal.' in dd['speak']
+            #assert dd['unit'] is None
             dd['centfield'] = cc
             cc['dollarfieldname'] = dd['uniqname']
             dd['unit'] = 'dollars'

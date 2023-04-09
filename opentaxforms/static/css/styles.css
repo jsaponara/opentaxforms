@@ -29,3 +29,11 @@ img.tff {
 .dd {
 	text-align:right;
 }
+@media print {
+	.tff a {
+		border-bottom: none;
+	}
+	input::placeholder, .pagelink, #pdflink {
+		visibility: hidden;
+	}
+}
