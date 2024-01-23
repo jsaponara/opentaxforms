@@ -365,6 +365,8 @@ class CommandParser(object):
         #     here and skip lines 5 through 9 for that column.
         # 1040ez/line43
         #     Line 6. ... If line 5 is larger than line 4, enter -0-.
+        # 2022/1040/line11
+        #     11. Enter the smaller of line 9 or line 10.
         # constants [see parseCommand]
         #     f8814/line5  Base amount. $2,100.
         #     f8814/line13 Amount not taxed. $1,050.
@@ -375,10 +377,17 @@ class CommandParser(object):
         seekConstant=re.match(r'^\$?(\d+)(?:,?(\d+))?$',s)
         if s == 'zero':
             s = '-0-'
-        elif not cond and seekConstant:
-            constant=''.join((string or '') for string in seekConstant.groups())
-            self.op = '='
-            self.terms = [constant]
+        elif not cond:
+            if seekConstant:
+                constant=''.join((string or '') for string in seekConstant.groups())
+                self.op = '='
+                self.terms = [constant]
+            elif 0 and (m := re.match(r'the (lesser|greater|larger|smaller) of (line \w+) or ((?:line\s*)?\w+)', s)):
+                which, lineA, lineB = m.groups()
+                lineA = lineA.replace(' ', '')
+                lineB = lineB.replace(' ', '')
+                self.terms = [lineA, lineB]
+                self.op = 'min' if which in ('lesser', 'smaller') else 'max'
         elif cond and s.startswith('the difference here'):
             op = '-'
             m1 = re.match(
@@ -489,7 +498,7 @@ class CommandParser(object):
                 term = line
         found = [f
             for f in fieldsByLine[(pgnum, term)]
-            if f['unit'] == 'dollars'
+            if f['unit'] in ('dollars', 'number')
                 # in 2020/1040sb we were adding non-dollar [text] fields,
                 #   which caused double-counting of the numeric fields.
                 # todo does this break forms other than 1040sb?
@@ -533,7 +542,7 @@ class CommandParser(object):
                     # it's the operands whose units should match.
                     and (upf[self.unitk] == 'cents') == (myFieldUnit == 'cents')]
         log.debug('%d upfields %s', len(upfields), pformat(upfields))
-        if op == '*':
+        if op in ('*', 'min', 'max'):
             # todo revisit: here we assume that 1. we want to multiply only two
             # fields, and specifically 2. we want the first and the last [and
             # thus most derived/computed] field.
@@ -541,6 +550,7 @@ class CommandParser(object):
             # this gives a constant and the [final, computed] line6d field.
             if len(upfields) > 1:
                 upfields = [upfields[0], upfields[-1]]
+        log.debug('%d upfields %s', len(upfields), pformat(upfields))
         self.form.upstreamFields.update(
             [upf['uniqname'] for upf in upfields
              if upf.get('typ') != 'constant'])

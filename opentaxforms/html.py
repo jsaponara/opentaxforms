@@ -196,10 +196,24 @@ def jsterm(field, key='uniqname', display=False):
     return expr
 
 
+def opjoin(op, ll, termz):
+    termz = list(termz)
+    if termz and op in ('min', 'max'):
+        op = '<' if op == 'min' else '>'
+        if len(termz) > 2:
+            log.warning('too many terms, ignoring extras')
+            termz = [t for t in termz if not '*' in t]
+                # todo this is a kludge for 2022/5695/line10 which will need a smarter exception
+        a, b = termz[:2]
+        out = f'({a}{op}{b})?{a}:{b}'
+    else:
+        out = op.join(termz)
+    #if 'min' in out: print('opjoin',out)
+    return out
+
+
 def math(cfield):
     log.debug('math: cfield %s deps=%s', cfield, cfield['deps'])
-    def opjoin(op, ll, termz):
-        return op.join(termz)
     lhsline = (cfield['linenum'] or '') + cfield.get('coltitle', '')
     termz = [jsterm(depfield, 'linenum', True) for depfield in cfield['deps']]
     rhsexpr = opjoin(cfield['op'], cfield['linenum'], termz)
@@ -345,14 +359,19 @@ def computeSteps(cfield):
             for now we remove checkbox fields from deps.
             todo but how did it get there?
         '''
+        #print(cfield)
         if any(f for f in cfield['deps'] if f['typ'] == 'text'):
             cfield['deps'] = [f for f in cfield['deps'] if f['typ'] != 'checkbox']
             log.debug(f"n_deps {len(cfield['deps'])}")
         steps.append('var result=%s;' % (
-            cfield['op'].join(
+            #cfield['op'].join(
+                #jsterm(dep, 'uniqlinenum')
+                #+ ('()' if dep.get('typ') != 'constant' else '')
+                #for dep in cfield['deps'])))
+            opjoin(cfield['op'], None, (
                 jsterm(dep, 'uniqlinenum')
                 + ('()' if dep.get('typ') != 'constant' else '')
-                for dep in cfield['deps'])))
+                for dep in cfield['deps']))))
         #if cfield['op'] == '*': import pdb ; pdb.set_trace()
     elif len(cfield.get('math').terms)==1:
         steps.append('var result=%s;' % (cfield['math'].terms[0]+'00',))
@@ -513,7 +532,7 @@ def writeEmptyHtmlPages(form):
         inputdepsUnitless = [
             "{name}".format(name=jsvar(name))
             for name in form.upstreamFields
-            if form.fieldsByName[name]['unit'] is None and
+            if form.fieldsByName[name]['unit'] in (None, 'number') and
             form.fieldsByName[name]['npage'] == npage]
         # inputdepsDc is dollar n cents pairs ['Dc' = Dollars and cents]
         # centfield handled seply cuz 2017?/1040a/40 has dollar field w/ no centfield partner

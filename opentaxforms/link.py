@@ -34,6 +34,8 @@ def findLineAndUnit(field):
         " Form 1040, line 60a, or Form 1040N R, line 59a. 2 lines available"
         " for entry.")  # f2441
     ('line1', '')
+    >>> findLineAndUnit("4. Number of qualifying children under age 17 with the required social security number.")
+    ('line4', 'number')
     '''
     speak = field['speak']
     log.debug('speak %s',speak)
@@ -41,22 +43,25 @@ def findLineAndUnit(field):
         speak = speak.decode('utf8')
     speak = re.sub(r'Page \d+\.\s*', '', speak)
         # remove any eg "Page 2. " eg 1040/2022/line16
+    # print('speak',speak)
     # todo unify searches and if-else via walrus op.
     findLineNum1 = re.search(r'(?:[\.\)]+\s*|^)(Line\s*\w+)\.(?:\s*\w\.)?', speak)
         # Line 62. a. etc
-    findLineNum1a = re.search(r'(\d+)\.(?:.+:)\s*(\w)\.', speak)
+    findLineNum1a = re.search(r'\b(\d\d?)\.(?:.+:)\s*(\w)\.', speak)
         # 2020/1040/10a: 10. Adjustments to income: a. From Schedule 1, line 22.
         # 2022/1040/25a: Payments. 25. Federal income tax withheld from: a. Form(s) W-2.
-    findLineNum1b = re.search(r'(\d+)\.\s*(\d)\.', speak)
+    findLineNum1b = re.search(r'\b(\d\d?)\.\s*(\d)\.', speak)
         # 2022/1040/16/checkboxes: 16. 2. 4972.
-    findLineNum2 = re.search(r'(?:\.\s*)(\d+)\.(?:\s*\w\.)?', speak)
+    findLineNum2 = re.search(r'(?:\.\s*)(\d\d?)\.(?:\s*\w\.)?', speak)
         # Exemptions. 62. a. etc
-    findLineNum2a = re.search(r'(?:\.\s*)(\d+\w?)\.', speak)
+    findLineNum2a = re.search(r'(?:\.\s*)(\d\d?\w?)\.', speak)
         # Income. Attach Form(s) W-2 here. Also attach Forms W-2G and 1099-R if tax was withheld. If you did not get a Form W-2, see instructions. 1a. Total amount from Form(s) W-2, box 1 (see instructions).
-    findLineNum3 = re.search(r'^(\d+\w*)\.\s', speak)
+    findLineNum3 = re.search(r'^(\d\d?\w*)\.\s', speak)
         # 16b. ... eg 990/page6/line16b
     if cfg.formyear <= 2017:  # todo was 2017 the last year of Dollars and Cents?
         units = re.findall(r'\.?\s*(Dollars|Cents)\.?', speak, re.I)
+    elif 'Number of' in speak:
+        units = ['number']
     else:
         # we assume very wide fields are not quantities
         # eg 2020/1040sb amount fields are ~30mm wide [amt fields are also labeled "Amount." but not eg in 1040]
