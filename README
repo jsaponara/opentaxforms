@@ -1,3 +1,10 @@
+Update: OpenTaxForms needs a serious redesign.  Hopefully IRS Free File will be
+ready before OpenTaxForms is!  Even if you manage to get OpenTaxForms to
+work, you'll need to send your forms by postal mail--there is no eFile
+capability.  In short, turn back, there be dragons...
+
+---------------------------------------------
+
 OpenTaxForms opens and automates US tax forms--it reads PDF tax forms
 (currently from IRS.gov only, not state forms), converts them to more
 feature-full HTML5, and offers a database and API for developers to
