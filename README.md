@@ -1,9 +1,13 @@
+Update: OpenTaxForms needs a redesign, but IRS Free File may be ready before
+I get to it.  Even if you manage to get OpenTaxForms working, there 
+is no eFile capability.  In short, turn back, there be dragons...
+
+=============================================
+
 OpenTaxForms opens and automates US tax forms--it reads PDF tax forms
 (currently from IRS.gov only, not state forms),
 converts them to more feature-full HTML5, 
 and offers a database and API for developers to create their own tax applications.
-The converted forms will be available to test (and ultimately use)
-at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
   - **PyPI**
 
@@ -40,8 +44,6 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 	- math is the computed fields and their dependencies--each computed field should have at least one dependency, or else what is it computed from?
 
 	Each status error has a corresponding warning in the log file, so they're easy to find. Each bugfix will likely reduce errors across many forms.
-
-    [1040 form status listing](https://opentaxforms.org/pages/status-form-1040-family-and-immediate-references.html)
 
   - **API**
 
@@ -84,7 +86,7 @@ at [OpenTaxForms.org](http://OpenTaxForms.org/).
 
   - **To do**
 
-	- Move lower-level ToDo items to [github/issues](https://github.com/jsaponara/opentaxforms/issues).
+    - Move lower-level ToDo items to [github/issues](https://github.com/jsaponara/opentaxforms/issues).
     - Refactor toward a less script-ish architecture that will scale to more developers. [architecturePlease]
 	- Switch to a pdf-to-svg converter that preserves text (rather than converting text to paths), perhaps pdfjs,
 	  so that testers can easily copy and paste text from forms. [copyableText]
